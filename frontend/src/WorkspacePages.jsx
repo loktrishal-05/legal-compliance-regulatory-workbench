@@ -1,0 +1,135 @@
+import { useState } from 'react'
+import { useLanguage } from './language.js'
+import { VoiceControls } from './ProductPages.jsx'
+import { usePaged, useRequest, useResource } from './hooks/useApi.js'
+import { nextPage } from './services/api.js'
+import { ListState } from './components/ui.jsx'
+import { isSubstantialReplacement, reviewGate } from './features/voice/identifierReview.js'
+import { QueryForm, TranscriptReview } from './features/voice/TranscriptReview.jsx'
+
+export function ApiState({ request, empty = 'No records returned.' }) {
+  if (request.loading) return <p role="status">Loading…</p>
+  if (request.error) return <p className="api-error" role="alert">{request.error.status === 401 ? 'Sign in to access this data.' : request.error.status === 403 ? `Access denied: ${request.error.message}` : request.error.message}</p>
+  if (request.data && typeof request.data === 'object' && !Object.keys(request.data).length) return <p>{empty}</p>
+  return null
+}
+
+const IDENTIFIER = /\b([A-Z]{1,5}-[A-Z0-9]+(?:-[A-Z0-9]+)*)\b/
+const ACRONYMS = /\b(ai|api|id|ids|ocr|rrf|stt|tts|sop|pid|ms|url|bi|llm|rag)\b/gi
+
+export function DataView({ value }) {
+  if (value == null) return <span className="muted">Unavailable</span>
+  if (Array.isArray(value)) return value.length ? <ul className="data-list">{value.map((item, index) => <li key={index}><DataView value={item} /></li>)}</ul> : <span className="muted">None returned</span>
+  if (typeof value === 'object') return <dl className="data-fields">{Object.entries(value).map(([key, item]) => <div key={key}><dt>{key.replaceAll('_', ' ').replace(ACRONYMS, word => word.toUpperCase())}</dt><dd><DataView value={item} /></dd></div>)}</dl>
+  // Floats are rounded for reading only; integers (sequence numbers, counts) stay exact and raw JSON stays available.
+  const shown = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : typeof value === 'number' && !Number.isInteger(value) ? String(+value.toFixed(3)) : String(value)
+  // Tags such as SOP-P204-001 or XV-2040 never wrap at their hyphens; the text itself is unchanged.
+  return <span>{shown.split(IDENTIFIER).map((part, index) => index % 2 ? <span key={index} className="identifier">{part}</span> : part)}</span>
+}
+
+function Evidence({ items = [] }) {
+  return <section><h3>Citations / source evidence</h3>{!items.length && <p>No source evidence returned.</p>}{items.some(item => item.ocr_derived || item.kind === 'pid_region') && <p className="review-notice">P&amp;ID / OCR evidence is as drawn only. It does not prove field topology, connectivity, isolation, valve state, permits, or readiness.</p>}{items.map((item, index) => <details key={item.evidence_id || index}><summary>{item.source_filename || item.evidence_id || `Source ${index + 1}`} — {item.locator || 'Locator in details'}</summary><DataView value={item} /></details>)}</section>
+}
+
+export function ExecutionPanel({ execution }) {
+  if (!execution) return null
+  const paths = { VERIFIED_FAST_PATH: 'Verified', CAG_PATH: 'CAG', HYBRID_RAG_PATH: 'Hybrid RAG', MGS_PATH: 'MGS', EXISTING_AGENTIC_PATH: 'Agentic' }
+  const coverage = execution.evidence_sufficiency || {}
+  return <aside className="review-notice" aria-label="Execution and evidence">
+    <strong>Execution: {paths[execution.execution_path] || 'Unavailable'}</strong>
+    <p>Evidence: {coverage.state || 'Unavailable'} ? Sources: {execution.retrieved_sources ?? 'Unavailable'} ? Model: {execution.model_used?.join(', ') || 'No inference recorded'} ? Latency: {Number.isFinite(execution.total_latency_ms) ? `${(execution.total_latency_ms / 1000).toFixed(2)} s` : 'Unavailable'}</p>
+    {!!coverage.missing_categories?.length && <p>Missing evidence: {coverage.missing_categories.join(', ')}</p>}
+    {!!coverage.issues?.length && <p>Coverage limits: {coverage.issues.join(', ')}</p>}
+    {execution.fallback_used && <p>Safe fallback used.</p>}
+    <p>Evidence coverage is not permission to operate equipment.</p>
+  </aside>
+}
+
+export function Result({ data }) {
+  if (!data) return null
+  const review = data.human_approval_required || data.human_review_required || data.presentation === 'DRAFT' || data.governance_status === 'PENDING_REVIEW'
+  const refusal = data.agent_result?.schema === 'S5' ? data.agent_result.output?.status : null
+  return <div className="result" aria-live="polite">
+    {refusal && <p className="review-notice">{refusal.replaceAll('_', ' ')}</p>}
+    <p className={review ? 'review-notice' : 'result-status'}>{review ? 'DRAFT — Human approval required. Advisory recommendation only.' : (data.governance_status || 'Backend response')}</p>
+    <DataView value={{ route: data.route, revision: data.action_revision_id, evidence_status: data.evidence_binding_status }} />
+    <h3>Agent result</h3><DataView value={data.agent_result} />
+    {!!data.warnings?.length && <><h3>Warnings</h3><DataView value={data.warnings} /></>}
+    <ExecutionPanel execution={data.execution} />
+    <Evidence items={data.evidence} />
+    <details><summary>Complete response / revision hashes</summary><pre>{JSON.stringify(data, null, 2)}</pre></details>
+  </div>
+}
+
+export function QueryConsole({ user, voiceFocus = false }) {
+  const { language, t } = useLanguage()
+  const [channel, setChannel] = useState('text')
+  const [query, setQuery] = useState('')
+  // H3: a voice transcript must be human-reviewed before it can be submitted.
+  const [review, setReview] = useState(null)
+  const [notice, setNotice] = useState('')
+  const request = useRequest()
+  const gate = review ? reviewGate(review) : { ready: true, pending: [], total: 0 }
+  function acceptTranscript(result) {
+    setQuery(result.text); setChannel('voice'); setNotice('')
+    setReview({ result, acknowledged: [], confirmed: false })
+  }
+  function edit(value) {
+    setQuery(value)
+    if (review && isSubstantialReplacement(review.result.text, value)) {
+      setReview(null); setChannel('text')
+      setNotice('The transcript was replaced, so this question will be sent as typed text.')
+    }
+  }
+  const acknowledge = (index, checked) => setReview(current => current && ({ ...current,
+    acknowledged: checked ? [...new Set([...current.acknowledged, index])] : current.acknowledged.filter(i => i !== index) }))
+  async function submit() {
+    if (!gate.ready) return
+    await request.run('/query', { method: 'POST', body: { query, request_id: crypto.randomUUID(), input_language: language, input_channel: channel }, timeout: 2100000 })
+  }
+  return <section className="panel"><h2>{voiceFocus ? 'Ask by voice' : t('Ask the workbench')}</h2><p>Answers are advisory. Refusals and clarification requests are shown as returned.</p>{!user && <p className="review-notice">Anonymous queries cannot produce reviewable approvals. Sign in first for governed recommendations.</p>}
+    <VoiceControls key={request.data?.run_id || 'input'} user={user} onTranscript={acceptTranscript} result={request.data} />
+    {review && <TranscriptReview result={review.result} acknowledged={review.acknowledged} confirmed={review.confirmed}
+      onAcknowledge={acknowledge} onConfirm={confirmed => setReview(current => current && ({ ...current, confirmed }))} />}
+    {notice && <p role="status">{notice}</p>}
+    <QueryForm query={query} onChange={edit} onSubmit={submit} gate={gate} loading={request.loading}
+      label={t('Question')} submitLabel={t('Submit query')} reviewing={!!review} />
+    {request.loading && <p>Local inference may take several minutes. Keep this page open.</p>}<ApiState request={request} /><Result data={request.data} />
+  </section>
+}
+
+export function Knowledge() {
+  const search = useRequest()
+  const ingest = useRequest()
+  const [query, setQuery] = useState('')
+  const [source, setSource] = useState('')
+  const [title, setTitle] = useState('')
+  return <section className="panel"><h2>Local knowledge and documents</h2><form onSubmit={e => { e.preventDefault(); search.run('/knowledge/retrieve', { method: 'POST', body: { query }, timeout: 180000 }) }}><label>Search source evidence<input value={query} onChange={e => setQuery(e.target.value)} required maxLength={2000} /></label><button disabled={search.loading}>Retrieve evidence</button></form><ApiState request={search} />
+    {search.data && <><p>{search.data.results?.length ?? 0} matching chunks returned.</p><DataView value={search.data} /></>}
+    <details><summary>Ingest an existing local PDF</summary><p>Path relative to the backend's data/raw directory. No browser or cloud upload. The server validates the path.</p><form onSubmit={e => { e.preventDefault(); ingest.run('/documents/ingest', { method: 'POST', body: { source_path: source, title, document_type: 'other' }, timeout: 660000 }) }}><label>Local PDF path<input value={source} onChange={e => setSource(e.target.value)} required maxLength={500} /></label><label>Document title<input value={title} onChange={e => setTitle(e.target.value)} required maxLength={200} /></label><button disabled={ingest.loading}>Ingest local PDF</button></form><ApiState request={ingest} />{ingest.data && <DataView value={ingest.data} />}</details>
+  </section>
+}
+
+export function Audit() {
+  const [draft, setDraft] = useState('')
+  const [eventType, setEventType] = useState('')
+  const log = usePaged(`/audit/log?limit=100${eventType ? `&event_type=${encodeURIComponent(eventType)}` : ''}`, nextPage.auditCursor)
+  const verify = useResource('/audit/verify')
+  return <section className="panel"><div className="section-heading"><h2>Tamper-Evident Audit</h2><button disabled={log.loading || verify.loading} onClick={() => { log.refresh(); verify.refresh() }}>Refresh audit</button></div>
+    <p>Verification covers the full chain and is a snapshot that may precede newly appended events. Filtered pages alone never establish chain validity.</p>
+    <ApiState request={verify} />{verify.data && <><p className={verify.data.valid ? 'result-status' : 'api-error'}>Chain verification: {verify.data.valid ? 'VALID' : 'FAILED'}</p><DataView value={verify.data} /></>}
+    <form className="toolbar" onSubmit={e => { e.preventDefault(); setEventType(draft.trim().toUpperCase()) }}>
+      <label>Event type<input value={draft} onChange={e => setDraft(e.target.value)} maxLength={60} placeholder="e.g. APPROVAL_DECISION_APPROVE" /></label>
+      <button type="submit">Filter</button>{eventType && <button type="button" className="ghost" onClick={() => { setDraft(''); setEventType('') }}>Clear filter</button>}</form>
+    <p className="muted small">Newest first. Event payloads are redacted in this explorer; stored rows and hashes are unchanged.</p>
+    <ListState list={log} empty={eventType ? `No ${eventType} events` : 'No audit events recorded yet'}>
+      {log.items.map(event => <details key={event.id}><summary>#{event.sequence_number} · {event.event_type} · {new Date(event.occurred_at).toLocaleString()} · {event.actor_id || event.actor_kind}</summary><DataView value={event} /></details>)}
+    </ListState>
+  </section>
+}
+
+export function Sovereignty({ proof }) {
+  const ready = useResource('/ready')
+  const health = useResource('/health')
+  return <section className="panel"><div className="section-heading"><h2>Application-level sovereignty</h2><button onClick={() => { proof.refresh(); ready.refresh(); health.refresh() }}>Refresh proof</button></div><p>No OS/firewall isolation is claimed. External hosted-AI dispatch counts cover the stated backend process observation window.</p><ApiState request={proof} />{proof.data && <DataView value={proof.data} />}<h3>Readiness</h3><ApiState request={ready} />{(ready.data || ready.error?.data) && <DataView value={ready.data || ready.error.data} />}<h3>Backend health</h3><ApiState request={health} />{health.data && <DataView value={health.data} />}</section>
+}

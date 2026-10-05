@@ -1,0 +1,6 @@
+{
+  "source": "https://api.osv.dev/v1/querybatch",
+  "packages_checked": 178,
+  "pip_version": "26.2.1",
+  "findings": []
+}

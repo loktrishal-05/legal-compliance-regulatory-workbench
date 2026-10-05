@@ -1,0 +1,10 @@
+# Preserve the verified snapshot's bytes, including mixed historical line endings.
+* -text
+*.pdf binary
+*.docx binary
+*.zip binary
+*.png binary
+*.webp binary
+*.mp4 binary
+*.woff2 binary
+*.ico binary

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "GHSA-4xh5-x5gv-qwph",
+    "summary": "pip's fallback tar extraction doesn't check symbolic links point to extraction directory",
+    "severity": "MODERATE",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2025-8869"
+    ]
+  },
+  {
+    "id": "GHSA-58qw-9mgm-455v",
+    "summary": "pip has an interpretation conflict due to handling both concatenated tar and ZIP files as ZIP files",
+    "severity": "MODERATE",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-3219"
+    ]
+  },
+  {
+    "id": "GHSA-6vgw-5pg2-w6jp",
+    "summary": "pip Path Traversal vulnerability",
+    "severity": "LOW",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-1703"
+    ]
+  },
+  {
+    "id": "GHSA-jp4c-xjxw-mgf9",
+    "summary": "pip Vulnerable to Inclusion of Functionality from Untrusted Control Sphere",
+    "severity": "MODERATE",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-6357"
+    ]
+  },
+  {
+    "id": "GHSA-qwm4-qh6w-59xr",
+    "summary": "pip would incorrectly handle doubly-encoded package URLs from indexes",
+    "severity": "MODERATE",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-13346"
+    ]
+  },
+  {
+    "id": "GHSA-wf93-45jw-7689",
+    "summary": " pip: Path traversal in console_scripts/gui_scripts\u00a0entry point names allows installing scripts outside of target directory",
+    "severity": "MODERATE",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-8643"
+    ]
+  }
+]

@@ -1,0 +1,93 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# Node / frontend
+node_modules/
+.next/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local model weights and caches
+/models/*
+!/models/.gitkeep
+*.gguf
+*.ggml
+*.safetensors
+*.pt
+*.pth
+*.onnx
+*.ckpt
+*.bin
+.cache/
+.ollama/
+
+# Local data and runtime files
+/data/**
+!/data/**/
+!/data/**/.gitkeep
+!/data/README.md
+!/data/manifests/*.csv
+!/data/manifests/dataset_licenses.md
+!/data/evaluation/retrieval_questions.jsonl
+!/data/evaluation/expected_citations.jsonl
+!/data/evaluation/README.md
+!/data/evaluation/manifest.json
+!/data/evaluation/model_eval_cases.jsonl
+!/data/evaluation/model_eval_config.json
+!/data/evaluation/retrieval_corpus.json
+*.log
+*.sqlite
+*.sqlite3
+
+# Isolated repository: never inherit hosting credentials or machine permissions.
+.vercel/
+.wrangler/
+.dev.vars
+.claude/settings.local.json
+.codex/hooks.json
+.impeccable/review/
+*.p12
+*.pfx
+*.crt
+*.dump
+*.snapshot
+*.bundle
+
+# Preserve useful development/recovery source from the old working directory.
+!/data/**/*.py
+!/data/**/*.js
+!/data/**/*.mjs
+!/data/**/*.ps1
+!/data/**/*.sh
+!/data/**/*.yml
+!/data/**/*.yaml
+
+# Frozen historical benchmark snapshots are source/evidence, not live backups.
+!/benchmark/**
