@@ -27,7 +27,7 @@ Phase B's detailed [domain/permission/workflow/source contracts](LEGAL_DOMAIN_BU
 | A | Complete: source custody, isolated defaults/CI, offline checks | Private runtime provisioning and acceptance remain gated for later phases |
 | B | Complete: approved development scope and domain/FR contracts | Operational-pilot pack/IdP/retention/recovery approvals remain release gates |
 | C | Backend identity verified; frontend acceptance deferred to user | Preserve existing frontend changes; no further frontend implementation |
-| D | In progress — scope, policy, audited provisioning and explicit legacy mapping tested (head 0021) | Workspace-scoped dedupe and old content/retrieval/review/audit route isolation |
+| D | Complete for development exit checks (head 0022); industrial regression suites not executable in available runtimes (recorded gap) | Start E secure intake on scoped versions |
 | E | Not started | Secure generic document intake and provenance |
 | F | Not started | Contract analysis and grounded summaries |
 | G | In progress — deterministic core tested (Part 2, integrator) | Registry/import/version persistence in migration 0022 after Part 1's 0021 |
@@ -104,14 +104,15 @@ C historical pause evidence: isolated backend identity 2/2, custody 6/6, focused
 
 ### Phase D — legal core and access control
 
-Current step: coordinate/review remaining D gates. Seven scoped ORM tables, DB-derived policy, two metadata APIs and migrations 0019/0020 were checkpointed/published in 87cd2bd; shared base is 496f903. 27 targeted checks and fresh/0018-to-head upgrades pass. 2026-10-06 (integrator, all teams unavailable): audited independent provisioning, operator bootstrap and explicit legacy mapping delivered with migration 0021 (`legal_provisioning.py`, `scripts/legal_provisioning_cli.py`); 41 scoped tests + migration validator pass on disposable PostgreSQL. Remaining D: tenant dedupe and old content/retrieval/review/audit isolation. No legal intake/pilot acceptance yet. The user approved the existing tested identity snapshot; no new frontend implementation.
+Current step: coordinate/review remaining D gates. Seven scoped ORM tables, DB-derived policy, two metadata APIs and migrations 0019/0020 were checkpointed/published in 87cd2bd; shared base is 496f903. 27 targeted checks and fresh/0018-to-head upgrades pass. 2026-10-06 (integrator, all teams unavailable): audited independent provisioning, operator bootstrap and explicit legacy mapping delivered with migration 0021 (`legal_provisioning.py`, `scripts/legal_provisioning_cli.py`); 41 scoped tests + migration validator pass on disposable PostgreSQL. Then 0022 workspace-scoped dedupe (legacy NULL-workspace namespace keeps global uniqueness; scoped versions unique per workspace; composite FK to the document's own scope), legacy-path guard on ten industrial read/dedupe/index sites, mapped versions stamped, and legal events excluded from the root audit log. 57/57 scoped tests + validator (fresh/0018 -> 0022, parity, reversibility, lossy-downgrade refusal) pass on disposable PostgreSQL. No legal intake/pilot acceptance yet. The user approved the existing tested identity snapshot; no new frontend implementation.
 
-- [ ] Reuse UUID/version/audit conventions; add Organization/Workspace/Membership/Matter and document-level access policy.
-- [ ] Add scoped source/domain references and validated API schemas; enforce server-derived context and tenant-qualified relationships.
-- [ ] Design explicit legacy ownership/quarantine and tenant-scoped deduplication; never guess private ownership. Legacy part done: unmapped documents stay denied; mapping is an audited operator command refusing re-mapping/foreign matters. Dedupe pending.
+- [x] Reuse UUID/version/audit conventions; add Organization/Workspace/Membership/Matter and document-level access policy.
+- [x] Add scoped source/domain references and validated API schemas; enforce server-derived context and tenant-qualified relationships.
+- [x] Design explicit legacy ownership/quarantine and tenant-scoped deduplication; never guess private ownership. Done: unmapped documents stay denied; mapping is an audited operator command refusing re-mapping/foreign matters/duplicate bytes; 0022 dedupe per workspace without revealing other tenants' copies.
 - [x] Audited independent provisioning: workspace admins grant/revoke others only, never self, never above own clearance, never beyond role operations; operator-only bootstrap; state + audit share one transaction (rollback tested).
 - [x] Create reviewed additive migrations after baseline 0018 and register ORM models. Delivered 0019 legal scope and 0020 policy-denial audit vocabulary; source head is 0020.
-- [ ] Test fresh/current-to-head upgrades, cross-workspace access/mapping denial and old immutable/audit record preservation in a disposable database.
+- [x] Test fresh/current-to-head upgrades, cross-workspace access/mapping denial and old immutable/audit record preservation in a disposable database.
+- [x] Isolate old paths: ingestion/P&ID dedupe and document reuse, retrieval ready-set, P&ID reads/evidence/indexing, verified knowledge, evidence integrity/sufficiency and knowledge-gap resolution use `legacy_version_clause`/`is_legacy_version`; root `/audit/log` uses `without_legal_audit`. Industrial suites could not run (bounded image lacks qdrant_client/langgraph; Windows Application Control blocks psycopg/ujson) — identical baseline/branch results for the runnable ones (agents_knowledge 25, knowledge 11, release_retrieval 7 OK; model_routing 4 pre-existing errors).
 
 ### Phase E — document intelligence
 

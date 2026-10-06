@@ -8,6 +8,7 @@ from app.agents.evidence import EvidenceRef
 from app.agents.citations import validate_citations
 from app.schemas.agent_outputs import Citation
 from app.db.models import Document, DocumentVersion
+from app.services.legal_policy import is_legacy_version
 from app.services import evidence_integrity as integrity
 
 
@@ -24,7 +25,7 @@ def source_valid(session, ref, scope="internal"):
         if ref.kind in ("document_chunk", "pid_region"):
             version = session.get(DocumentVersion, UUID(ref.document_version_id))
             doc = session.get(Document, UUID(ref.document_id))
-            if (not version or not doc or doc.classification != scope or version.status not in ("indexed", "pid_processed", "pid_indexed")
+            if (not version or not doc or not is_legacy_version(session, version) or doc.classification != scope or version.status not in ("indexed", "pid_processed", "pid_indexed")
                     or doc.ingestion_status not in ("indexed", "pid_processed", "pid_indexed") or doc.checksum != ref.source_sha256
                     or version.document_id != doc.id):
                 return False

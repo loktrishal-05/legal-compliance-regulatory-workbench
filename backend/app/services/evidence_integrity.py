@@ -21,6 +21,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.db.models import DocumentVersion, EvidenceManifest, EvidenceManifestItem, MaintenanceRecord, SensorReading
+from app.services.legal_policy import is_legacy_version
 from app.services.canonicalization import canonical_hash, canonical_json
 
 MANIFEST_VERSION = "phase5d-evidence-v1"
@@ -388,7 +389,7 @@ def _reverify_against_source(session, item: EvidenceManifestItem) -> tuple[bool,
         except (ValueError, TypeError, AttributeError):
             return False, "document_provenance_missing"
         version = session.get(DocumentVersion, version_uuid)
-        if version is None:
+        if not is_legacy_version(session, version):
             return False, "document_version_unresolved"
         if not item.source_hash or version.source_sha256 != item.source_hash:
             return False, "document_source_hash_mismatch"

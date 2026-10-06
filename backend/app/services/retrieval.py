@@ -3,6 +3,7 @@ from sqlalchemy import select
 from time import perf_counter
 from app.core.config import settings
 from app.db.models.document_version import DocumentVersion
+from app.services.legal_policy import legacy_version_clause
 from app.schemas.knowledge import ChunkMetadata, Citation, RetrievedChunk, RetrieveResponse
 from app.services.sparse import identifiers as extract_identifiers
 from app.services.pid_identifiers import normalize_identifier
@@ -41,7 +42,8 @@ def retrieve(request, session, embeddings=None, qdrant=None, reranker=None):
         raise ValueError("Reranking is disabled by configuration")
     query = normalize_identifier(request.query)
     identifiers = extract_identifiers(query)
-    ready = session.scalars(select(DocumentVersion.id).where(DocumentVersion.status.in_(["indexed", "pid_indexed"]))).all()
+    ready = session.scalars(select(DocumentVersion.id).where(DocumentVersion.status.in_(["indexed", "pid_indexed"]),
+                                                      legacy_version_clause())).all()
     response = RetrieveResponse(query=request.query, strategy={"hybrid": "dense_sparse_rrf", "hybrid_rerank": "dense_sparse_rrf_rerank"}.get(strategy, strategy),
                                 detected_identifiers=identifiers, results=[], timings_ms=timings)
     if not ready:

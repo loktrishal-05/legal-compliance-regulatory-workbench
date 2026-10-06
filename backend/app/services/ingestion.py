@@ -8,6 +8,7 @@ from sqlalchemy import select, text
 from app.core.config import settings
 from app.db.models.document import Document
 from app.db.models.document_version import DocumentVersion
+from app.services.legal_policy import is_legacy_document, legacy_version_clause
 from app.schemas.document import IngestionResponse
 from app.schemas.knowledge import ChunkMetadata, IngestRequest
 from app.services.extraction import extract_pdf, source_sha256
@@ -75,14 +76,15 @@ def ingest(request: IngestRequest, session, embeddings=None, qdrant=None):
     acquired = session.scalar(text("SELECT pg_try_advisory_xact_lock(:key)"), {"key": lock_key})
     if not acquired:
         raise IngestionConflict("This source is already being ingested; retry later")
-    version = session.scalar(select(DocumentVersion).where(DocumentVersion.source_sha256 == checksum))
+    version = session.scalar(select(DocumentVersion).where(DocumentVersion.source_sha256 == checksum,
+                                                          legacy_version_clause()))
     if version:
         document = session.get(Document, version.document_id)
         if duplicate_matches(version, request):
             return ingestion_result(version, document, "duplicate" if version.status == "indexed" else "ocr_required")
     else:
         document = session.get(Document, request.document_id) if request.document_id else None
-        if request.document_id and document is None:
+        if request.document_id and (document is None or not is_legacy_document(session, document.id)):
             raise ValueError("Unknown document_id")
         if document is None:
             document = Document(

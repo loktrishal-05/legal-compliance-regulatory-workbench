@@ -5,6 +5,7 @@ from sqlalchemy import select, text
 from app.core.config import settings
 from app.db.models.document import Document
 from app.db.models.document_version import DocumentVersion
+from app.services.legal_policy import is_legacy_document, legacy_version_clause
 from app.schemas.pid import PIDManifest, PIDProcessResponse
 from app.services.extraction import source_sha256
 from app.services.ingestion import IngestionConflict, write_json
@@ -65,14 +66,16 @@ def process_pid(request, session, ocr=None, vision=None):
     key = int.from_bytes(bytes.fromhex(checksum[:16]), "big", signed=True)
     if not session.scalar(text("SELECT pg_try_advisory_xact_lock(:key)"), {"key": key}):
         raise IngestionConflict("This source is already being processed; retry later")
-    version = session.scalar(select(DocumentVersion).where(DocumentVersion.source_sha256 == checksum))
+    version = session.scalar(select(DocumentVersion).where(DocumentVersion.source_sha256 == checksum,
+                                                          legacy_version_clause()))
     if version:
         document = session.get(Document, version.document_id)
         complete = check_duplicate(version, request)
     else:
         complete = False
         document = session.get(Document, request.document_id) if request.document_id else None
-        if request.document_id and (document is None or document.document_type != "pid"):
+        if request.document_id and (document is None or document.document_type != "pid"
+                                    or not is_legacy_document(session, document.id)):
             raise IngestionConflict("document_id must refer to an existing P&ID document")
         if document is None:
             document = Document(

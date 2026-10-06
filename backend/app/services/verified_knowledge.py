@@ -10,6 +10,7 @@ from sqlalchemy import select
 from app.agents.evidence import document_chunk_evidence
 from app.core.config import settings
 from app.db.models import ActionRevision, Document, DocumentVersion, User, VerifiedKnowledge
+from app.services.legal_policy import is_legacy_version
 from app.schemas.agent_outputs import GroundedAnswer
 from app.schemas.knowledge import ChunkMetadata
 from app.schemas.query import QueryRequest
@@ -58,7 +59,8 @@ def resolve_sources(session, chunk_ids, scope, with_scope=False):
         doc = session.scalars(select(Document).where(Document.id == chunk.document_id)
                               .execution_options(populate_existing=True)).one_or_none()
         if (chunk.chunk_id != key or chunk.ocr_derived or scope != "internal" or chunk.access_scope != scope
-                or version is None or doc is None or version.created_at is None or version.document_id != doc.id
+                or version is None or doc is None or not is_legacy_version(session, version)
+                or version.created_at is None or version.document_id != doc.id
                 or doc.classification != scope or version.status != "indexed" or doc.ingestion_status != "indexed"
                 or version.source_sha256 != chunk.source_sha256 or doc.checksum != chunk.source_sha256
                 or version.ingestion_metadata.get("access_scope") != scope

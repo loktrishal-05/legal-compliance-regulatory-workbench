@@ -4,6 +4,7 @@ import json
 
 from app.core.config import settings
 from app.db.models import DocumentVersion
+from app.services.legal_policy import is_legacy_version
 from app.schemas.pid import OCRRegion, PIDManifest
 from app.agents.evidence import pid_region_evidence
 from app.services.canonicalization import canonical_hash
@@ -11,7 +12,7 @@ from app.services.canonicalization import canonical_hash
 
 def load_pid_evidence(session, version_id, *, page_number=None, offset=0, limit=None):
     version = session.get(DocumentVersion, version_id)
-    if version is None or version.ingestion_metadata.get('kind') != 'pid':
+    if not is_legacy_version(session, version) or version.ingestion_metadata.get('kind') != 'pid':
         raise ValueError('No processed P&ID found for this document_version_id.')
     root = settings.data_root.resolve()
     def read(uri, directory):

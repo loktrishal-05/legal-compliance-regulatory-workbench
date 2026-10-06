@@ -6,10 +6,10 @@ This is a policy prerequisite, not an approval/release service.
 from dataclasses import dataclass
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import and_, exists, select
 from sqlalchemy.orm import Session
 
-from app.db.models import User
+from app.db.models import AuditEvent, DocumentVersion, User
 from app.db.models.legal_scope import (
     Organization, Workspace, WorkspaceMembership, Matter, MatterAccess, LegalDocumentScope, DocumentAccess,
 )
@@ -30,6 +30,9 @@ class LegalContext:
     platform_role: str
 
 
+# Legal audit is scoped (Phase J); the root industrial audit log never lists these.
+LEGAL_AUDIT_EVENT_TYPES = ("SECURITY_POLICY_DENIED", "LEGAL_WORKSPACE_BOOTSTRAPPED", "LEGAL_ACCESS_GRANTED",
+                           "LEGAL_ACCESS_REVOKED", "LEGAL_LEGACY_DOCUMENT_MAPPED")
 CLASSIFICATIONS = {"public": 0, "internal": 1, "confidential": 2, "restricted": 3}
 ROLE_OPERATIONS = {
     "analyst": {"read", "propose"},
@@ -97,3 +100,27 @@ def authorize_document(db: Session, actor_id: UUID, workspace_id: UUID, document
         if matter_access is None:
             raise LegalAccessDenied()
     return context
+
+
+def legacy_version_clause():
+    """SQL condition for OLD industrial paths: version and its document have no legal ownership.
+
+    Legal content is reachable only through the scoped `/v1` APIs; every legacy read/dedupe/index
+    path filters with this so a mapped or legally ingested document can never leak through it.
+    """
+    return and_(DocumentVersion.workspace_id.is_(None),
+                ~exists().where(LegalDocumentScope.document_id == DocumentVersion.document_id))
+
+
+def is_legacy_version(db: Session, version) -> bool:
+    return (version is not None and version.workspace_id is None
+            and db.get(LegalDocumentScope, version.document_id) is None)
+
+
+def without_legal_audit(query):
+    """Root industrial audit reads exclude legal events; legal audit is scoped (Phase J)."""
+    return query.where(AuditEvent.event_type.not_in(LEGAL_AUDIT_EVENT_TYPES))
+
+
+def is_legacy_document(db: Session, document_id) -> bool:
+    return db.get(LegalDocumentScope, document_id) is None
