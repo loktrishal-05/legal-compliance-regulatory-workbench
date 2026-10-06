@@ -27,6 +27,8 @@ jobs:
         run: docker compose -f infra/docker-compose.legal-core-test.yml build tests
       - name: Legal scope, real session API and PostgreSQL policy checks
         run: docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests
+      - name: Part 2 deterministic regulatory/compliance core
+        run: docker compose -f infra/docker-compose.legal-core-test.yml run --rm --no-deps tests python -B -m unittest tests.test_legal_regulatory_core -v
       - name: Fresh and existing-schema migration acceptance
         run: docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests python -B -m scripts.validate_legal_migrations
       - name: Whitespace check

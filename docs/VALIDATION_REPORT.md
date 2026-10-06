@@ -149,6 +149,18 @@ Isolated frontend preview PID 14916 used proxy `http://127.0.0.1:9` and intercep
 
 One unintended authenticated redirect reached the legacy dashboard with a generic `{}` mock and caused a rendering error; probe timeouts and this mock-shape failure are not passes. Dashboard is outside this bounded identity check and no frontend repair was made. User subsequently deferred frontend/landing/design acceptance and K to their own work; backend D may proceed. Existing frontend files remain preserved outside the backend checkpoint. No broad unchanged suites repeated; earlier results remain dated evidence.
 
+## Part 2 deterministic G/H core — 2026-10-06
+
+Branch `team/2-regulatory-compliance` (owner reassigned Part 2 to the integrator). Pure stdlib modules; no DB/settings/network/model access, so no test container dependency beyond Python.
+
+| Command | Result |
+|---|---|
+| `python -B -m unittest tests.test_legal_regulatory_core -v` (backend venv, Windows) | 14/14 OK |
+| Same module in approved `legal-core-test` image, `--no-deps`, no network | 14/14 OK (Python 3.11 image; network removed after run) |
+| Mutation: inclusive `effective_until`; removed partial state; allowed cross-workspace link | each FAILED as expected (1, 2, 2 failures) |
+
+Not covered: persistence/migration 0022, tenant FK enforcement in PostgreSQL, APIs, authorized human applicability, semantic change proposals, review binding. Not FR acceptance.
+
 ## Initial D verification — 2026-10-06
 
 - RED: native isolated target fails because the new scope module is intentionally absent. Initial in-memory policy/migration checks subsequently passed 12/12.

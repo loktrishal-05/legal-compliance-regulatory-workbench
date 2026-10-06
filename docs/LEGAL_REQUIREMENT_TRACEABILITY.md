@@ -6,6 +6,8 @@ Read `LEGAL_DOMAIN_BUILD_CONTRACTS.md` for approved development scope, role/stat
 
 Initial D evidence: `app/db/models/legal_scope.py`, `app/services/legal_policy.py`, `app/api/routes/legal_scope.py`, migrations 0019/0020 and four `test_legal_scope*` targets: 27/27 scoped tests; fresh/0018-to-head parity/idempotency/source/audit/trigger preservation pass. Demonstration is bounded synthetic metadata/session/denial tests, not full document/search/review/recovery journeys. Provisioning, tenant dedupe, legacy-path isolation and legal hold/retention policy acceptance remain unfinished.
 
+Part 2 deterministic core evidence (2026-10-06, partial, not acceptance): `app/services/regulatory_versions.py`, `app/services/compliance_assessment.py`, `tests/test_legal_regulatory_core.py` 14/14 with synthetic fixtures; mutation checks confirmed failures are caught. Partial for FR-028/029 (exact part)/032 (freshness)/035/037/038/039/040 and relational part of FR-034. Persistence, tenant FKs, registry/import (FR-026/027), human applicability (FR-030), jurisdiction mapping (FR-031), AI interpretation (FR-036) and APIs remain open.
+
 | Requirement | Priority | Build label / phases | Deliverable and acceptance evidence (planned) |
 |---|---|---|---|
 | FR-001 | Must | Pilot gate — D/L/M | Enterprise OIDC/SAML/SSO and MFA support; configured IdP/session/authentication tests. Local auth is development-only and does not satisfy this gate. |
