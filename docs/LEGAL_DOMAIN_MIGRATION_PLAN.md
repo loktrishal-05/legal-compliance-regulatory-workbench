@@ -30,8 +30,8 @@ Phase B's detailed [domain/permission/workflow/source contracts](LEGAL_DOMAIN_BU
 | D | In progress — initial scope/API/migrations tested | Finish audited provisioning, legacy access isolation and scoped deduplication |
 | E | Not started | Secure generic document intake and provenance |
 | F | Not started | Contract analysis and grounded summaries |
-| G | Not started | Approved regulatory imports and version changes |
-| H | Not started | Requirement/control/evidence assessment and digital twin |
+| G | In progress — deterministic core tested (Part 2, integrator) | Registry/import/version persistence in migration 0022 after Part 1's 0021 |
+| H | In progress — deterministic core tested (Part 2, integrator) | Persist entities/mappings/assessments in 0022; review binding with Part 3 |
 | I | Not started | Durable obligations, deadlines and notifications |
 | J | Not started | Expanded legal review, remediation and audit |
 | K | Owner-managed, not accepted | User builds frontend; real-data/accessibility/end-to-end exit checks remain required |
@@ -130,6 +130,8 @@ Current step: coordinate/review remaining D gates. Seven scoped ORM tables, DB-d
 
 ### Phase G — regulatory intelligence
 
+Current step (2026-10-06): owner reassigned Part 2 to the integrator. Pure `app/services/regulatory_versions.py` (half-open as-of selection, unknown/overlap -> needs verification, exact structural diff, failed check = unavailable) is tested. No persistence, registry approval, import or semantic AI proposal yet; persistent work waits for agreed/merged 0021.
+
 - [ ] Add authoritative-source registry, trust/jurisdiction metadata and manual approved import; keep external acquisition separate from confidential content.
 - [ ] Persist publication/effective periods, source hashes, amendments and supersession/version relationships.
 - [ ] Extract proposed requirements and retain exact text/structural differences beside semantic change explanations.
@@ -137,6 +139,8 @@ Current step: coordinate/review remaining D gates. Seven scoped ORM tables, DB-d
 - [ ] Verify historical version selection, provenance, freshness failure and change impact; label unconfigured live connectors honestly.
 
 ### Phase H — compliance assurance and digital twin
+
+Current step (2026-10-06): pure `app/services/compliance_assessment.py` implements versioned declarative rules, six states with fixed precedence and reasons, accepted/expired/stale/superseded/conflicting evidence, drift reasons without rewriting history, and workspace-bounded blast radius. Visible component counts only; no weights/score. Entities, FKs, review binding and AI interpretation remain unbuilt.
 
 - [ ] Add separate Requirement/Policy/Control/Evidence/Assessment/Finding revisions and scoped relational mappings.
 - [ ] Implement approved deterministic evaluations and provisional grounded AI interpretation with six explainable states.
