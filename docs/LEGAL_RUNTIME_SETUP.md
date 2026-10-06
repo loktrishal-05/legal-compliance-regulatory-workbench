@@ -1,12 +1,12 @@
 # Legal platform runtime setup — current workspace only
 
-Status: Phase A configuration isolation. Services, migrations, model execution and deployment are **not provisioned or validated by this document**. Read the living migration plan before the relevant phase. This guide supersedes operational commands in historical phase/handoff/deployment documents.
+Status: isolated defaults plus approved disposable D tests/migrations. Private application/model/deployment acceptance remains pending. Read SESSION_RESUME -> CLAUDE_HANDOFF and the living phase guide; historical setup instructions are superseded.
 
 ## 1. Verify custody before setup
 
 Only work in `C:\Users\Lohith k\Desktop\OLD hard work\legal-compliance-regulatory-workbench`, with origin exactly `https://github.com/loktrishal-05/legal-compliance-regulatory-workbench.git`. Do not clone/overlay sibling worktrees, fetch old history, initialize/update submodules, execute nested `claudex-loop`, or use historical `.kilo` worktrees. Their content/metadata is preserved as quarantined reference material.
 
-Run root/origin/status inspection before operational commands. Use the existing application checkout; no new clone is needed. Do not commit or push without separate authorization.
+Run root/origin/status inspection before operational commands. The assistant uses the existing authorized root; teammates may clone assigned branches in their own approved checkouts. Regular coherent verified local commits are authorized. Development/review publication follows recorded approval and protected PR rules; main reconciliation/promotion and private runtime/model/deployment remain separately gated. See AGENTS and CLAUDE_HANDOFF.
 
 ## 2. Review private configuration without overwriting it
 
@@ -58,7 +58,19 @@ node --check frontend/vite.config.js
 
 The backend overlay additionally requires explicit container model values. Use approved synthetic values for render-only tests; do not interpret configuration rendering as connectivity, schema or security acceptance.
 
-CI is manual-only, exact-repository gated and GitHub-hosted. The historical self-hosted/live inference job was removed. No workflow was dispatched. The pre-existing frozen-readiness-report mismatch remains a regression/release issue; its manifest and user edits were not rewritten.
+Full regression remains manual, repository-gated and GitHub-hosted; old self-hosted/live inference jobs stay removed. New legal-backend-checks baseline CI runs automatically on assigned team/development pushes and PRs using disposable resources. Credential-free/non-recursive checkout correction is in PR #4 pending independent approval. Baseline CI is not future-feature acceptance. Frozen-readiness mismatch remains recorded, not rewritten.
+
+Approved synthetic legal-core validation (verify Docker context/targets first):
+
+```powershell
+docker compose -f infra/docker-compose.legal-core-test.yml config --quiet
+docker compose -f infra/docker-compose.legal-core-test.yml build tests
+docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests
+docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests python -B -m scripts.validate_legal_migrations
+docker compose -f infra/docker-compose.legal-core-test.yml down --volumes
+```
+
+This dedicated project uses an internal network, no host ports/persistent volumes, selected read-only backend mounts, no private .env/data/models and unused loopback model/vector targets. 27 scoped checks and fresh/0018-to-0020 migrations/parity/idempotency/source-audit-trigger preservation passed; no full app/legal/restore/private schema acceptance. Test container/network was removed after validation.
 
 ## 6. Later approved provisioning and validation
 
