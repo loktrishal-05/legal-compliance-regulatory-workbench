@@ -2,6 +2,15 @@
 
 Updated: 2026-10-06. **One entry point for the next assistant.** This is a factual handoff and reading index, not a replacement for the master specification, repository boundaries, detailed build guide or actual tests. Reverify recorded state before acting. The user's latest request is to save the conversation/build/team/repository context for Claude; this documentation change does not start another implementation phase.
 
+## 0. Current state — 2026-10-06 (supersedes the §3/§4 snapshot rows below)
+
+- All three teammates are unavailable; the owner asked the integrator to build all remaining backend work and commit. Frontend/landing (K) stays with the owner.
+- Owner set required approvals to **0** on `main` and development (kept: `legal-core` required, strict up-to-date, conversation resolution, admin enforcement, no force push/deletion). Integrator self-reviews; independent human review is an open acceptance gate.
+- Merged to development: #4 handoff/CI, #6 Part 2 deterministic G/H core, #7 D provisioning (0021), #8 D dedupe/isolation (0022). Development head `5ff7ed8`; migration head `0022_legal_version_scope`.
+- `main` = `a85494d` (PR #5 joined the unrelated histories; tree = development at 496f903). Creating a development -> main promotion PR was **blocked by the session permission classifier**; the owner must create/merge it or grant that permission.
+- Phase D complete for development exit checks; industrial regression suites cannot run in available runtimes (recorded gap). Next: Phase E secure intake on scoped versions, then F, G/H persistence (Part 2 core exists), I, J, L, M.
+- Work happens in temp worktrees (`%TEMP%\lrw-part1`, `%TEMP%\lrw-part2`) so the owner's dirty working tree is never touched.
+
 ## 1. Exact workspace and source of truth
 
 **Only application root:**
@@ -69,7 +78,7 @@ Snapshot verified immediately before writing this handoff; re-query on resume.
 
 Important normal checkpoints (do not amend): `34dc7af` terms/auth preservation; `dfea5db` A custody/config/plan; `3f94383` B domain/FR contracts; `1968d2e` inherited frontend preservation; `770c834` identity RED checks; **`87cd2bd`** scoped backend + saved identity + three-team handoff; **`496f903`** published evidence/shared base; `30caf9c` protections evidence; `9cd84af` CI checkout custody fix. Preservation snapshots are not fresh legal acceptance.
 
-Both main/development protection was verified: required **`legal-core`** with up-to-date branch, one independent approval including last-push independence, stale-review dismissal, conversation resolution and admin enforcement; force pushes and deletions disabled. Do not weaken protection, use `--admin`, self-approve an account's own PR, merge on baseline CI alone, or bypass checks. Claude using the same authenticated account is not a separate GitHub reviewer for PR #4. Obtain a real independent reviewer.
+Both main/development protection was verified: required **`legal-core`** with up-to-date branch, one independent approval including last-push independence, stale-review dismissal, conversation resolution and admin enforcement; force pushes and deletions disabled. Superseded 2026-10-06 by the owner: approvals set to 0 (see §0). Still never use `--admin`, force push, or bypass `legal-core`; record self-review honestly.
 
 ## 4. Current application state and remaining phases
 
@@ -78,11 +87,11 @@ Both main/development protection was verified: required **`legal-core`** with up
 | A — custody/config/discovery | Source/config milestone complete; isolated defaults/CI/runbooks; master ingested unchanged. Private runtime/deployment ownership still gated |
 | B — architecture/contracts | Approved development baseline, scoped role/state/source/review contracts and 66-FR registry complete; planning is not feature delivery |
 | C — identity/configuration | Backend identity and saved paired frontend identity verified/published. Existing layout retained; frontend/design acceptance now user-owned. Historical industrial pages/results are labelled legacy |
-| D — legal core/authorization | **Initial slice implemented/tested, phase incomplete.** Finish audited independent provisioning, explicit legacy ownership/quarantine, workspace-scoped dedupe/version strategy and old content/retrieval/review/audit isolation before enabling legal intake |
+| D — legal core/authorization | **Complete for development exit checks** (0019-0022): scope/policy, audited independent provisioning, operator bootstrap/legacy mapping, per-workspace dedupe, legacy-path guards, root audit exclusion |
 | E — document intelligence | Secure formats/upload/import, scan/quarantine/type/size/archive/parser limits, immutable originals, OCR/layout/quality/corrections, exact source spans, authorized retrieval still to build |
 | F — contracts/summaries | Contract/party/clause/playbook/version analysis, source-linked duty/date/conflict proposals, deviations/missing clauses/redlines, cited audience summaries/coverage/exports and review integration still to build |
-| G — regulatory intelligence | Approved source registry/manual imports, authority/version/effectivity/amendment/diff/freshness/applicability/change impact still to build |
-| H — compliance assurance | Separate requirements/policies/controls/evidence/assessments/findings/mappings, six explainable states, evidence expiry/drift/current invalidation and relational impact still to build |
+| G — regulatory intelligence | Deterministic as-of/diff/freshness core merged (#6). Approved source registry/manual imports, authority/version/effectivity/amendment/diff/freshness/applicability/change impact still to build |
+| H — compliance assurance | Deterministic six-state/evidence/drift/impact core merged (#6). Persistent requirements/policies/controls/evidence/assessments/findings/mappings and APIs still to build |
 | I — monitoring/work | Accepted obligations, approved timezone/recurrence/calendar deadlines, durable occurrence/outbox/receipt/escalation/task/in-app notification behavior still to build/test |
 | J — legal governance/audit | Exact immutable legal review/independence/request-changes/escalation, remediation closure/retest/reopen, scoped audit/replay/export and atomic hash/evidence binding still to build |
 | K — frontend | User-owned implementation; real backend journeys/role/error/loading/responsive/accessibility/source-jump acceptance remains required, not skipped |
