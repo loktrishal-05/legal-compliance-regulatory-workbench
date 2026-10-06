@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { countBy, dedupeWorkOrders, defaultSession, eventsPerDay, niceTicks, recordingSessions, sensorSeries, sumBy, workOrderBoard } from './insightsModel.js'
+import { countBy, dedupeWorkOrders, distributionRows, defaultSession, eventsPerDay, niceTicks, recordingSessions, sensorSeries, sumBy, workOrderBoard } from './insightsModel.js'
 import { matchCommands } from '../../app/navigation.js'
 
 const reading = (tag, iso, value, unit = 'mm/s') => ({ sensor_tag: tag, equipment_tag: 'P-204', measurement: 'vibration', unit, value, timestamp: iso, quality: 'good', citation: { source_filename: 'f.csv', source_row_number: 2 } })
@@ -61,4 +61,12 @@ test('command palette ranks prefix, then substring, then initials', () => {
   assert.deepEqual(matchCommands(commands, 'sensor').map(c => c.id), ['m'])
   assert.equal(matchCommands(commands, '  ').length, 3)
   assert.equal(matchCommands(commands, 'zzz').length, 0)
+})
+
+test('BI distributions keep unrecorded cohorts null instead of zero', () => {
+  assert.equal(distributionRows({ counts: null, sample_size: 0 }), null)
+  assert.equal(distributionRows(undefined), null)
+  assert.deepEqual(distributionRows({ counts: { PENDING_REVIEW: 2, APPROVED: 5 }, sample_size: 7 }),
+    [{ label: 'Approved', value: 5 }, { label: 'Pending review', value: 2 }])
+  assert.deepEqual(distributionRows({ counts: { 'qwen3.5:9b': 3 } }, key => key), [{ label: 'qwen3.5:9b', value: 3 }])
 })

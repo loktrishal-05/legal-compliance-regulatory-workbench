@@ -27,6 +27,7 @@ export const APP_SECTIONS = [
   { group: 'Trust', items: [
     { path: 'sovereignty', label: 'Sovereignty', icon: 'shield' },
     { path: 'resources', label: 'Government Resources', icon: 'globe' },
+    { path: 'help', label: 'Help & Resources', icon: 'help' },
   ] },
   { group: 'Admin', items: [
     { path: 'admin', label: 'Administration', icon: 'users', roles: ADMINS },

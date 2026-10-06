@@ -75,7 +75,7 @@ fieldset:disabled label { color: var(--text-faint); }
 .nav-note { display: flex; gap: var(--space-2); margin-top: auto; padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); color: var(--text-muted); font-size: var(--fs-xs); }
 .nav-scrim { display: none; }
 /* Laptop-height screens: every destination stays visible without scrolling the sidebar. */
-@media (max-height: 860px) {
+@media (max-height: 940px) {
   .shell-nav { padding-block: var(--space-3); }
   .nav-group ul { margin-bottom: 6px; }
   .nav-label { margin-bottom: 2px; font-size: 11px; }

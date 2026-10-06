@@ -32,7 +32,8 @@ export const routes = [{
     {
       path: 'app',
       element: <RequireAuth />,
-      children: [{
+      // First-login terms: accepted server-side before any Workbench page renders.
+      children: [{ lazy: lazyNamed(() => import('../features/resources/TermsGate.jsx'), 'TermsGate'), children: [{
         lazy: lazyNamed(() => import('./AppShell.jsx'), 'default'),
         children: [
           { index: true, element: <Navigate to="dashboard" replace /> },
@@ -53,6 +54,7 @@ export const routes = [{
           { path: 'audit', element: <RequireAuth roles={REVIEWERS} />, children: [indexPage('AuditPage', 'Audit')] },
           page('sovereignty', 'SovereigntyPage', 'Sovereignty'),
           page('resources', 'ResourcesPage', 'Government Resources'),
+          page('help', 'HelpPage', 'Help & Resources'),
           { path: 'admin', element: <RequireAuth roles={ADMINS} />, children: [
             indexPage('AdminPage', 'Administration'),
             page('*', 'AdminPage', 'Administration'),
@@ -60,7 +62,7 @@ export const routes = [{
           page('profile', 'ProfilePage', 'Profile'),
           { path: '*', element: <NotFound />, handle: { title: 'Page not found' } },
         ],
-      }],
+      }] }],
     },
     { path: '403', element: <main id="main" className="standalone"><Forbidden /></main>, handle: { title: 'Access restricted' } },
     { path: '*', element: <main id="main" className="standalone"><NotFound /></main>, handle: { title: 'Page not found' } },

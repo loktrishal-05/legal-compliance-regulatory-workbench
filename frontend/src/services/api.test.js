@@ -1,6 +1,29 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { apiRequest, getBackendHealth } from './api.js'
+import { TERMS_REQUIRED_EVENT, apiRequest, getBackendHealth, nextPage } from './api.js'
+
+test('a terms-gated 403 anywhere returns the user to terms acceptance', async (t) => {
+  const events = []
+  globalThis.window = new EventTarget()
+  t.after(() => { delete globalThis.window })
+  window.addEventListener(TERMS_REQUIRED_EVENT, event => events.push(event.type))
+  t.mock.method(globalThis, 'fetch', async () => new Response(JSON.stringify({ detail: { code: 'terms_acceptance_required', version: '1.0' } }), { status: 403 }))
+  await assert.rejects(apiRequest('/executions'), error => error.status === 403 && error.message === 'Accept the current terms to continue.')
+  assert.deepEqual(events, [TERMS_REQUIRED_EVENT])
+})
+
+test('pagination follows each backend contract and stops at the last page', async (t) => {
+  t.mock.method(globalThis, 'fetch', async () => new Response('[]', { headers: { 'X-Has-More': 'true', 'X-Next-Offset': '100', 'X-Sample-Size': '0' } }))
+  const { data, meta } = await apiRequest('/verified-knowledge?limit=50', { meta: true })
+  assert.deepEqual(data, [])
+  // An empty knowledge page can still have more: the next offset comes from the header, not the item count.
+  assert.equal(nextPage.header({ meta, path: '/verified-knowledge?limit=50' }), '/verified-knowledge?limit=50&offset=100')
+  assert.equal(nextPage.envelope({ data: { has_more: true, next_offset: 50 }, path: '/executions?limit=50' }), '/executions?limit=50&offset=50')
+  assert.equal(nextPage.envelope({ data: { has_more: false, next_offset: null }, path: '/executions' }), null)
+  assert.equal(nextPage.offset({ meta: { hasMore: true }, path: '/knowledge-gaps?limit=100&offset=100' }), '/knowledge-gaps?limit=100&offset=200')
+  assert.equal(nextPage.auditCursor({ meta: { hasMore: true }, items: [{ sequence_number: 90 }, { sequence_number: 41 }], path: '/audit/log?limit=100' }), '/audit/log?limit=100&before_sequence=41')
+  assert.equal(nextPage.auditCursor({ meta: { hasMore: false }, items: [{ sequence_number: 1 }], path: '/audit/log' }), null)
+})
 
 test('requests use server cookies and preserve exact revision binding', async (t) => {
   let seen

@@ -1,10 +1,10 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import { useResource } from '../../hooks/useApi.js'
 import { BarList, ColumnChart } from '../../components/charts.jsx'
 import { Icon } from '../../components/ui.jsx'
 import { RequestState, SensorTrends, WorkOrderSummary } from '../maintenance/MaintenanceView.jsx'
-import { GOVERNANCE_EVENTS, countBy, eventsPerDay, humanizeEvent } from '../insights/insightsModel.js'
+import { GOVERNANCE_EVENTS, countBy, distributionRows, eventsPerDay, humanizeEvent } from '../insights/insightsModel.js'
 
 const dayLabel = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short' })
 const relative = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
@@ -95,4 +95,53 @@ export function DashboardView({ user, health }) {
       {reviewer && <Card title="Governance activity" to="/app/audit" action="Audit log" className="span-2"><GovernanceActivity /></Card>}
     </div>
   </div>
+}
+
+const RANGES = [['24h', '24 hours'], ['7d', '7 days'], ['30d', '30 days']]
+const hourLabel = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', hour: '2-digit' })
+
+// One bounded cohort from /bi/operational. Unrecorded is shown as such; truncated samples are flagged.
+function Cohort({ title, value, sample, keep }) {
+  const rows = distributionRows(value, keep ? key => key : undefined)
+  return <section className="dash-card" aria-label={title}>
+    <header><h2>{title}</h2><span className="muted small">{sample?.truncated ? `latest ${sample.limit} (truncated)` : `${value?.sample_size ?? 0} recorded`}</span></header>
+    {rows ? <BarList data={rows} label={title} /> : <p className="chart-empty">Not recorded in this window.</p>}
+  </section>
+}
+
+export function OperationalBI() {
+  const [range, setRange] = useState('7d')
+  const bi = useResource(`/bi/operational?range=${range}`)
+  const d = bi.data
+  const volume = (d?.query_volume?.points || []).map(p => ({ t: Date.parse(p.at), value: p.count })).filter(p => Number.isFinite(p.t))
+  const latency = d?.approval_latency_seconds?.mean
+  return <section className="panel" aria-labelledby="bi-title">
+    <div className="section-heading"><h2 id="bi-title">Operational activity</h2>
+      <div className="segmented" role="group" aria-label="Time window">{RANGES.map(([value, label]) =>
+        <button key={value} type="button" aria-pressed={range === value} onClick={() => setRange(value)}>{label}</button>)}</div></div>
+    <p className="muted small">Descriptive counts of stored records in the selected window, advisory only. Each figure has its own sample; nothing is extrapolated.</p>
+    <RequestState request={bi}>
+      {d && <div className="dash-grid">
+        <section className="dash-card span-2" aria-label="Recorded runs">
+          <header><h2>Recorded runs</h2><span className="muted small">{d.query_volume.sample_size} runs{d.samples?.runs?.truncated ? ' · truncated' : ''}</span></header>
+          <ColumnChart data={volume} label={`Recorded runs per ${d.query_volume.bucket}`} unitLabel="runs"
+            format={t => (d.query_volume.bucket === 'hour' ? hourLabel : dayLabel).format(t)} />
+          <p className="muted small">Runs with stored traces, not every incoming request. {d.query_volume.bucket === 'hour' ? 'Hours' : 'Days'} without recorded runs are not drawn.</p>
+        </section>
+        <section className="dash-card" aria-label="Approvals">
+          <header><h2>Approvals</h2></header>
+          <p className="queue-count"><b>{d.pending_approvals.count}</b> of {d.pending_approvals.sample_size} drafts created in this window still await review</p>
+          <p className="muted small">Mean time to decision: {latency == null ? 'not recorded' : latency < 3600 ? `${Math.round(latency / 60)} min` : `${(latency / 3600).toFixed(1)} h`} ({d.approval_latency_seconds.sample_size} decisions)</p>
+          <p className="muted small">Escalations: {d.escalations.count == null ? 'not recorded' : `${d.escalations.count} of ${d.escalations.sample_size}`}</p>
+        </section>
+        <Cohort title="Model selection" value={d.model_routing} sample={d.samples?.metadata} keep />
+        <Cohort title="Execution status" value={d.execution_status} sample={d.samples?.executions} />
+        <Cohort title="Approval outcomes" value={d.approval_outcomes} sample={d.samples?.decisions} />
+        <Cohort title="Evidence sufficiency" value={d.evidence_sufficiency} sample={d.samples?.metadata} />
+        <Cohort title="Knowledge lifecycle" value={d.knowledge_lifecycle} sample={d.samples?.knowledge} />
+        <Cohort title="Knowledge gaps" value={d.knowledge_gap_status} sample={d.samples?.knowledge_gaps} />
+      </div>}
+      {d?.limitations?.length ? <details className="disclosure"><summary>How to read these figures</summary><ul>{d.limitations.map(item => <li key={item}>{item}</li>)}</ul></details> : null}
+    </RequestState>
+  </section>
 }

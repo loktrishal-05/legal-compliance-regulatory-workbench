@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useRequest, useResource } from '../../hooks/useApi.js'
-import { EmptyState, ErrorState, Icon, LoadingState } from '../../components/ui.jsx'
+import { EmptyState, ErrorState, Icon, LoadingState, RequestProblem } from '../../components/ui.jsx'
 import { DataView } from '../../WorkspacePages.jsx'
 
 // The reviewer's desk: the queue on the left, one exact revision on the right, and a decision bar that is
@@ -8,7 +8,7 @@ import { DataView } from '../../WorkspacePages.jsx'
 
 const STATUS = {
   PENDING_REVIEW: ['Awaiting review', 'warn'], APPROVED: ['Approved', 'ok'], REJECTED: ['Rejected', 'bad'],
-  REVOKED: ['Revoked', 'muted'], RELEASED: ['Released', 'ok'],
+  REVOKED: ['Revoked', 'muted'], RELEASED: ['Released', 'ok'], EXPIRED: ['Expired', 'muted'],
 }
 const BINDING = { VERIFIED: ['Evidence integrity-bound', 'ok'], BOUND: ['Evidence integrity-bound', 'ok'], LEGACY_UNVERIFIED: ['Evidence not integrity-bound', 'warn'] }
 const relative = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
@@ -106,7 +106,8 @@ function ReviewPane({ revision, user, onDecided }) {
 }
 
 export function ReviewDesk({ user }) {
-  const queue = useResource('/approvals')
+  const [view, setView] = useState('pending')
+  const queue = useResource(`/approvals?view=${view}&limit=100`)
   const detail = useRequest()
   const { run } = detail
   const [selected, setSelected] = useState(null)
@@ -128,15 +129,19 @@ export function ReviewDesk({ user }) {
   }
   return <div className="desk">
     <aside className="desk-queue" aria-label="Review queue">
-      <header><h2>Queue</h2><span className="count">{items.length}</span>
+      <div className="segmented" role="group" aria-label="Approvals view">{[['pending', 'Awaiting review'], ['history', 'Decided']].map(([value, label]) =>
+        <button key={value} type="button" aria-pressed={view === value} onClick={() => { setView(value); setSelected(null); setNotice('') }}>{label}</button>)}</div>
+      <header><h2>{view === 'pending' ? 'Queue' : 'History'}</h2><span className="count">{items.length}</span>
         <button type="button" className="icon-button ghost" onClick={queue.refresh} aria-label="Refresh queue" disabled={queue.loading}><Icon name="refresh" size={18} /></button></header>
-      {queue.error ? <ErrorState title="Queue unavailable" message={queue.error.message} onRetry={queue.refresh} /> : !queue.data ? <LoadingState label="Loading queue…" />
+      {queue.error ? (queue.error.status === 403 ? <EmptyState title="Reviewer access required" message="Approval queues are for reviewers and administrators. The approval state of your own drafts appears in Executions." />
+        : <RequestProblem error={queue.error} title="Queue unavailable" onRetry={queue.refresh} />) : !queue.data ? <LoadingState label="Loading queue…" />
         : items.length ? <ul className="queue-rows" onKeyDown={onKey}>{items.map(item => <li key={item.action_revision_id}>
           <button type="button" id={`queue-${item.action_revision_id}`} className="queue-row" aria-current={activeId === item.action_revision_id || undefined} onClick={() => open(item.action_revision_id)}>
             <span className="queue-row-title">{title(item.route)}</span>
-            <span className="queue-row-meta"><code className="identifier">{item.action_revision_id.slice(0, 8)}</code><span>{ago(item.created_at)}</span></span>
+            <span className="queue-row-meta"><code className="identifier">{item.action_revision_id.slice(0, 8)}</code><span>{view === 'history' && item.decided_at ? `${(STATUS[item.governance_status] || [item.governance_status])[0]} ${ago(item.decided_at)}` : ago(item.created_at)}</span></span>
           </button></li>)}</ul>
-          : <EmptyState title="The queue is clear" message="New advisory drafts appear here for human review." />}
+          : view === 'pending' ? <EmptyState title="The queue is clear" message="New advisory drafts appear here for human review." />
+          : <EmptyState title="No decided revisions yet" message="Approved, rejected, revoked and expired advisories appear here." />}
       {items.length > 1 && <p className="muted small desk-hint"><kbd>↑</kbd> <kbd>↓</kbd> or <kbd>J</kbd> <kbd>K</kbd> move through the queue</p>}
       <details className="desk-lookup"><summary>Open a decided revision</summary>
         <form onSubmit={event => { event.preventDefault(); if (manual.trim()) open(manual.trim()) }}>

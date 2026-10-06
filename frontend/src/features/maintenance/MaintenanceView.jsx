@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useResource } from '../../hooks/useApi.js'
 import { BarList, TimeSeriesChart } from '../../components/charts.jsx'
-import { EmptyState, ErrorState, Icon, LoadingState } from '../../components/ui.jsx'
+import { EmptyState, Icon, LoadingState, RequestProblem } from '../../components/ui.jsx'
 import { SERIES_COLORS, dedupeWorkOrders, defaultSession, sumBy, recordingSessions, sensorSeries, seriesStats, workOrderBoard } from '../insights/insightsModel.js'
 
 const dateOnly = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
@@ -15,7 +15,7 @@ function useSensorSeries() {
 }
 
 export function RequestState({ request, children, empty, isEmpty }) {
-  if (request.error) return <ErrorState title="Could not load live data" message={request.error.message} onRetry={request.refresh} />
+  if (request.error) return <RequestProblem error={request.error} onRetry={request.refresh} />
   if (!request.data) return <LoadingState label="Loading live data…" />
   if (isEmpty) return <EmptyState title={empty} />
   return children

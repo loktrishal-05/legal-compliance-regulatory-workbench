@@ -108,6 +108,7 @@ export default function AppShell() {
           <div className="menu-panel">
             <p><strong>{session.user?.username}</strong><br /><span className="muted">Server role: {role}</span></p>
             <Link to="/app/profile">Profile</Link>
+            <Link to="/app/help">Help &amp; Resources</Link>
             <button type="button" onClick={signOut}>Sign out</button>
             {session.error && <p role="alert">Sign-out failed. {session.error.message}</p>}
           </div>

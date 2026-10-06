@@ -1,29 +1,31 @@
-import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { useSession } from './session.jsx'
 import { REVIEWERS } from './navigation.js'
-import { AgentAvatar, EmptyState, NotFound, PageHeader, PlannedCapability } from '../components/ui.jsx'
-import { ApiState, Audit, DataView, Knowledge, QueryConsole, Sovereignty } from '../WorkspacePages.jsx'
+import { AgentAvatar, EmptyState, NotFound, PageHeader } from '../components/ui.jsx'
+import { ApiState, Audit, Knowledge, QueryConsole, Sovereignty } from '../WorkspacePages.jsx'
 import { OperationalWorkspace } from '../OperationalPages.jsx'
-import { AutomationStatus, BIReport } from '../ProductPages.jsx'
-import { useRequest, useResource } from '../hooks/useApi.js'
+import { AutomationStatus } from '../ProductPages.jsx'
+import { useResource } from '../hooks/useApi.js'
 import { useBackendHealth } from '../hooks/useBackendHealth.js'
-import { DashboardView, GovernanceActivity } from '../features/dashboard/DashboardView.jsx'
+import { DashboardView, GovernanceActivity, OperationalBI } from '../features/dashboard/DashboardView.jsx'
 import { SensorTrends, WorkOrderBoard } from '../features/maintenance/MaintenanceView.jsx'
 import { ReviewDesk } from '../features/approvals/ReviewDesk.jsx'
 import { AgentsView } from '../features/agents/AgentsView.jsx'
+import { ResourcesView } from '../features/resources/ResourcesView.jsx'
+import { ExecutionsView } from '../features/executions/ExecutionsView.jsx'
+import { PidViewer } from '../features/pid/PidViewer.jsx'
+import { GapBoard, VerifiedRegistry } from '../features/knowledge/KnowledgeViews.jsx'
 
 // Pages wrap existing, backend-connected components. Unfinished areas say so plainly; nothing is fabricated.
 export function DashboardPage() {
   const { user } = useSession()
   const { status } = useBackendHealth()
   const reviewer = REVIEWERS.includes(user?.role)
-  const bi = useResource(reviewer ? '/bi/operational' : null)
   const today = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())
   return <>
     <PageHeader title="Dashboard" description={`${today} · live from this Workbench. Every figure below is read from the local backend.`} />
     <DashboardView user={user} health={status} />
-    {reviewer && <details className="panel disclosure"><summary><h2>Stored operational BI</h2><span className="muted small">Sampled run metadata, advisory only</span></summary><ApiState request={bi} /><BIReport data={bi.data} /></details>}
+    {reviewer && <OperationalBI />}
   </>
 }
 
@@ -45,11 +47,8 @@ export function AgentsPage() {
 }
 
 export function PidPage() {
-  return <><PageHeader title="P&ID Intelligence" />
-    <PlannedCapability title="Interactive P&ID evidence viewer" phase="Phase F6"
-      available={<>P&ID regions appear as cited, as-drawn evidence in <Link to="/app/workspace">AI Workspace</Link> results.</>}
-      planned="Drawing viewer with OCR regions, visual candidates, registry matches, conflicts and review indicators."
-      requires="Read-only drawing and region endpoints in the backend." /></>
+  return <><PageHeader title="P&ID Intelligence" description="Processed drawings with OCR regions, visual candidates and registry matches. As-drawn evidence only." />
+    <PidViewer /></>
 }
 
 export function MaintenancePage() {
@@ -73,16 +72,14 @@ export function OperationsPage() {
 }
 
 export function KnowledgePage() {
-  return <><PageHeader title="Knowledge" description="Retrieve cited evidence from locally indexed documents." />
+  return <><PageHeader title="Knowledge" description="Retrieve cited evidence from locally indexed documents, and review the verified knowledge registry." />
     <Knowledge />
-    <p className="muted">The Verified Knowledge registry lifecycle view (candidate, verified, stale, revoked) arrives in Phase F5.</p></>
+    <VerifiedRegistry /></>
 }
 
 export function GapsPage() {
-  const gaps = useResource('/knowledge-gaps')
-  return <><PageHeader title="Knowledge Gaps" description="Evidence gaps recorded by governed runs. Resolving a gap requires verified knowledge or an authoritative source." actions={<button type="button" onClick={gaps.refresh}>Refresh</button>} />
-    <section className="panel"><ApiState request={gaps} empty="No knowledge gaps recorded." />{gaps.data?.length ? <DataView value={gaps.data} /> : null}
-      <p className="muted">The lifecycle board with review actions arrives in Phase F5.</p></section></>
+  return <><PageHeader title="Knowledge Gaps" description="Evidence gaps recorded by governed runs. Resolving a gap requires verified knowledge or an authoritative source." />
+    <GapBoard /></>
 }
 
 export function ApprovalsPage() {
@@ -92,17 +89,8 @@ export function ApprovalsPage() {
 }
 
 export function ExecutionsPage() {
-  const lookup = useRequest()
-  const [id, setId] = useState('')
-  return <><PageHeader title="Durable executions" description="Checkpointed graph runs you own. No reasoning traces are stored or shown." />
-    <section className="panel">
-      <form className="toolbar" onSubmit={event => { event.preventDefault(); lookup.run(`/executions/${encodeURIComponent(id.trim())}`) }}>
-        <label>Execution ID<input value={id} onChange={event => setId(event.target.value)} required pattern="[0-9a-fA-F-]{36}" /></label>
-        <button disabled={lookup.loading || !id.trim()}>Look up execution</button>
-      </form>
-      <ApiState request={lookup} />{lookup.data && <DataView value={lookup.data} />}
-      <p className="muted">A list of executions and the timeline view arrive with the execution list endpoint (Phase F5).</p>
-    </section></>
+  return <><PageHeader title="Durable executions" description="Checkpointed graph runs you own; administrators see all. No reasoning traces are stored or shown." />
+    <ExecutionsView /></>
 }
 
 export function AuditPage() {
@@ -132,6 +120,11 @@ export function ResourcesPage() {
         <tbody>{resources.map(r => <tr key={r.name}><td>{r.name}</td><td>{r.provider}</td><td><code>{r.classification}</code></td><td>{r.confidential_eligible ? 'Allowed' : 'Never'}</td></tr>)}</tbody></table></div>
         : status.data && <EmptyState title="No resources reported" />}
       {status.data && <AutomationStatus data={status.data} />}</section></>
+}
+
+export function HelpPage() {
+  return <><PageHeader title="Help & Resources" description="Guidance video, user guide, terms of use and how this Workbench behaves. Everything here is served locally." />
+    <ResourcesView /></>
 }
 
 export { AdminPage, ProfilePage } from '../features/auth/AccountPages.jsx'

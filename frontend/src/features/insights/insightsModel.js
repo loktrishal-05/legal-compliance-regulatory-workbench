@@ -129,5 +129,14 @@ export function eventsPerDay(events = []) {
 }
 
 // Governance events are the ones a reviewer cares about; logins and integration pings are context.
-export const GOVERNANCE_EVENTS = /^(APPROVAL_|ADVISORY_|GOVERNED_|EVIDENCE_|PREFLIGHT_)/
+// A backend `{counts, sample_size}` distribution as BarList rows. `null` counts mean nothing was recorded in the
+// cohort and stay null (shown as "not recorded"), never an invented zero.
+export function distributionRows(value, label = humanizeEvent) {
+  if (!value || value.counts == null || typeof value.counts !== 'object') return null
+  return Object.entries(value.counts).filter(([, count]) => Number.isFinite(count))
+    .map(([key, count]) => ({ label: label(key), value: count }))
+    .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label))
+}
+
+export const GOVERNANCE_EVENTS =/^(APPROVAL_|ADVISORY_|GOVERNED_|EVIDENCE_|PREFLIGHT_)/
 export const humanizeEvent = type => (type || '').toLowerCase().replaceAll('_', ' ').replace(/^\w/, c => c.toUpperCase())

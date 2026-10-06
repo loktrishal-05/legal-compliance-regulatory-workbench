@@ -31,6 +31,7 @@ const ICONS = {
   home: 'M3 11 12 4l9 7 M5 10v10h14V10',
   logout: 'M15 4h4v16h-4 M10 8l-4 4 4 4 M6 12h10',
   refresh: 'M20 11a8 8 0 0 0-14.9-3.5 M4 4v4h4 M4 13a8 8 0 0 0 14.9 3.5 M20 20v-4h-4',
+  help: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6 M12 17h.01',
 }
 
 export function Icon({ name, size = 20, ...props }) {
@@ -74,6 +75,22 @@ export function ErrorState({ title = 'Something went wrong', message, onRetry })
 
 export function EmptyState({ title, message, children }) {
   return <div className="state state-empty"><strong>{title}</strong>{message && <p>{message}</p>}{children}</div>
+}
+
+// A 403 is a permission answer, not a failure: say so plainly instead of offering a pointless retry.
+export function RequestProblem({ error, onRetry, title = 'Could not load live data' }) {
+  if (error?.status === 403) return <EmptyState title="Not available for your role" message={error.message} />
+  return <ErrorState title={title} message={error?.message} onRetry={onRetry} />
+}
+
+// States for a paged list (see usePaged): loading, error, permission denied, empty, then "Load more".
+export function ListState({ list, empty, emptyMessage, children }) {
+  if (list.error && !list.items.length) return <RequestProblem error={list.error} onRetry={list.refresh} />
+  if (!list.loaded) return <LoadingState label="Loading live data…" />
+  if (!list.items.length && !list.nextPath) return <EmptyState title={empty} message={emptyMessage} />
+  return <>{children}
+    {list.error && <p className="api-error" role="alert">{list.error.message}</p>}
+    {list.nextPath && <div className="toolbar list-more"><button type="button" onClick={list.more} disabled={list.loading}>{list.loading ? 'Loading…' : 'Load more'}</button></div>}</>
 }
 
 // Honest placeholder for capabilities whose UI or backend support has not landed yet. Never fake data.

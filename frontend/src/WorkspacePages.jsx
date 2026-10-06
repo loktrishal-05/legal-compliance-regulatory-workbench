@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useLanguage } from './language.js'
 import { VoiceControls } from './ProductPages.jsx'
-import { useRequest, useResource } from './hooks/useApi.js'
+import { usePaged, useRequest, useResource } from './hooks/useApi.js'
+import { nextPage } from './services/api.js'
+import { ListState } from './components/ui.jsx'
 import { isSubstantialReplacement, reviewGate } from './features/voice/identifierReview.js'
 import { QueryForm, TranscriptReview } from './features/voice/TranscriptReview.jsx'
 
@@ -109,10 +111,20 @@ export function Knowledge() {
 }
 
 export function Audit() {
-  const log = useResource('/audit/log?limit=100')
+  const [draft, setDraft] = useState('')
+  const [eventType, setEventType] = useState('')
+  const log = usePaged(`/audit/log?limit=100${eventType ? `&event_type=${encodeURIComponent(eventType)}` : ''}`, nextPage.auditCursor)
   const verify = useResource('/audit/verify')
-  return <section className="panel"><div className="section-heading"><h2>Tamper-Evident Audit</h2><button disabled={log.loading || verify.loading} onClick={() => { log.refresh(); verify.refresh() }}>Refresh audit</button></div><p>Latest 100 events. Verification is a snapshot and may precede newly appended events.</p><ApiState request={verify} />{verify.data && <><p className={verify.data.valid ? 'result-status' : 'api-error'}>Chain verification: {verify.data.valid ? 'VALID' : 'FAILED'}</p><DataView value={verify.data} /></>}<ApiState request={log} />
-    {log.data?.map(event => <details key={event.id}><summary>#{event.sequence_number} · {event.event_type} · {new Date(event.occurred_at).toLocaleString()} · {event.actor_id || event.actor_kind}</summary><DataView value={event} /></details>)}
+  return <section className="panel"><div className="section-heading"><h2>Tamper-Evident Audit</h2><button disabled={log.loading || verify.loading} onClick={() => { log.refresh(); verify.refresh() }}>Refresh audit</button></div>
+    <p>Verification covers the full chain and is a snapshot that may precede newly appended events. Filtered pages alone never establish chain validity.</p>
+    <ApiState request={verify} />{verify.data && <><p className={verify.data.valid ? 'result-status' : 'api-error'}>Chain verification: {verify.data.valid ? 'VALID' : 'FAILED'}</p><DataView value={verify.data} /></>}
+    <form className="toolbar" onSubmit={e => { e.preventDefault(); setEventType(draft.trim().toUpperCase()) }}>
+      <label>Event type<input value={draft} onChange={e => setDraft(e.target.value)} maxLength={60} placeholder="e.g. APPROVAL_DECISION_APPROVE" /></label>
+      <button type="submit">Filter</button>{eventType && <button type="button" className="ghost" onClick={() => { setDraft(''); setEventType('') }}>Clear filter</button>}</form>
+    <p className="muted small">Newest first. Event payloads are redacted in this explorer; stored rows and hashes are unchanged.</p>
+    <ListState list={log} empty={eventType ? `No ${eventType} events` : 'No audit events recorded yet'}>
+      {log.items.map(event => <details key={event.id}><summary>#{event.sequence_number} · {event.event_type} · {new Date(event.occurred_at).toLocaleString()} · {event.actor_id || event.actor_kind}</summary><DataView value={event} /></details>)}
+    </ListState>
   </section>
 }
 

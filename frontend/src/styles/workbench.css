@@ -291,3 +291,54 @@ button.danger:hover:not(:disabled) { border-color: var(--danger); background: co
 .shell, .shell * { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--text-faint) 45%, transparent) transparent; }
 .shell ::selection { background: color-mix(in srgb, var(--ai) 22%, transparent); color: var(--text); }
 .shell a { text-underline-offset: 3px; }
+
+/* ── Help & Resources ────────────────────────────────────────── */
+.help-starts { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-5); }
+.help-starts a { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface-1); color: var(--text); text-decoration: none; box-shadow: var(--shadow-1); transition: border-color var(--dur-fast), transform var(--dur-fast) var(--ease-out); }
+.help-starts a:hover { border-color: var(--line-strong); transform: translateY(-1px); }
+.help-starts a > svg { color: var(--ai); }
+.help-starts span { display: grid; gap: 2px; }
+.help-starts small { color: var(--text-muted); }
+.help-video { margin: 0; }
+.help-video video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: var(--radius-md); background: #06111f; }
+.help-video figcaption { margin-top: var(--space-2); }
+.help-rules { display: grid; gap: var(--space-3); margin: 0 0 var(--space-4); padding-left: 1.2em; }
+.terms-text { max-height: min(56vh, 520px); overflow-y: auto; margin: var(--space-3) 0; padding: var(--space-4) var(--space-5); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-2); overscroll-behavior: contain; }
+.terms-text h3 { margin: var(--space-4) 0 var(--space-2); font-size: var(--fs-md); }
+.terms-text section:first-child h3 { margin-top: 0; }
+.terms-text p, .terms-text li { max-width: 72ch; }
+.terms-text ul { padding-left: 1.2em; }
+
+/* ── First-login terms: calm light page, no Workbench chrome until accepted ── */
+.terms-gate { min-height: 100vh; min-height: 100dvh; background: var(--surface-0); color: var(--text); }
+.terms-page { max-width: 820px; margin: 0 auto; padding: var(--space-6) var(--space-4) var(--space-8); }
+.terms-logo { display: block; height: 40px; width: auto; margin-bottom: var(--space-5); padding: 4px 12px; border-radius: var(--radius-md); background: var(--brand-navy); }
+.terms-panel h1 { margin: 0; font-size: clamp(1.4rem, 3vw, 1.9rem); }
+.terms-panel h1:focus { outline: none; } /* focus target for screen readers, not a control */
+.terms-acks { display: grid; gap: var(--space-3); margin: var(--space-4) 0; padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.terms-acks legend { padding: 0 var(--space-2); font-weight: 700; }
+.terms-actions { align-items: center; }
+
+/* ── Live data views: P&ID viewer, registry, lists ───────────── */
+.list-more { justify-content: center; margin-top: var(--space-4); }
+.pid-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); align-items: start; gap: var(--space-4); }
+@media (max-width: 1024px) { .pid-layout { grid-template-columns: minmax(0, 1fr); } }
+.pid-sheet { min-width: 0; }
+.pid-sheet { margin: 0; }
+.pid-canvas { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-md); background: #fff; }
+.pid-canvas img { display: block; width: 100%; height: auto; }
+.pid-canvas svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pid-box { fill: color-mix(in srgb, var(--ai) 8%, transparent); stroke: var(--ai); stroke-width: 2; vector-effect: non-scaling-stroke; cursor: pointer; }
+.pid-box[data-state="review"] { fill: color-mix(in srgb, var(--human) 10%, transparent); stroke: var(--human); stroke-dasharray: 5 3; }
+.pid-box[data-state="conflict"] { fill: color-mix(in srgb, var(--danger) 10%, transparent); stroke: var(--danger); }
+.pid-box[aria-current="true"] { stroke-width: 4; fill-opacity: 0.35; }
+.pid-regions { display: grid; gap: 4px; max-height: 320px; overflow-y: auto; margin: 0 0 var(--space-3); padding: 0; list-style: none; }
+.pid-regions .queue-row[aria-pressed="true"] { border-color: var(--ai); background: color-mix(in srgb, var(--ai) 8%, var(--surface-1)); }
+.pid-region-detail { display: grid; gap: var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--line); }
+.pid-region-detail p { margin: 0; }
+.registry-list { display: grid; gap: var(--space-3); margin: var(--space-4) 0 0; padding: 0; list-style: none; }
+.registry-list .evidence-card header { justify-content: space-between; }
+.registry-list footer { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); }
+.shell-main tr[aria-current] > td { background: color-mix(in srgb, var(--ai) 7%, var(--surface-1)); }
+.panel > .toolbar + .review-notice { margin-top: var(--space-4); }
+.pid-regions { overflow-x: hidden; } .pid-regions .queue-row-title { white-space: normal; overflow-wrap: anywhere; }
