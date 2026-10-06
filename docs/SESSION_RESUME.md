@@ -16,6 +16,8 @@ Published implementation checkpoint: `87cd2bd`; normal development-base push suc
 
 Final remote baseline is `496f903`; CI run `37492025870` passed. Three team branches exist at 496f903. Main/development protection is enabled/verified (strict legal-core + one independent/last-push approval, stale dismissal, conversations resolved, admins enforced, no force/deletion). Main remains d95dfc3. No teammate PRs yet; usernames needed for account assignment. Final protection-evidence docs follow a separate PR rather than bypassing the newly protected integration branch. Preserve remaining benchmark/nested/private/local work.
 
+Actual local branch is now team/handoff-review-evidence, carrying only handoff evidence/CI custody correction; PR #4 targets the protected development base and awaits independent review. It is not a fourth implementation workstream. Existing checkout post-cleanup warning on stale gitlink is addressed by explicit public non-recursive credential-free CI fetch/checkout; do not repair or execute nested tooling. Verify the newest PR checks before integration; main unchanged.
+
 ## Latest steering — backend only
 
 The user resumed and then explicitly requested no further frontend or landing work; they will handle it afterwards. Continue backend Phase D onward. C backend identity is verified; C frontend acceptance and K are deferred to the user, not complete. Preserve existing frontend edits without staging them into backend checkpoints. Read the updated living guide/progress/validation for actual evidence and D entry scope. Historical pause notes below remain provenance, superseded by this instruction.
