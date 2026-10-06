@@ -11,7 +11,7 @@ Reviewed implementation checkpoint: `87cd2bd` on the shared development base. Th
 - Part 2 ticket: https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/issues/3
 - Part 3 ticket: https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/issues/2
 
-Tickets assign work to the three owner slots; GitHub assignees remain unset until the user supplies their actual handles. PR review protection is authorized; verify actual branch settings when beginning integration. Baseline CI success does not complete D or accept future teammate features.
+Tickets assign work to the three owner slots; GitHub assignees remain unset until the user supplies their actual handles. Verified remote team baseline is `496f903`; all three assigned team branches exist at that commit. Latest baseline CI passed: https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/actions/runs/37492025870 . Both main and the shared development base are protected: required `legal-core`, up-to-date branch, one independent/latest-push approval, stale review dismissal, resolved conversations and admin enforcement; force pushes/deletions disabled. Main remains `d95dfc3`. Baseline CI success does not complete D or accept future teammate features.
 
 ## Shared baseline and branches
 
