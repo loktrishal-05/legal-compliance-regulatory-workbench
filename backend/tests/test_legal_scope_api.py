@@ -106,6 +106,32 @@ class LegalScopeApiTests(unittest.TestCase):
         self.assertNotIn("synthetic.txt", str([e.payload for e in events]))
         self.assertTrue(verify_chain(self.fixture.db)["valid"])
 
+    def test_upload_route_quarantines_bounds_rejects_and_denies(self):
+        import tempfile
+        from sqlalchemy import select
+        from app.core.config import settings
+        from app.db.models import AuditEvent
+        from app.services import legal_intake
+        upload = f"/v1/workspaces/{self.fixture.workspace.id}/documents"
+        params = {"filename": "synthetic.txt", "document_type": "contract", "classification": "internal"}
+        body = b"SYNTHETIC contract clause: payment within 30 days.\n"
+        with patch.object(settings, "data_root", Path(tempfile.mkdtemp(prefix="legal-api-intake-"))):
+            created = self.client.post(upload, params=params, content=body)
+            self.assertEqual(created.status_code, 201)
+            self.assertEqual((created.json()["status"], created.json()["quarantine_reasons"]),
+                             ("quarantined", ["malware_scanner_not_configured"]))  # no scanner configured
+            with patch.object(legal_intake, "MAX_BYTES", 8):
+                self.assertEqual(self.client.post(upload, params=params, content=body).status_code, 413)
+            rejected = self.client.post(upload, params={**params, "filename": "synthetic.pdf"}, content=body)
+            self.assertEqual((rejected.status_code, rejected.json()), (422, {"detail": {"code": "type_mismatch"}}))
+            self.assertEqual(self.client.post(upload, params=params, content=body,
+                                              headers={"Origin": "https://untrusted.invalid"}).status_code, 403)
+            foreign = self.client.post(f"/v1/workspaces/{self.fixture.other_workspace.id}/documents",
+                                       params=params, content=b"other bytes\n")
+            self.assertEqual((foreign.status_code, foreign.json()), (404, {"detail": {"code": "legal_resource_unavailable"}}))
+        types = [e.event_type for e in self.fixture.db.scalars(select(AuditEvent).order_by(AuditEvent.sequence_number))]
+        self.assertEqual(types, ["LEGAL_DOCUMENT_RECEIVED", "LEGAL_INTAKE_REJECTED", "SECURITY_POLICY_DENIED"])
+
     def test_real_session_terms_revocation_and_header_spoofing(self):
         self.client.cookies.clear()
         self.assertEqual(self.client.get(self.path, headers={"X-User-ID": str(self.fixture.actor.id),

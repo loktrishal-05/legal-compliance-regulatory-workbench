@@ -28,7 +28,7 @@ Phase B's detailed [domain/permission/workflow/source contracts](LEGAL_DOMAIN_BU
 | B | Complete: approved development scope and domain/FR contracts | Operational-pilot pack/IdP/retention/recovery approvals remain release gates |
 | C | Backend identity verified; frontend acceptance deferred to user | Preserve existing frontend changes; no further frontend implementation |
 | D | Complete for development exit checks (head 0022); industrial regression suites not executable in available runtimes (recorded gap) | Start E secure intake on scoped versions |
-| E | Not started | Secure generic document intake and provenance |
+| E | In progress — E1 secure intake tested (head 0023) | E2 extraction to exact source spans + correction revisions; E3 scoped retrieval |
 | F | Not started | Contract analysis and grounded summaries |
 | G | In progress — deterministic core tested (Part 2, integrator) | Registry/import/version persistence in migration 0022 after Part 1's 0021 |
 | H | In progress — deterministic core tested (Part 2, integrator) | Persist entities/mappings/assessments in 0022; review binding with Part 3 |
@@ -116,7 +116,9 @@ Current step: coordinate/review remaining D gates. Seven scoped ORM tables, DB-d
 
 ### Phase E — document intelligence
 
-- [ ] Add secure upload/import with hash-preserved originals, type/size/archive limits, quarantine/scanning and isolated processing.
+Current step (2026-10-06, integrator for Parts 1/2): E1 `app/services/legal_intake.py` + `POST /v1/workspaces/{id}/documents` (raw body, bounded read). Bytes decide PDF/DOCX/TXT; empty/oversize/macro/unsafe-path/archive-bomb/encrypted/type-mismatch/binary/unsupported/malformed input is rejected and audited, never stored. Active PDF content, embedded archives/objects, external references, scanner findings, and the absence of a configured malware scanner all quarantine. Originals are write-once, read-only, content-addressed per workspace and re-verified on reuse; dedupe is idempotent within a workspace and never reveals other tenants; uploader gets read only. Migration 0023 adds intake audit events. Next: E2 extraction for `received` versions only.
+
+- [ ] Add secure upload/import with hash-preserved originals, type/size/archive limits, quarantine/scanning and isolated processing. Upload/limits/quarantine/originals done (E1); no malware engine is configured, so every real upload stays quarantined until one is approved; isolated processing comes with E2.
 - [ ] Adapt PDF extraction and add DOCX/approved formats; reuse OCR with legal layout/quality handling and correction revisions.
 - [ ] Persist exact version/page/section/offset/box source spans and derived-artifact lineage.
 - [ ] Propagate authorization/source metadata into dense/sparse retrieval, reranking and source viewers; use a controlled legal index rebuild.

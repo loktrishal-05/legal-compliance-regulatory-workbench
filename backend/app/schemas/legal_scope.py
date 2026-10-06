@@ -24,3 +24,12 @@ class LegalDocumentMetadata(BaseModel):
     classification: Literal["public", "internal", "confidential", "restricted"]
     ingestion_status: str
     legal_hold: bool
+
+
+class IntakeResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    document_id: UUID
+    version_id: UUID
+    status: Literal["received", "quarantined"]
+    duplicate: bool
+    quarantine_reasons: list[str]
