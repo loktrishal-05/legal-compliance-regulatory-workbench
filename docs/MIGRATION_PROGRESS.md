@@ -8,7 +8,8 @@ Date: 2026-10-06. **Phase A committed; Phase B development contracts complete; P
 |---|---|
 | A custody/report/discovery | Complete: preserved branch activation, isolated defaults/CI/runbooks, offline regression/frontend checks |
 | B architecture/reuse | Complete: approved development baseline; domain/permission/state/provenance contracts and all 66 FR acceptance mappings |
-| C-M implementation/validation | Not started |
+| C identity | In progress; neutral identity and legacy-terms treatment explicitly approved |
+| D-M implementation/validation | Not started |
 
 Phase A changed configuration/backup guards and operational documentation; Phase B defined development contracts. Legal feature code/schema/migrations remain planned. Local checkpoints are now authorized and recorded below. No sibling/external repository, deployment, DB or model operation occurred; no push.
 
@@ -119,3 +120,13 @@ Verification: inspected current session/dependency, immutable ActionRevision, Do
 Files changed: new domain contracts/requirement registry; target architecture, reuse matrix, living guide, progress and validation. Next phase C safely adapts product/service/package/UI identity without claiming unimplemented legal capability. D-M models/workflows/UI/security/runtime validation and pilot-specific approvals remain unfinished. Existing unrelated frontend/benchmark/tool/runtime work is preserved outside checkpoint scope.
 
 Checkpoint preparation: seven explicit Phase B document paths only, with requirement coverage and whitespace/diff checks complete. Local commit message: `Define legal domain contracts and requirement acceptance`. Record the resulting commit ID in the next phase/session log; never amend a checkpoint to insert its own hash. No push authorized.
+
+## Phase C start — 2026-10-06
+
+Phase B committed as `3f94383`. Read guide/progress/validation and inspected coupled service/UI identities and current branding/copy. User approved retaining layout/fonts/palette, a neutral LRA development mark and full PDF product name; active industrial footage/branding stops while original assets/motion infrastructure are retained. Separately approved retaining exact v1.0 legacy terms and acceptance history, visibly labelled until a new legal-platform version is approved.
+
+Current scope: health title/validator identity, package/HTML/manifest/assets, shared logo/page titles, landing/auth/shell migration copy, help/legacy terms notices and product/design documentation. Existing industrial runtime routes remain legacy until their validated replacement phases; no cosmetic database/index rename or new legal feature claims. Existing uncommitted frontend work must be preserved and separated before checkpointing overlapping files.
+
+User separately approved frontend preservation. Commit `1968d2e` records 29 existing frontend/resource/help paths; 39/39 frontend tests passed immediately beforehand; unrelated binary diffs matched across commit. This snapshot is not legal-domain acceptance. Benchmark/private/runtime/nested-tool/cache work stayed excluded.
+
+Phase C RED: new backend identity target has two expected assertion failures; focused frontend identity/API target has five expected failures (metadata/logo/landing/auth/help/legal service mismatch) and nine existing passes. No missing dependency caused these failures. Current local venv's FastAPI import is blocked by OS Application Control on `ujson`; do not disable protection. Backend identity checks execute the actual pure health function via AST and inspect title metadata without private settings/services/native DLLs. Full backend HTTP/runtime acceptance remains a later supported-environment gate.

@@ -64,6 +64,16 @@ test('health validates the actual service contract', async (t) => {
   await assert.rejects(getBackendHealth(), /Unexpected backend/)
 })
 
+test('health accepts the legal backend and refuses legacy or non-ready identities', async (t) => {
+  const legal = { status: 'ok', service: 'legal-compliance-regulatory-workbench-backend' }
+  t.mock.method(globalThis, 'fetch', async () => new Response(JSON.stringify(legal)))
+  assert.deepEqual(await getBackendHealth(), legal)
+  for (const value of [{ ...legal, service: 'sovereign-agentic-workbench-backend' }, { ...legal, status: 'failed' }]) {
+    t.mock.method(globalThis, 'fetch', async () => new Response(JSON.stringify(value)))
+    await assert.rejects(getBackendHealth(), /Unexpected backend/)
+  }
+})
+
 test('timeouts surface uncertainty and do not retry submissions', async (t) => {
   let calls = 0
   t.mock.method(globalThis, 'fetch', (_url, { signal }) => new Promise((_resolve, reject) => {

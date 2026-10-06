@@ -26,7 +26,7 @@ Phase B's detailed [domain/permission/workflow/source contracts](LEGAL_DOMAIN_BU
 |---|---|---|
 | A | Complete: source custody, isolated defaults/CI, offline checks | Private runtime provisioning and acceptance remain gated for later phases |
 | B | Complete: approved development scope and domain/FR contracts | Operational-pilot pack/IdP/retention/recovery approvals remain release gates |
-| C | Not started | Begin identity/config adaptation after A/B entry gates |
+| C | In progress | Coherent health/product identity, neutral development branding and truthful migration copy |
 | D | Not started | Scoped legal core and additive migrations |
 | E | Not started | Secure generic document intake and provenance |
 | F | Not started | Contract analysis and grounded summaries |
@@ -38,7 +38,7 @@ Phase B's detailed [domain/permission/workflow/source contracts](LEGAL_DOMAIN_BU
 | L | Not started | Legal evaluation and security hardening |
 | M | Not started | Full isolated acceptance and recovery validation |
 
-**Resume at C.** Read A/B evidence, detailed domain contracts and the requirement registry before implementing. No private runtime targets are yet accepted: before any service, DB migration, backup or model execution, follow `LEGAL_RUNTIME_SETUP.md` and verify effective configuration ownership. Do not treat new defaults as proof that an old `.env` is safe.
+**Resume within C.** A/B are complete (`3f94383` is the B checkpoint). User approved preserving existing layout/fonts/palette, neutral LRA development branding and removal of active industrial branding/footage, with original assets retained. Existing v1.0 industrial terms stay byte-for-byte unchanged and enforced, explicitly labelled legacy migration terms until a separately approved new version. No private runtime targets are yet accepted: follow the runtime guide before live DB/model operations.
 
 Approved B baseline (2026-10-06): retain React/Vite and local/private AI; public/synthetic fixtures clearly labelled; no validated jurisdiction-compliance claim; local session auth for development only, enterprise SSO/MFA required for operational pilot; manual approved regulatory imports first; no automatic deletion/signing/filing. Deployment-specific legal packs, identity provider, retention and recovery acceptance stay release gates. This approval does not enable live services/models, deployment or a push.
 

@@ -99,3 +99,11 @@ Phase A checkpoint `dfea5db`: 29 explicit paths covering custody/config/tests/gu
 | Documentation whitespace/diff | New contract/registry no-index checks and focused tracked-document `git diff --check` passed with CRLF recognition; reviewed intended document diff |
 
 Phase B is documentation/architecture acceptance only. No new business logic, migration or backend domain test was executed; reversible documentation changes do not need a mirrored implementation test. Implementation phases must add real components/tests/demo evidence before any FR status changes. No services/models/DB, deployment, push or unrelated Git operations were invoked.
+
+## Phase C start / RED — 2026-10-06
+
+User approved neutral development branding with existing styles and exact legacy-terms preservation/labeling. Frontend preservation snapshot `1968d2e` contains 29 approved paths; 39/39 existing frontend tests passed and unrelated diff comparison passed before Phase C edits.
+
+- `python -B -m unittest discover -s backend/tests -p test_product_identity.py -v`: two intended identity assertion failures before implementation.
+- `node --test src/productIdentity.test.js src/services/api.test.js` from frontend: five intended identity/copy/health failures and nine existing passes before implementation.
+- Native venv inspection: prefix is inside current application; FastAPI import fails because `ujson` DLL is blocked by Application Control. No app services imported, no model/DB execution and no security policy changed. AST-isolated health/title contract checks avoid that dependency; no full HTTP acceptance claimed.
