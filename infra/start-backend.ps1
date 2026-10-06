@@ -7,5 +7,5 @@ $env:TRANSFORMERS_OFFLINE = '1'
 $env:HF_HUB_DISABLE_TELEMETRY = '1'
 & $Python -m scripts.release_health --dependencies-only
 if ($LASTEXITCODE -ne 0) { throw 'Release preflight failed; backend was not started.' }
-& $Python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+& $Python -m uvicorn app.main:app --host 127.0.0.1 --port 18000
 exit $LASTEXITCODE

@@ -1,5 +1,9 @@
 # Offline deployment and release
 
+> Historical industrial deployment record. Operational instructions below are superseded by
+> [the current legal runtime guide](LEGAL_RUNTIME_SETUP.md). Preserve this record as provenance;
+> do not execute its old clone/service/worktree/live-runner commands for the legal application.
+
 Supported topology: Linux Docker Python 3.11 CPU backend, host-local Ollama, existing Compose PostgreSQL 17 and Qdrant 1.17.0,
 local files, and a locally served frontend build behind a site-managed TLS proxy. Optional STT/TTS are
 local HTTP adapters. Optional n8n stays on-premise and summary-only. No Netlify deployment is involved.

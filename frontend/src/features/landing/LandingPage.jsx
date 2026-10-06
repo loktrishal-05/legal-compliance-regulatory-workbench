@@ -6,7 +6,8 @@ import { SplitText } from 'gsap/SplitText'
 import { useGSAP } from '@gsap/react'
 import { useSession } from '../../app/session.jsx'
 import { Logo } from '../../components/ui.jsx'
-import { PRODUCT_FACTS as F, SOURCES, STORY, canvasSize, createParticles, particlePosition, smoothstep } from './landingModel.js'
+import { SOURCES, STORY, canvasSize, createParticles, particlePosition, smoothstep } from './landingModel.js'
+import { BRAND_MARK, DEVELOPMENT_NOTICE, PRODUCT_NAME } from '../../product.js'
 import { createHeroScene } from './heroScene.js'
 import { createAtmosphere } from './atmosphere.js'
 import './landing.css'
@@ -20,7 +21,7 @@ function ConvergenceCanvas({ controllerRef }) {
     if (!context) return undefined
     const particles = createParticles()
     const mark = new Image()
-    mark.src = '/assets/branding/sovereign-mark.png'
+    mark.src = BRAND_MARK
     let progress = 1
     let frame = 0
     let size = { width: 1, height: 1, dpr: 1, cssWidth: 1, cssHeight: 1 }
@@ -85,7 +86,7 @@ function ConvergenceCanvas({ controllerRef }) {
     resize()
     return () => { observer.disconnect(); cancelAnimationFrame(frame); controllerRef.current = null }
   }, [controllerRef])
-  return <canvas ref={canvas} className="unify-canvas" role="img" aria-label="SOPs, P&IDs, sensors, maintenance and operator knowledge converging into one sovereign intelligence core" />
+  return <canvas ref={canvas} className="unify-canvas" role="img" aria-label="Planned links among contracts, regulations, policies, evidence and human decisions" />
 }
 
 // The first viewport's signature: the approved mark assembled from GPU particles over a P&ID-style floor.
@@ -101,7 +102,7 @@ function HeroScene({ apiRef }) {
     const cleanups = []
     const image = new Image()
     image.decoding = 'async'
-    image.src = '/assets/branding/sovereign-mark.png'
+    image.src = BRAND_MARK
     image.onload = () => {
       if (disposed) return
       try { scene = createHeroScene(element, image, { particles: window.innerWidth < 760 ? 6500 : 15000 }) } catch { scene = null }
@@ -126,7 +127,7 @@ function HeroScene({ apiRef }) {
     }
     return () => { disposed = true; cleanups.forEach(fn => fn()); scene?.destroy(); apiRef.current = null }
   }, [still, apiRef])
-  if (still) return <img className="hero-mark" src="/assets/branding/sovereign-mark.png" alt="" width="458" height="458" fetchPriority="high" />
+  if (still) return <img className="hero-mark" src={BRAND_MARK} alt="" width="512" height="512" fetchPriority="high" />
   return <canvas ref={canvas} className="hero-canvas" aria-hidden="true" />
 }
 
@@ -173,26 +174,24 @@ const Tag = ({ id }) => {
   return <span className="tag-bubble" aria-hidden="true"><span>{code}</span><span>{number}</span></span>
 }
 
-const Count = ({ value }) => <span className="fact-num" data-count={value}>{value.toLocaleString()}</span>
-
 function SourceCard({ source, children }) {
   return <article className="source-card" data-glass style={{ '--accent': source.color }}><header><span className="dot" />{source.label}</header>{children}<footer>{source.detail}</footer></article>
 }
 
 const STATIONS = [
-  ['Retrieve', 'Hybrid dense and sparse retrieval with reranking over your locally indexed documents. Every claim carries a citation.'],
-  ['Verify', 'Evidence sufficiency and integrity checks. Verified knowledge is human-approved and goes stale when its source changes.'],
-  ['Reason', `Risk-aware routing: bounded low-risk tasks may use ${F.fastModel}; safety and evidence-heavy reasoning uses ${F.primaryModel}.`],
-  ['Review', 'Anything that could influence operations is held as a draft for a human reviewer. Self-approval is blocked.'],
-  ['Approve', 'Approval releases advisory output only. No plant or equipment action is ever executed.'],
+  ['Ingest', 'Planned: secure contract and regulation intake with immutable originals and extraction quality. Existing PDF infrastructure is being adapted.'],
+  ['Ground', 'Planned: every material legal statement links to authorized source spans and the exact document version.'],
+  ['Evaluate', 'Planned: requirements, controls and evidence yield an explainable state. Missing evidence must never become a green status.'],
+  ['Review', 'Existing independent advisory review is retained. Scoped legal findings and applicability decisions are still being built.'],
+  ['Monitor', 'Planned: accepted obligations, deadlines and evidence freshness trigger deterministic work that survives restarts.'],
 ]
 
 const ECOSYSTEM = [
-  ['AIKosh', 'Resource registry', 'Downloadable resources need provenance, licence, a named approver and a pinned SHA-256 before local approval.'],
-  ['BHASHINI', 'Public data only', 'Optional and off by default. Never used for confidential data; no client ships in this build.'],
-  ['data.gov.in', 'Optional public connector', 'Off by default and never receives plant or company data.'],
-  ['API Setu', 'Interface-ready', 'A registered-endpoint interface. No live integration is claimed.'],
-  ['DigiLocker', 'Evaluated · future', 'Not part of confidential inference.'],
+  ['Regulatory sources', 'Manual import first · planned', 'Authoritative source approval and version provenance precede any claim of regulatory applicability. No live authority connector is configured.'],
+  ['Enterprise identity', 'Operational-pilot gate', 'Development uses the existing sessions. Enterprise SSO, MFA and privileged re-authentication remain required before pilot readiness.'],
+  ['Document systems', 'Future integration', 'Scoped document synchronization needs governed connectors, retries and source-change reconciliation.'],
+  ['Ticketing and notifications', 'Planned', 'Accepted findings may create tasks and in-app notifications. External delivery is not configured.'],
+  ['Jurisdiction packs', 'Not validated', 'Legal/compliance owners must approve sources, interpretations, playbooks, retention and reporting policies.'],
 ]
 
 export default function LandingPage() {
@@ -203,7 +202,7 @@ export default function LandingPage() {
   const enter = session.status === 'authenticated' ? '/app/dashboard' : '/login'
 
   useMagneticGlass(root)
-  useEffect(() => { document.title = 'Sovereign AI Workbench · Governed industrial intelligence on your own infrastructure' }, [])
+  useEffect(() => { document.title = `${PRODUCT_NAME} · Development migration` }, [])
 
   useGSAP(() => {
     gsap.registerPlugin(ScrollTrigger, SplitText)
@@ -273,8 +272,8 @@ export default function LandingPage() {
   return <div className="landing" data-theme="dark" ref={root}>
     <a className="skip-link" href="#main">Skip to content</a>
     <header className="landing-header">
-      <Link to="/" aria-label="Sovereign AI Workbench home"><Logo variant="horizontal" decorative className="landing-logo" /></Link>
-      <nav aria-label="Story"><a href="#workflow">Workflow</a><a href="#governance">Governance</a><a href="#sovereignty">Sovereignty</a><a href="#ecosystem">Ecosystem</a></nav>
+      <Link to="/" aria-label={`${PRODUCT_NAME} home`}><Logo variant="horizontal" decorative className="landing-logo" /></Link>
+      <nav aria-label="Story"><a href="#workflow">Build scope</a><a href="#governance">Governance</a><a href="#sovereignty">Private runtime</a><a href="#ecosystem">Integrations</a></nav>
       <Link className="button primary" to={enter}>{session.status === 'authenticated' ? 'Open Workbench' : 'Sign in'}</Link>
     </header>
     <Atmosphere />
@@ -286,96 +285,76 @@ export default function LandingPage() {
     <main id="main">
       <section id="hero" className="hero">
         <Tag id="hero" />
-        <p className="hero-ghost" aria-hidden="true">Sovereign</p>
+        <p className="hero-ghost" aria-hidden="true">LRA</p>
         <HeroScene apiRef={heroScene} />
         <div className="hero-scrim" aria-hidden="true" />
         <div className="hero-copy">
-          <h1 className="hero-title"><span className="line-mask"><span className="line">Industrial intelligence</span></span> <span className="line-mask"><span className="line">that runs inside <em>your plant.</em></span></span></h1>
-          <p className="lede">Sovereign AI Workbench answers from your procedures, drawings, sensors and maintenance history. Every answer cites its evidence, and every operational recommendation waits for a human.</p>
+          <h1 className="hero-title"><span className="line-mask"><span className="line">Legal &amp; Regulatory</span></span> <span className="line-mask"><span className="line"><em>Assurance Platform</em></span></span></h1>
+          <p className="lede">Building the link between legal text, evidence and accountable action. Contract intelligence, compliance monitoring and cited summaries are the target.</p>
+          <p className="disclaimer">{DEVELOPMENT_NOTICE}</p>
           <div className="hero-actions"><Link className="button primary" to={enter}>{session.status === 'authenticated' ? 'Open the Workbench' : 'Enter the Workbench'}</Link><a className="button ghost" href="#scattered">See how it works</a></div>
-          <p className="hero-facts" aria-label="Verified product facts">
-            <span><Count value={F.hostedAiCalls} /> hosted AI calls in the confidential path</span>
-            <span><Count value={F.localModels} /> local models</span>
-            <span><Count value={F.languages} /> languages · English, हिन्दी, தமிழ்</span>
-            <span><Count value={F.backendTests} /> backend tests ({F.asOf})</span>
-          </p>
+          <p className="hero-facts" aria-label="Development boundaries"><span>Evidence-first design</span><span>Human-governed decisions</span><span>Local/private AI policy</span></p>
         </div>
         <a className="scroll-cue" href="#scattered" aria-label="Scroll to the story"><span /></a>
       </section>
 
       <section id="scattered" className="story scattered">
         <Tag id="scattered" />
-        <div className="story-copy" data-reveal><h2>Industrial knowledge is scattered</h2>
-          <p>Procedures, drawings, readings, work history and shift notes live in different systems, formats and people. Answers depend on who remembers where to look.</p>
-          <p className="stat"><Count value={F.evidenceSources} /> evidence sources the Workbench brings together</p></div>
+        <div className="story-copy" data-reveal><h2>Legal evidence spans many documents</h2>
+          <p>The target platform connects contracts, regulations, policies, evidence and accountable decisions. These are planned relationships, not current compliance results.</p>
+          <p className="stat">Illustrative source categories only. No customer or live regulatory data is shown.</p></div>
         <div className="source-field">
-          <SourceCard source={SOURCES[0]}><p className="doc-lines"><span /><span /><span /><span /></p><code>SOP-P204-001 §4.2</code></SourceCard>
-          <SourceCard source={SOURCES[1]}><svg viewBox="0 0 120 60" aria-hidden="true"><circle cx="24" cy="30" r="12" /><path d="M36 30 H70 M70 20 v20 l16-10z M86 30 H112" /><text x="16" y="56">P-101A</text></svg></SourceCard>
-          <SourceCard source={SOURCES[2]}><svg viewBox="0 0 120 50" aria-hidden="true"><polyline points="0,40 15,36 30,38 45,30 60,32 75,20 90,24 105,12 120,16" /></svg></SourceCard>
-          <SourceCard source={SOURCES[3]}><p className="ticket"><strong>WO-7745</strong> Bearing inspection · closed</p></SourceCard>
-          <SourceCard source={SOURCES[4]}><p className="note">“Pump sounded rough near end of shift.”</p></SourceCard>
+          <SourceCard source={SOURCES[0]}><p className="doc-lines"><span /><span /><span /><span /></p><p className="note">Source version → clause → proposed obligation</p></SourceCard>
+          <SourceCard source={SOURCES[1]}><p className="note">Approved source → effective version → requirement</p></SourceCard>
+          <SourceCard source={SOURCES[2]}><p className="note">Policy → control → evidence</p></SourceCard>
+          <SourceCard source={SOURCES[3]}><p className="note">Original artifact → provenance → freshness</p></SourceCard>
+          <SourceCard source={SOURCES[4]}><p className="note">Exact revision → independent review → audit</p></SourceCard>
         </div>
       </section>
 
       <section id="unify" className="story unify">
         <Tag id="unify" />
         <ConvergenceCanvas controllerRef={convergence} />
-        <div className="unify-copy"><h2>One sovereign intelligence layer</h2></div>
-        <div className="unify-notes"><p className="unify-note unify-note-a">Retrieved locally. Every answer cites its source.</p>
-        <p className="unify-note unify-note-b">One layer over all five sources: on your hardware, under your governance.</p></div>
+        <div className="unify-copy"><h2>A living compliance model — planned</h2></div>
+        <div className="unify-notes"><p className="unify-note unify-note-a">Sources, controls, obligations and evidence remain distinct.</p>
+        <p className="unify-note unify-note-b">Accepted relationships will carry version, scope and human decision history.</p></div>
       </section>
 
       <section id="workflow" className="story workflow">
         <Tag id="workflow" />
-        <div className="story-copy"><h2>Retrieve · Verify · Reason · Review · Approve</h2></div>
+        <div className="story-copy"><h2>The target legal workflow</h2><p>Not yet available end to end. The mature platform foundation is reused behind these planned legal modules.</p></div>
         <div className="flow-track" aria-hidden="true"><span className="flow-progress" /></div>
         <ol className="stations">{STATIONS.map(([name, text], index) => <li key={name} className="station" data-glass><span className="station-index">0{index + 1}</span><h3>{name}</h3><p>{text}</p></li>)}</ol>
       </section>
 
       <section id="reveal" className="story reveal">
         <Tag id="reveal" />
-        <div className="story-copy" data-reveal><h2>One governed workbench</h2><p>Queries, evidence, approvals, knowledge and audit in one place. Restrained, keyboard-friendly and built for long shifts.</p></div>
+        <div className="story-copy" data-reveal><h2>A governed foundation, honestly labelled</h2><p>Existing sessions, evidence retrieval, advisory review, durable executions and audit are being adapted. Industrial regression views remain clearly marked until replaced.</p></div>
         <figure className="reveal-stage">
           <div className="reveal-frame">
-            <div className="reveal-chrome" aria-hidden="true"><i /><i /><i /><span>127.0.0.1 · Sovereign AI Workbench</span></div>
-            <img src="/assets/landing/workbench-dashboard.webp" width="1424" height="900" loading="lazy" decoding="async"
-              alt="The Workbench dashboard: system status, a P-204 vibration trend, the review queue, work orders and agent routes" />
+            <div className="reveal-chrome" aria-hidden="true"><i /><i /><i /><span>{PRODUCT_NAME}</span></div>
+            <div className="reveal-status"><h3>Development migration</h3><p>Legal dashboards will use authorized backend data. No compliance score, customer records or legal findings are fabricated here.</p></div>
           </div>
-          <figcaption>The real Workbench dashboard, captured from a local instance. Records shown are synthetic, cited test data.</figcaption>
+          <figcaption>Build status, not a dashboard preview. The historical industrial screenshot is retained outside the active landing page.</figcaption>
         </figure>
       </section>
 
       <section id="pid" className="story pid">
         <Tag id="pid" />
-        <div className="story-copy" data-reveal><h2>P&ID evidence, never proof of plant state</h2>
-          <p>Local OCR and optional local vision propose tag candidates. Registry matches need human-verified knowledge, and disagreements are flagged for review.</p>
-          <p className="disclaimer">Drawings are as-drawn evidence only. They do not prove valve state, isolation, LOTO, permit status or process readiness.</p></div>
-        <figure className="pid-figure" data-reveal data-glass>
-          <svg viewBox="0 0 520 280" role="img" aria-label="Synthetic P&ID with OCR regions and a flagged visual candidate">
-            <g className="pid-lines"><path className="draw" pathLength="1" d="M20 150 H150 M190 150 H300 M340 150 H402 M438 150 H500 M170 130 V60 H420 V132" /><circle cx="170" cy="150" r="20" /><path d="M300 136 v28 l40-14z M340 136 v28 l-40-14z" /><circle cx="420" cy="150" r="18" /><text x="410" y="155">FT</text></g>
-            <g className="ocr-box"><rect x="140" y="180" width="70" height="26" /><text x="146" y="198">P-101A</text><text className="conf" x="146" y="222">OCR 0.96</text></g>
-            <g className="ocr-box"><rect x="292" y="180" width="74" height="26" /><text x="298" y="198">XV-204D</text><text className="conf" x="298" y="222">OCR 0.91</text></g>
-            <g className="vision-box"><rect x="392" y="100" width="60" height="96" /><text x="452" y="246" textAnchor="end">visual candidate · review</text></g>
-          </svg>
-          <figcaption>Synthetic illustration. Region colours are categories, never valve or equipment states.</figcaption>
-        </figure>
+        <div className="story-copy" data-reveal><h2>Contract intelligence — planned</h2>
+          <p>Parties, clauses, obligations and playbook deviations will remain source-linked proposals until authorized review.</p>
+          <p className="disclaimer">No contract analysis or legal accuracy is claimed in this phase.</p></div>
+        <div className="pid-figure" data-reveal data-glass><h3>Implementation gates</h3><p>Secure intake → exact source spans → validated extraction → independent review.</p><p>Original text remains available beside every material interpretation.</p></div>
       </section>
 
       <section id="maintenance" className="story maintenance">
         <Tag id="maintenance" />
-        <div className="story-copy" data-reveal><h2>Maintenance and sensor intelligence</h2><p>Measured observations and tentative hypotheses stay visibly separate. Thresholds are supplied by people, and correlation is never presented as causation.</p></div>
-        <figure className="chart-figure" data-reveal data-glass>
-          <svg viewBox="0 0 520 220" role="img" aria-label="Synthetic vibration trend crossing a user-supplied threshold">
-            <rect className="persist" x="345" y="20" width="110" height="170" rx="6" /><text className="persist-label" x="400" y="206" textAnchor="middle">3 readings above</text>
-            <line className="threshold" x1="20" x2="500" y1="90" y2="90" /><text className="threshold-label" x="24" y="82">User-supplied threshold · 7.1 mm/s</text>
-            <polyline className="draw trend" pathLength="1" points="20,170 70,160 120,164 170,150 220,146 270,130 320,110 360,84 400,76 440,70 480,66" />
-          </svg>
-          <figcaption>Synthetic illustration.</figcaption>
-        </figure>
+        <div className="story-copy" data-reveal><h2>Obligations and evidence freshness — planned</h2><p>Approved duties, owners and deadlines will persist. Changed sources or stale evidence must invalidate current conclusions and request re-evaluation.</p></div>
+        <div className="chart-figure" data-reveal data-glass><h3>Deterministic monitoring</h3><p>Timers, recurrence, reminders and escalation belong to durable software, not the language model.</p><p>Restart and duplicate-event tests must pass before this is described as continuous monitoring.</p></div>
         <div className="evidence-cards">
-          <article className="evidence observation" data-reveal data-glass><small>Observation · measured</small><p>Vibration above the 7.1 mm/s threshold for three consecutive readings.</p></article>
-          <article className="evidence hypothesis" data-reveal data-glass><small>Hypothesis · tentative</small><p>Possible bearing wear. Unconfirmed; correlation is not causation.</p></article>
-          <article className="evidence verify" data-reveal data-glass><small>Recommended verification</small><p>Review maintenance history and request a field inspection.</p></article>
+          <article className="evidence observation" data-reveal data-glass><small>Source fact</small><p>Exact text and version provide the evidence basis.</p></article>
+          <article className="evidence hypothesis" data-reveal data-glass><small>Proposed interpretation</small><p>Uncertainty and missing information stay visible.</p></article>
+          <article className="evidence verify" data-reveal data-glass><small>Human decision</small><p>An independent authorized reviewer governs acceptance.</p></article>
         </div>
       </section>
 
@@ -393,42 +372,41 @@ export default function LandingPage() {
 
       <section id="voice" className="story voice">
         <Tag id="voice" />
-        <div className="story-copy" data-reveal><h2>Speak locally. Review every identifier.</h2>
-          <p>Speech is transcribed on your hardware. Suspicious identifiers are highlighted and must be confirmed by you. Transcripts are never corrected silently.</p></div>
+        <div className="story-copy" data-reveal><h2>Source text before interpretation</h2>
+          <p>Legal OCR corrections, summaries and obligations will retain the original source. Existing transcript-review infrastructure is reused only after legal-domain evaluation.</p></div>
         <div className="voice-demo" data-reveal data-glass>
-          <p className="raw">Raw transcript: “Check vibration trend on <mark>P204A</mark> since last shift”</p>
-          <p className="reason">Flag: <strong>Malformed identifier</strong>. Resembles an equipment tag but does not match the expected format.</p>
-          <p className="fixed">Your correction: “Check vibration trend on <code>P-204A</code> since last shift”</p>
-          <p className="langs" lang="hi">P-204A का कंपन रुझान दिखाइए</p><p className="langs" lang="ta">P-204A அதிர்வு போக்கைக் காட்டு</p>
+          <p className="raw">Planned review contract: preserve source → identify uncertainty → record a human correction.</p>
+          <p className="reason">Do not silently repair ambiguous dates, parties or obligations.</p>
+          <p className="fixed">Legal speech recognition and multilingual legal accuracy are not yet evaluated.</p>
         </div>
       </section>
 
       <section id="sovereignty" className="story sovereignty">
         <Tag id="sovereignty" />
-        <div className="story-copy" data-reveal><h2>Your hardware. Your boundary.</h2>
-          <p>Inference, retrieval, storage and speech run on local services. No hosted AI is configured for confidential work.</p>
+        <div className="story-copy" data-reveal><h2>Private runtime policy</h2>
+          <p>The existing gateway restricts inference to local/private services. Dedicated service ownership, confidentiality and workspace isolation still require implementation and verification.</p>
           <p className="disclaimer">Offline-capable, not automatically air-gapped: network isolation is enforced by your site controls.</p></div>
         <div className="topology" data-reveal data-glass role="img" aria-label="Local services inside the site boundary">
           <span className="node core">Workbench API</span>
-          {['Ollama · qwen3.5 9B / 4B', 'PostgreSQL', 'Qdrant', 'Local STT / TTS', 'Local files'].map(node => <span key={node} className="node">{node}</span>)}
-          <span className="boundary-label">Site boundary</span>
+          {['Private model endpoint', 'PostgreSQL', 'Qdrant', 'Immutable source storage · planned', 'Authorized retrieval · planned'].map(node => <span key={node} className="node">{node}</span>)}
+          <span className="boundary-label">Target topology · not a deployment claim</span>
         </div>
       </section>
 
       <section id="ecosystem" className="story ecosystem">
         <Tag id="ecosystem" />
-        <div className="story-copy" data-reveal><h2>Government ecosystem, accurately represented</h2><p>Confidential plant data may only use locally approved resources. Public services stay optional and are never sent confidential data.</p></div>
+        <div className="story-copy" data-reveal><h2>Integration boundaries, clearly stated</h2><p>Source authority, permissions and operational failure handling come before connector claims. Confidential documents are not inputs to public regulatory acquisition.</p></div>
         <ul className="eco-grid">{ECOSYSTEM.map(([name, status, note]) => <li key={name} data-reveal data-glass><strong>{name}</strong><span className="badge">{status}</span><p>{note}</p></li>)}</ul>
       </section>
 
       <section id="enter" className="story enter">
         <Tag id="enter" />
-        <img className="enter-mark brand-img" src="/assets/branding/sovereign-mark.png" alt="" width="220" height="220" />
-        <h2 data-reveal>Enter Sovereign Workbench</h2>
-        <p data-reveal>Local inference. Cited evidence. Human approval. Tamper-evident audit.</p>
-        <Link className="button primary large" to={enter}>Enter Sovereign Workbench</Link>
+        <img className="enter-mark brand-img" src={BRAND_MARK} alt="" width="220" height="220" />
+        <h2 data-reveal>Open the development workbench</h2>
+        <p data-reveal>Review the existing platform foundation. Legal workflows remain under controlled construction.</p>
+        <Link className="button primary large" to={enter}>Open the workbench</Link>
       </section>
     </main>
-    <footer className="landing-footer"><Logo variant="horizontal" decorative className="landing-logo" /><p>Facts as of {F.asOf}: {F.benchmarkCases}-case benchmark, {F.frozenBenchmarkFiles} hash-verified frozen benchmark files. Advisory recommendations only.</p></footer>
+    <footer className="landing-footer"><Logo variant="horizontal" decorative className="landing-logo" /><p>Development migration. Historical industrial benchmarks do not establish legal accuracy. No legal advice, compliance certification or live authority integration is claimed.</p></footer>
   </div>
 }

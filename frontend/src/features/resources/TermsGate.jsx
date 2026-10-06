@@ -8,6 +8,7 @@ import { TermsDocument, TermsDownload } from './ResourcesView.jsx'
 import { TERMS_V1 } from './termsV1.js'
 import { TERMS_ACCEPT, TERMS_CURRENT, acceptBody, gateDecision, isVersionChanged, termsStatus } from './termsModel.js'
 import '../../styles/workbench.css'
+import { LEGACY_TERMS_NOTICE } from '../../product.js'
 
 // Sits between authentication and the Workbench. The URL never changes, so after acceptance the user
 // lands exactly where they were going. There is no skip: the only ways out are Accept or Sign out.
@@ -76,6 +77,7 @@ function AcceptTerms({ status, onDone }) {
       <span className="badge">Version {version}</span>
     </header>
     <p>Before you use the Workbench, read and accept the current terms. Your acceptance is recorded by the server in the tamper-evident audit chain.</p>
+    <p className="review-notice">{LEGACY_TERMS_NOTICE}</p>
     <TermsDocument id="terms-gate-text" />
     <div className="toolbar"><TermsDownload /></div>
     <fieldset className="terms-acks">

@@ -181,7 +181,8 @@ class PhaseETests(unittest.TestCase):
         for forbidden in ("benchmark.stage4", "resume_stage4", "--blind", "benchmark/harness/evaluate.py"):
             self.assertNotIn(forbidden, ci)
         self.assertIn("workflow_dispatch", ci)
-        self.assertIn("inputs.live_nonblind == true", ci)
+        self.assertNotIn("self-hosted", ci)
+        self.assertNotIn("--execute", ci)
         selected, _ = nonblind_regression.selected_inputs()
         self.assertEqual(len(selected), 30)
         self.assertEqual({c["split"] for c in selected}, {"development", "validation"})

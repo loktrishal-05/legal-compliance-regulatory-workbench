@@ -102,6 +102,8 @@
 .reveal-chrome i { width: 10px; height: 10px; border-radius: 50%; background: #c6cfdb; }
 .reveal-chrome span { margin-left: var(--space-3); color: #5d7089; font: 500 12px var(--font-sans); }
 .reveal-frame img { display: block; width: 100%; height: auto; }
+.reveal-status { padding: clamp(1.5rem, 4vw, 3rem); color: #0b1a2e; }
+.reveal-status p { color: #3f5570; font-size: var(--fs-md); }
 .reveal-stage figcaption { margin-top: var(--space-3); }
 
 .pid, .maintenance { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); align-items: center; gap: var(--space-7); }

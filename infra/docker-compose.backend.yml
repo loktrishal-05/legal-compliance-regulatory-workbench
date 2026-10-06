@@ -9,8 +9,8 @@ services:
     environment:
       DATABASE_URL: ${BACKEND_DATABASE_URL:?Set BACKEND_DATABASE_URL with the postgres service hostname and URL-encoded credentials}
       QDRANT_URL: http://qdrant:6333
-      MODEL_BASE_URL: http://host.docker.internal:11434
-      MODEL_ALLOWED_HOSTS: host.docker.internal
+      MODEL_BASE_URL: ${BACKEND_MODEL_BASE_URL:?Set BACKEND_MODEL_BASE_URL to this application's dedicated private model endpoint}
+      MODEL_ALLOWED_HOSTS: ${BACKEND_MODEL_ALLOWED_HOSTS:?Set BACKEND_MODEL_ALLOWED_HOSTS to that endpoint's exact private host}
       MODEL_RUNTIME: ollama
       WORKBENCH_DATA_ROOT: /workbench/data
       WORKBENCH_MODEL_ROOT: /workbench/models

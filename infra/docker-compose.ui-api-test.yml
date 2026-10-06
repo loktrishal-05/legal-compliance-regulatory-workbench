@@ -1,4 +1,5 @@
 # Disposable, network-isolated validation; no production volumes or services.
+name: legal-compliance-regulatory-workbench-ui-api-test
 services:
   postgres:
     image: postgres:17
@@ -12,7 +13,7 @@ services:
       timeout: 3s
       retries: 30
   tests:
-    image: sovereign-phase-f-auth:release
+    image: legal-compliance-workbench-backend:py311-cpu
     user: root
     working_dir: /validation/repo
     environment:

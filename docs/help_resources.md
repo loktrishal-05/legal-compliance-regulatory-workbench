@@ -1,5 +1,7 @@
 # Help & Resources
 
+Phase C update: these supplied artifacts are retained byte-for-byte as **legacy industrial resources**, not legal-platform guidance. The active Help page and terms gate label the original terms as legacy migration terms; new legal-platform terms are pending approval. Original text, v1.0, acknowledgement keys and recorded acceptance are not changed. Legacy user guide/video remain explicit historical downloads/playback, not landing/sign-in branding.
+
 In-app page: `/app/help` (sidebar **Trust → Help & Resources**, account menu, command palette).
 Everything is served from `frontend/public/resources/`; no external player or viewer is used.
 

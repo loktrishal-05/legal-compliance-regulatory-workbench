@@ -1,15 +1,11 @@
 name: Offline product regression
 on:
   workflow_dispatch:
-    inputs:
-      live_nonblind:
-        description: Run explicit non-BLIND inference on an approved on-premise runner
-        type: boolean
-        default: false
 permissions:
   contents: read
 jobs:
   backend:
+    if: github.repository == 'loktrishal-05/legal-compliance-regulatory-workbench'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -48,6 +44,7 @@ jobs:
       - run: git diff --exit-code -- benchmark
       - run: git diff --check
   frontend:
+    if: github.repository == 'loktrishal-05/legal-compliance-regulatory-workbench'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -63,16 +60,3 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
-  live_nonblind:
-    # Isolation: provision a new runner/environment before enabling live inference.
-    if: ${{ false }}
-    runs-on: ubuntu-latest
-    env:
-      WORKBENCH_LIVE_REGRESSION: "1"
-      MODEL_NAME: qwen3.5:9b
-      PYTHONPATH: .:backend
-    steps:
-      - uses: actions/checkout@v4
-      # Dedicated Linux runner: preprovisioned Python dependencies and both local Ollama models.
-      # Never attach this runner to production data; protect the environment with required reviewers.
-      - run: python -m scripts.nonblind_regression --execute

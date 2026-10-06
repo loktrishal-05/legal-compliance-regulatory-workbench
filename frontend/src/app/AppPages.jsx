@@ -23,7 +23,7 @@ export function DashboardPage() {
   const reviewer = REVIEWERS.includes(user?.role)
   const today = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())
   return <>
-    <PageHeader title="Dashboard" description={`${today} · live from this Workbench. Every figure below is read from the local backend.`} />
+    <PageHeader title="Dashboard" description={`${today} · legacy platform data from the backend. These figures are not legal compliance scores.`} />
     <DashboardView user={user} health={status} />
     {reviewer && <OperationalBI />}
   </>
@@ -31,7 +31,7 @@ export function DashboardPage() {
 
 export function WorkspacePage() {
   const { user } = useSession()
-  return <><PageHeader title="AI Workspace" description="Ask a governed question. Answers cite their evidence and anything operational is held for human review." />
+  return <><PageHeader title="AI Workspace" description="Legacy governed query infrastructure. Legal specialists and legal-source authorization are not yet available." />
     <QueryConsole user={user} /></>
 }
 
@@ -47,12 +47,12 @@ export function AgentsPage() {
 }
 
 export function PidPage() {
-  return <><PageHeader title="P&ID Intelligence" description="Processed drawings with OCR regions, visual candidates and registry matches. As-drawn evidence only." />
+  return <><PageHeader title="Legacy P&ID Intelligence" description="Industrial regression view retained during migration. As-drawn evidence only; not contract intelligence." />
     <PidViewer /></>
 }
 
 export function MaintenancePage() {
-  return <><PageHeader title="Maintenance & Sensors" description="Sensor readings and work orders from the local system of record, each traceable to its source row." />
+  return <><PageHeader title="Legacy Maintenance & Sensors" description="Industrial regression view with source-linked readings and work orders. Not legal compliance monitoring." />
     <section className="panel"><div className="section-heading"><h2>Sensor trends</h2><span className="muted small">Hover or use the arrow keys to read exact values</span></div><SensorTrends /></section>
     <section className="panel"><div className="section-heading"><h2>Work orders</h2></div><WorkOrderBoard /></section></>
 }
@@ -67,7 +67,7 @@ export function OperationsPage() {
     if (label === 'Knowledge Gaps') return navigate('/app/gaps')
     navigate(`/app/operations/${Object.keys(OPERATION_VIEWS).find(key => OPERATION_VIEWS[key] === label)}`)
   }
-  return <><PageHeader title="Operations" description="Shift handover, environmental compliance and operator notes. Advisory only." />
+  return <><PageHeader title="Legacy Operations" description="Industrial handover and environmental workflows retained for regression. Legal compliance assurance is not yet available." />
     <OperationalWorkspace user={user} view={OPERATION_VIEWS[view]} onViewChange={change} /></>
 }
 
@@ -84,7 +84,7 @@ export function GapsPage() {
 
 export function ApprovalsPage() {
   const { user } = useSession()
-  return <><PageHeader title="Approvals" description="Human approval releases advisory output only. No plant or equipment action is ever executed." />
+  return <><PageHeader title="Approvals" description="Existing review infrastructure releases advisory output only. Legal findings and scoped reviewer permissions arrive in later phases." />
     <ReviewDesk user={user} /></>
 }
 
@@ -100,7 +100,7 @@ export function AuditPage() {
 
 export function SovereigntyPage() {
   const proof = useResource('/sovereignty/proof')
-  return <><PageHeader title="Sovereignty" description="Offline-capable, not automatically air-gapped: network isolation is enforced by site controls." /><Sovereignty proof={proof} /></>
+  return <><PageHeader title="Private runtime" description="Configuration and process observations, not a deployment attestation. Offline-capable, not automatically air-gapped." /><Sovereignty proof={proof} /></>
 }
 
 const POLICY = [
@@ -123,7 +123,7 @@ export function ResourcesPage() {
 }
 
 export function HelpPage() {
-  return <><PageHeader title="Help & Resources" description="Guidance video, user guide, terms of use and how this Workbench behaves. Everything here is served locally." />
+  return <><PageHeader title="Help & Resources" description="Migration guidance and clearly labelled legacy resources. Legal-platform workflows and new terms remain pending." />
     <ResourcesView /></>
 }
 

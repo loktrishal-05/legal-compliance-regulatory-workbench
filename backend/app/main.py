@@ -9,12 +9,12 @@ from urllib.parse import urlsplit
 from app.core.config import settings
 from app.api.router import api_router
 
-app = FastAPI(title="Sovereign On-Premise Agentic AI Workbench")
+app = FastAPI(title="Legal & Regulatory Assurance Platform")
 
 
 @app.middleware("http")
 async def browser_origin_guard(request, call_next):
-    sensitive = request.url.path.startswith(("/auth/", "/admin/", "/executions", "/approvals", "/audit/",
+    sensitive = request.url.path.startswith(("/v1/", "/auth/", "/admin/", "/executions", "/approvals", "/audit/",
         "/bi/", "/documents/pid", "/equipment", "/sensors/", "/maintenance/", "/verified-knowledge", "/knowledge-gaps"))
     mutation = request.method not in {"GET", "HEAD", "OPTIONS"} or (
         request.url.path.startswith("/approvals/") and request.url.path.endswith("/release"))
@@ -28,7 +28,8 @@ async def browser_origin_guard(request, call_next):
         if origin is None and not referer and request.headers.get("sec-fetch-site") is not None:
             rejected = True
         if rejected:
-            return JSONResponse({"detail": "Request origin is not allowed."}, status_code=403)
+            return JSONResponse({"detail": "Request origin is not allowed."}, status_code=403,
+                headers={"Cache-Control": "no-store", "Referrer-Policy": "no-referrer"} if sensitive else None)
     try:
         response = await call_next(request)
     finally:
@@ -44,7 +45,7 @@ async def browser_origin_guard(request, call_next):
 
 @app.exception_handler(RequestValidationError)
 async def validation_error(request, error):
-    if request.url.path.startswith(("/auth/", "/admin/")):
+    if request.url.path.startswith(("/v1/", "/auth/", "/admin/")):
         return JSONResponse({"detail": [{"loc": list(e["loc"]), "msg": e["msg"], "type": e["type"]}
                                          for e in error.errors()]}, status_code=422)
     from fastapi.exception_handlers import request_validation_exception_handler
