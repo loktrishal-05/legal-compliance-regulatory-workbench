@@ -2,6 +2,17 @@
 
 Date: 2026-10-06. This divides all remaining backend work; it does not reduce the master requirements or waive phase gates. Frontend/landing implementation belongs to the user. The master PDF stays unchanged.
 
+## Published checkpoint and work tickets
+
+Reviewed implementation checkpoint: `87cd2bd` on the shared development base. The owner explicitly approved publishing the saved tested identity snapshot, the partial backend milestone and PR protection. No new frontend implementation occurred.
+
+- Baseline CI passed: https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/actions/runs/37491748786
+- Part 1 ticket: https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/issues/1
+- Part 2 ticket: https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/issues/3
+- Part 3 ticket: https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/issues/2
+
+Tickets assign work to the three owner slots; GitHub assignees remain unset until the user supplies their actual handles. PR review protection is authorized; verify actual branch settings when beginning integration. Baseline CI success does not complete D or accept future teammate features.
+
 ## Shared baseline and branches
 
 - Repository: `https://github.com/loktrishal-05/legal-compliance-regulatory-workbench.git` only.
