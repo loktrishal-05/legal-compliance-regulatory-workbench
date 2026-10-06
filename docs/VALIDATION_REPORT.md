@@ -1,6 +1,6 @@
-# Validation report — discovery and Phase A
+# Validation report — discovery and Phases A/B
 
-Date: 2026-10-06. Overall: **Phase A source custody/configuration verified; legal migration and full runtime validation NOT COMPLETE**.
+Date: 2026-10-06. Overall: **Phase A source custody/configuration verified; Phase B development contracts reviewed; legal implementation and full runtime validation NOT COMPLETE**.
 
 ## Discovery checks (historical baseline; Phase A supersedes custody/config state)
 
@@ -83,3 +83,19 @@ Final custody verification: branch `feat/legal-regulatory-platform-migration`, a
 ## Commit custody follow-up — 2026-10-06
 
 The user authorized regular local checkpoint commits and separately approved preserving the inherited staged terms/auth work as a commit. `34dc7af` contains exactly the original 17 staged paths; no new files were added to its index. Reviewed staged patch; no private keys/real credentials identified (password strings are existing synthetic fixtures). Exact unstaged binary diffs matched before/after. No new backend, PostgreSQL or model acceptance is claimed for this preservation snapshot. Push remains gated by the full migration/validation report and explicit authorization.
+
+Phase A checkpoint `dfea5db`: 29 explicit paths covering custody/config/tests/guides/master PDF/provenance. Before staging, custody suite revalidated 6/6 and PDF hash unchanged; cached whitespace check passed with CRLF recognition. Post-commit status confirmed unrelated frontend, benchmark, nested tooling and private/runtime work was not included. This does not certify a clean or complete whole working tree.
+
+## Phase B document acceptance — 2026-10-06
+
+| Check | Evidence / result |
+|---|---|
+| Explicit development baseline approval | User selected approved baseline; enterprise/legal/retention/recovery policies remain operational-pilot gates |
+| Mature component compatibility | Read session/deps, immutable revision model, Document/DocumentVersion, Query and S1-S7 output contracts before defining additive legal contracts |
+| Complete catalogue mapping | Dedicated content search `^\| FR-[0-9]{3} \|` in `LEGAL_REQUIREMENT_TRACEABILITY.md` returned **66** rows; inspected sequential 001-066, no duplicate/missing rows; Must 001-045 / Should 046-066 preserved |
+| Source/authority/time invariants | Reviewed exact immutable version/span binding, unknown-date handling, historical/effective time, authorized retrieval and insufficient-evidence release boundary |
+| Governance/isolation invariants | Reviewed scoped role/ACL matrix, no default admin content-read, independent reviewer, six assessment states, immutable successor revisions and deterministic timers |
+| Scope honesty | All legal FR rows planned; local auth explicitly development-only; no configured regulator, validated jurisdiction pack, legal accuracy or SLO attainment claimed |
+| Documentation whitespace/diff | New contract/registry no-index checks and focused tracked-document `git diff --check` passed with CRLF recognition; reviewed intended document diff |
+
+Phase B is documentation/architecture acceptance only. No new business logic, migration or backend domain test was executed; reversible documentation changes do not need a mirrored implementation test. Implementation phases must add real components/tests/demo evidence before any FR status changes. No services/models/DB, deployment, push or unrelated Git operations were invoked.

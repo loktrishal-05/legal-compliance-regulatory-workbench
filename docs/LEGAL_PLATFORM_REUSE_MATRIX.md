@@ -1,6 +1,6 @@
 # Legal platform reuse matrix
 
-Status: proposal awaiting discovery approval. **RETIRE means remove from active legal routes only after dependency/replacement proof; no deletion in discovery.** BUILD below is split into NEW and narrowly justified REBUILD.
+Status: reuse-first development baseline approved; legal feature implementation remains planned. **RETIRE means remove from active legal routes only after dependency/replacement proof; no immediate deletion.** BUILD below is split into NEW and narrowly justified REBUILD.
 
 | Subsystem | Decision | Existing assets / target change | Dependency / gate |
 |---|---|---|---|
@@ -47,3 +47,5 @@ Status: proposal awaiting discovery approval. **RETIRE means remove from active 
 No blanket backend rebuild, Next.js replacement, graph database, microservice split, Kubernetes or new AI provider is justified for the first slice. Required missing controls are not deferred merely for simplicity.
 
 Phase A execution update: Docker/CI/defaults/runbooks were adapted for source-level isolation; existing password/terms/security/domain behavior remains intact. Backup Compose-target validation was extended and tested. Auxiliary tools/history remain quarantined reference material instead of being deleted or retargeted. Live resource provisioning, legal identity migration and all NEW domain capabilities remain unfinished.
+
+Phase B acceptance contracts retain React/Vite, FastAPI/PostgreSQL/Qdrant, local gateway, session/RBAC and immutable review/audit infrastructure. Scoped legal memberships/ACLs and tenant-qualified relations are additive; account administrator is not automatically a confidential-content reader. Tenant deduplication needs a reviewed forward transition from the inherited global source-hash constraint. Material output still needs actual sufficient source spans, not merely a schema-valid response or empty manifest. See domain contracts and FR traceability for required tests and unconfigured operational-pilot gates.

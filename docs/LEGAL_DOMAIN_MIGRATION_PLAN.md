@@ -1,10 +1,12 @@
 # Controlled legal-domain migration plan
 
-Status: phased building and regular local checkpoint commits authorized by the user on 2026-10-06; Phase A source custody/configuration complete. Phase B product-policy decisions remain pending. No push authorized. Preserve all existing user work, historic migrations, immutable records and frozen industrial evidence.
+Status: phased building and regular local checkpoint commits authorized by the user on 2026-10-06; Phases A/B development foundations complete. Phase C is next; operational-pilot policies and actual legal implementation remain unfinished. No push authorized. Preserve all existing user work, historic migrations, immutable records and frozen industrial evidence.
 
 ## How this guide must be used
 
 This is the canonical execution checklist for rebuilding the **existing** codebase into the Legal & Regulatory Assurance Platform. The unchanged master PDF remains the product authority; this guide translates it into ordered implementation work, not a claim of delivered capabilities.
+
+Phase B's detailed [domain/permission/workflow/source contracts](LEGAL_DOMAIN_BUILD_CONTRACTS.md) and [66-requirement acceptance registry](LEGAL_REQUIREMENT_TRACEABILITY.md) are execution inputs for every relevant implementation phase. Update their actual component/test/demo evidence as work lands; no planning row is an implementation pass.
 
 **Before starting or resuming every phase:**
 
@@ -23,7 +25,7 @@ This is the canonical execution checklist for rebuilding the **existing** codeba
 | Phase | Current status | Next action |
 |---|---|---|
 | A | Complete: source custody, isolated defaults/CI, offline checks | Private runtime provisioning and acceptance remain gated for later phases |
-| B | Architecture/reuse/plan prepared; decisions pending | Confirm initial slice, scope ambiguities and legal/security policies |
+| B | Complete: approved development scope and domain/FR contracts | Operational-pilot pack/IdP/retention/recovery approvals remain release gates |
 | C | Not started | Begin identity/config adaptation after A/B entry gates |
 | D | Not started | Scoped legal core and additive migrations |
 | E | Not started | Secure generic document intake and provenance |
@@ -36,7 +38,9 @@ This is the canonical execution checklist for rebuilding the **existing** codeba
 | L | Not started | Legal evaluation and security hardening |
 | M | Not started | Full isolated acceptance and recovery validation |
 
-**Resume at B.** Read the Phase A evidence in `VALIDATION_REPORT.md`, then confirm the initial slice and remaining product-policy decisions. No private runtime targets are yet accepted: before any service, DB migration, backup or model execution, follow `LEGAL_RUNTIME_SETUP.md` and verify effective configuration ownership. Do not treat new defaults as proof that an old `.env` is safe.
+**Resume at C.** Read A/B evidence, detailed domain contracts and the requirement registry before implementing. No private runtime targets are yet accepted: before any service, DB migration, backup or model execution, follow `LEGAL_RUNTIME_SETUP.md` and verify effective configuration ownership. Do not treat new defaults as proof that an old `.env` is safe.
+
+Approved B baseline (2026-10-06): retain React/Vite and local/private AI; public/synthetic fixtures clearly labelled; no validated jurisdiction-compliance claim; local session auth for development only, enterprise SSO/MFA required for operational pilot; manual approved regulatory imports first; no automatic deletion/signing/filing. Deployment-specific legal packs, identity provider, retention and recovery acceptance stay release gates. This approval does not enable live services/models, deployment or a push.
 
 ## Prerequisite decisions
 
@@ -80,11 +84,13 @@ Phase A exit: exact legal branch/origin confirmed; quit/switch preserved staged/
 
 ### Phase B — approve the target and acceptance contracts
 
-- [ ] Confirm the first operational slice against PDF pp. 52/59 and map all FR-001..066 to implemented or explicitly planned scope.
-- [ ] Resolve identity/MFA, collision-detection, jurisdiction/source/playbook, retention/legal hold, model policy and SLO/RPO/RTO decisions.
-- [ ] Specify workspace/matter/document role permissions, six assessment states and independent review authority.
-- [ ] Specify immutable source spans, version/effectivity semantics and legal AI output contracts.
-- [ ] Confirm reuse-first topology and additive DB/index compatibility strategy; record approved decisions and remaining release blockers.
+- [x] Confirm the first operational slice against PDF pp. 52/59 and map all FR-001..066 to implemented or explicitly planned scope.
+- [x] Resolve development scope and record operational-pilot approval gates for identity/MFA, collision-detection, jurisdiction/source/playbook, retention/legal hold, model policy and SLO/RPO/RTO; no deployment values are invented.
+- [x] Specify workspace/matter/document role permissions, six assessment states and independent review authority.
+- [x] Specify immutable source spans, version/effectivity semantics and legal AI output contracts.
+- [x] Confirm reuse-first topology and additive DB/index compatibility strategy; record approved decisions and remaining release blockers.
+
+Phase B exit: user-approved development profile; inspected mature session/revision/source/output models; domain contracts and all 66 catalogue FRs mapped to phase/deliverable/planned check; priorities preserved; version/ACL/state/AI/deadline invariants specified. This is design acceptance for development, not completed FRs or a legally validated operational pilot.
 
 ### Phase C — safe identity and configuration
 
@@ -181,6 +187,7 @@ Phase A exit: exact legal branch/origin confirmed; quit/switch preserved staged/
 |---|---|---|---|
 | 2026-10-06 | User requested a permanent phased build document that must be read before each phase and kept synchronized during building; expanded existing plan into an execution checklist and added AGENTS instructions | A-M; process for all FRs | Documentation workflow requested; implementation not started; existing custody/product-policy decisions remain open |
 | 2026-10-06 | User authorized building and explicitly approved quit-with-preservation/branch activation. Moved C's service/proxy/default isolation into A, added offline custody regression and current runtime guide; quarantined nested tools instead of altering metadata | A/C/M; security/isolation NFRs, FR-065/066 operational support (not full delivery) | A source/config exit checks passed; no deployment/private configuration acceptance; B product-policy decisions still pending |
+| 2026-10-06 | User authorized regular local commits and separately approved preserved staged work; explicitly approved B development baseline. Added detailed domain contracts and 66-row FR registry; resolved development sequencing while retaining enterprise/legal/deployment gates | B/C-M; FR-001..066 and NFRs | Development architecture/contract checkpoint complete; no new legal feature/runtime pass; next C |
 
 Append a row when an implementation discovery changes the plan. Include the reason, old/new decision or step, affected FRs/phases, and any approval dependency. Routine progress belongs in `MIGRATION_PROGRESS.md`; actual verification belongs in `VALIDATION_REPORT.md`.
 
@@ -229,6 +236,6 @@ At each checkpoint: inspect callers -> minimal coherent diff -> relevant tests -
 
 - Resolved: user approved quit-with-preservation and migration-branch activation; no commit or loss of staged/unstaged work.
 - Delivered: current CI/defaults/runbooks isolated; nested tools/worktrees quarantined unchanged. Private runtime acceptance still required before operational commands.
-- Approve retaining React/Vite and private/local inference for the initial slice, rather than adopting recommended Next.js/hosted AI automatically.
-- Select initial jurisdiction/industry/source/playbook and reviewer acceptance policy, or approve explicitly synthetic packs until those exist.
-- Resolve SSO/MFA and advanced conflict-detection scope inconsistencies; define operational-pilot identity, retention/legal hold and performance/recovery acceptance gates.
+- Approved: React/Vite and private/local inference for development; no automatic Next.js/hosted-AI switch.
+- Approved: explicitly public/synthetic fixtures and manual approved imports for development; no actual jurisdiction/playbook authority or legal compliance claim. Scoped independent review contracts are defined.
+- Development sequencing defined: basic source-grounded conflict/collision workflow; advanced simulations later. Enterprise SSO/MFA/re-auth, real legal packs/retention/hold and deployment performance/RPO/RTO remain operational-pilot gates, not silently waived requirements.

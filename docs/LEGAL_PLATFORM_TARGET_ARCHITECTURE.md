@@ -1,6 +1,8 @@
 # Legal & Regulatory Assurance Platform — target architecture
 
-Status: **proposed**, not implemented. Product name follows PDF pp. 1, 5 and 69. Primary intent: contract analysis, compliance monitoring and document summarization as one persistent, governed operational lifecycle. Blueprint v1.0 has 66 FRs; distinguish recommendations and jurisdiction-dependent validation from verified delivery.
+Status: **development baseline approved in Phase B; domain implementation not delivered**. Product name follows PDF pp. 1, 5 and 69. Primary intent: contract analysis, compliance monitoring and document summarization as one persistent, governed operational lifecycle. Blueprint v1.0 has 66 FRs; distinguish recommendations and jurisdiction-dependent validation from verified delivery.
+
+Detailed execution contracts: [domain/permission/workflow/source contracts](LEGAL_DOMAIN_BUILD_CONTRACTS.md) and [all 66 FR acceptance mappings](LEGAL_REQUIREMENT_TRACEABILITY.md). Existing reusable IDs/schema/hash patterns were inspected when defining these contracts; no applied migration or stored immutable row is rewritten by planning.
 
 ## Source understanding
 
@@ -85,10 +87,12 @@ First runtime uses independently named local Compose resources and private model
 
 ## Blueprint ambiguities (do not alter the PDF)
 
-1. FR-001 calls SSO/MFA Must, while p.14 places SSO/SCIM after pilot and p.52 MVP says real auth. Approve an explicit MVP/pilot identity gate; production catalog requirements remain tracked.
-2. FR-017 collision detection is Must, while p.64 calls it advanced. A basic source-grounded/manual reviewable detection slice and later advanced reasoning need explicit acceptance boundaries.
+1. FR-001 calls SSO/MFA Must, while p.14 places SSO/SCIM after pilot and p.52 MVP says real auth. Resolved for development by explicit user approval: local session auth first; enterprise SSO/MFA and privileged re-auth remain required operational-pilot gates, not completed FRs.
+2. FR-017 collision detection is Must, while p.64 calls it advanced. Basic source-linked duty/deadline conflict workflow remains in F/I; advanced semantic collision/simulation later. Neither is claimed delivered by planning.
 3. p.67's summary traceability ranges are shifted relative to the detailed catalogue. Use pp.17-19 IDs: contracts FR-012..019, summaries FR-020..025, regulation FR-026..032, compliance FR-033..040. Preserve PDF unchanged.
 4. Jurisdiction, industry, authoritative sources/playbooks, privilege/retention/legal hold, IdP, model restrictions, scoring thresholds and actual SLO/RPO/RTO are not approved by the blueprint alone.
+
+Explicit user-approved development handling for item 4: public/synthetic fixtures and manual approved imports, no jurisdiction-compliance claims, local/private AI and no automatic deletion/signing/filing. Deployment-specific packs/IdP/retention/recovery policies stay unconfigured approval gates. This keeps development moving without fabricating legal facts or lowering pilot acceptance.
 
 ## Implemented foundation — Phase A
 

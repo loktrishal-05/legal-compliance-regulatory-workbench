@@ -1,16 +1,16 @@
 # Migration progress
 
-Date: 2026-10-06. **Phase A source custody/configuration complete; Phase B next.**
+Date: 2026-10-06. **Phase A committed; Phase B development contracts complete; Phase C next.**
 
 ## Current state
 
 | Checkpoint | Status |
 |---|---|
 | A custody/report/discovery | Complete: preserved branch activation, isolated defaults/CI/runbooks, offline regression/frontend checks |
-| B architecture/reuse | Proposal documents prepared, not approved |
+| B architecture/reuse | Complete: approved development baseline; domain/permission/state/provenance contracts and all 66 FR acceptance mappings |
 | C-M implementation/validation | Not started |
 
-Phase A changed configuration/backup guards and current operational documentation. Legal feature code, schema and migrations have not been built. No sibling/external repository changed. No staging, commit, push, service deployment, DB connection/migration or model execution occurred.
+Phase A changed configuration/backup guards and operational documentation; Phase B defined development contracts. Legal feature code/schema/migrations remain planned. Local checkpoints are now authorized and recorded below. No sibling/external repository, deployment, DB or model operation occurred; no push.
 
 ## Changes made in this discovery
 
@@ -97,3 +97,25 @@ Final checks: active branch/origin and unchanged HEAD verified; `.git/CHERRY_PIC
 User requested regular commits while continuing the phased build. Root/origin/common metadata/hooks/status/diffs/recent log were rechecked. The user explicitly chose a separate preservation commit for the 17 inherited staged terms/auth files. Commit `34dc7af` (`Preserve inherited terms acceptance work`) records that original index without adding Phase A or unrelated frontend/benchmark work. Exact unstaged binary diff comparison passed across the commit. This is preservation evidence, not fresh backend/migration acceptance.
 
 Next checkpoint records Phase A configuration, tests, current operational instructions and discovery/planning/provenance documents. Existing private/runtime files, nested Git/tooling, incoming archives, unrelated frontend work and modified frozen readiness report are excluded. Regular local commits are now authorized; pushes remain unauthorized.
+
+Completed Phase A checkpoint: `dfea5db` (`Isolate legal migration workspace and document phased build`), 29 explicit paths including immutable master PDF and preserved audit/handoff provenance. Custody suite revalidated 6/6 immediately before staging; PDF hash unchanged; staged whitespace check passed with CRLF recognition. Unrelated frontend/benchmark/runtime/tool content remains outside the commit.
+
+## Phase B start — 2026-10-06
+
+Read the living guide/progress/validation and target/reuse decisions. Master-report anchors: detailed FR catalogue pp.17-19, roles p.21, source/RAG/data contracts pp.27-29, guardrails/review pp.37-39, MVP/acceptance pp.52/59 and workflow/output/pack appendices pp.72/74/77. User explicitly approved the development baseline described in the guide. Deployment legal packs/IdP/retention policies remain unconfigured release gates.
+
+Current step: document executable domain invariants, scoped role policy, review/status transitions, immutable/effective-date provenance and per-FR implementation/acceptance ownership. Phase B is an architecture/contract checkpoint, not feature delivery or legal accuracy acceptance.
+
+## Phase B completion — 2026-10-06
+
+Delivered `LEGAL_DOMAIN_BUILD_CONTRACTS.md`: initial end-to-end operational slice; tenant/matter/document ownership; additive source/hash/revision migration strategy; scoped role matrix and administrator boundaries; six assessment states, independent review/remediation transitions; immutable source spans/effective-vs-recorded time; legal AI proposal/API contracts; deterministic deadline/recovery semantics and pilot gates.
+
+Delivered `LEGAL_REQUIREMENT_TRACEABILITY.md`: FR-001 through FR-066, preserving catalogue Must/Should priorities, with owning phases, core/extended/pilot/later sequencing, deliverables and planned verification. Every legal FR remains **planned**, not delivered by these documents. Related target/reuse/guide records synchronized.
+
+Approval: user explicitly selected the development baseline (React/Vite, private/local AI, public/synthetic fixtures, local auth development-only, enterprise identity pilot gate, manual approved imports, no automatic deletion/signing/filing). Unknown legal pack/IdP/retention/RPO/RTO values are named release gates, not guessed settings.
+
+Verification: inspected current session/dependency, immutable ActionRevision, Document/DocumentVersion, Query and S1-S7 output contracts to avoid incompatible redesign. Content search returned 66 ordered distinct FR table rows (001-066); catalogue priorities reviewed against the master report; permission/source/review/state/deadline invariants reviewed for consistency. No runtime tests are represented as Phase B domain acceptance. New and changed documentation whitespace/diff checks are recorded in the validation report.
+
+Files changed: new domain contracts/requirement registry; target architecture, reuse matrix, living guide, progress and validation. Next phase C safely adapts product/service/package/UI identity without claiming unimplemented legal capability. D-M models/workflows/UI/security/runtime validation and pilot-specific approvals remain unfinished. Existing unrelated frontend/benchmark/tool/runtime work is preserved outside checkpoint scope.
+
+Checkpoint preparation: seven explicit Phase B document paths only, with requirement coverage and whitespace/diff checks complete. Local commit message: `Define legal domain contracts and requirement acceptance`. Record the resulting commit ID in the next phase/session log; never amend a checkpoint to insert its own hash. No push authorized.
