@@ -9,6 +9,7 @@ Updated: 2026-10-06. **One entry point for the next assistant.** This is a factu
 - Merged to development: #4 handoff/CI, #6 Part 2 deterministic G/H core, #7 D provisioning (0021), #8 D dedupe/isolation (0022). Development head `5ff7ed8`; migration head `0022_legal_version_scope`.
 - `main` = `a85494d` (PR #5 joined the unrelated histories; tree = development at 496f903). Creating a development -> main promotion PR was **blocked by the session permission classifier**; the owner must create/merge it or grant that permission.
 - Phase D complete for development exit checks; industrial regression suites cannot run in available runtimes (recorded gap). Next: Phase E secure intake on scoped versions, then F, G/H persistence (Part 2 core exists), I, J, L, M.
+- Parts 1/2: integrator. Part 3 (#2): owner-run Codex agent in worktree `C:/Users/Lohith k/AppData/Local/Temp/lrw-part3` on `team/3-workflows-assurance`; integrator reviews every commit/full diff, fixes on a separate branch, merges after `legal-core`. Both agents use the owner's GitHub account: no independent human review (open gate).
 - Work happens in temp worktrees (`%TEMP%\lrw-part1`, `%TEMP%\lrw-part2`) so the owner's dirty working tree is never touched.
 
 ## 1. Exact workspace and source of truth
