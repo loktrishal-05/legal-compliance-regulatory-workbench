@@ -172,6 +172,8 @@ Make coherent verified local checkpoints with their docs. Before each commit ins
 
 ### Main promotion is a separate gate
 
+**Update 2026-10-06:** owner chose the one-time join. PR [#5](https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/pull/5) (`reconcile/main-join`, merge `b451860`, parents `d95dfc3` + `496f903`, tree identical to `496f903`) awaits `legal-core` and one teammate approval. After it merges, the integrator opens a normal reviewed dev → main promotion PR after each integrated checkpoint; promotion never claims phase/FR acceptance. The text below is the pre-approval rule, kept for history.
+
 Remote main has unrelated history. Show the actual graph/tree differences and propose a preservation-first reconciliation plan; obtain owner approval before any reconciliation. Do not invoke `--allow-unrelated-histories`, recreate main, force/reset or promote a partial checkpoint silently. Final main promotion requires relevant complete acceptance/known-limitations report and owner approval, preserving main history and satisfying protection via a normal reviewed PR. This has **not happened**.
 
 ## 8. Exact next actions for Claude
