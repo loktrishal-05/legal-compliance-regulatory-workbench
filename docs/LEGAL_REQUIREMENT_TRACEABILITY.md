@@ -8,6 +8,8 @@ Initial D evidence: `app/db/models/legal_scope.py`, `app/services/legal_policy.p
 
 D provisioning evidence (2026-10-06, partial): `app/services/legal_provisioning.py`, `scripts/legal_provisioning_cli.py`, migration 0021, `tests/test_legal_scope_provisioning.py` 7 SQLite + 7 PostgreSQL. Strengthens FR-002/003 (tenant/role isolation, independent provisioning) and FR-054 (audited access changes). Migration 0022 + `tests/test_legal_scope_isolation.py` (9 SQLite + 9 PostgreSQL): per-workspace dedupe, legacy-path guards, root audit exclusion. Not FR acceptance.
 
+E1 intake evidence (2026-10-06, partial): `app/services/legal_intake.py`, upload route, migration 0023, `tests/test_legal_scope_intake.py` 8 SQLite + 8 PostgreSQL, API upload test. Partial for FR-006 (PDF/DOCX/TXT detection), FR-007 (type/size/archive/macro/quarantine; no malware engine configured), FR-009 (workspace-scoped duplicate detection without cross-tenant leakage), FR-010 (immutable hashed originals). Extraction/OCR/spans pending.
+
 Part 2 deterministic core evidence (2026-10-06, partial, not acceptance): `app/services/regulatory_versions.py`, `app/services/compliance_assessment.py`, `tests/test_legal_regulatory_core.py` 14/14 with synthetic fixtures; mutation checks confirmed failures are caught. Partial for FR-028/029 (exact part)/032 (freshness)/035/037/038/039/040 and relational part of FR-034. Persistence, tenant FKs, registry/import (FR-026/027), human applicability (FR-030), jurisdiction mapping (FR-031), AI interpretation (FR-036) and APIs remain open.
 
 | Requirement | Priority | Build label / phases | Deliverable and acceptance evidence (planned) |

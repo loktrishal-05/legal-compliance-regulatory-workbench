@@ -149,6 +149,10 @@ Isolated frontend preview PID 14916 used proxy `http://127.0.0.1:9` and intercep
 
 One unintended authenticated redirect reached the legacy dashboard with a generic `{}` mock and caused a rendering error; probe timeouts and this mock-shape failure are not passes. Dashboard is outside this bounded identity check and no frontend repair was made. User subsequently deferred frontend/landing/design acceptance and K to their own work; backend D may proceed. Existing frontend files remain preserved outside the backend checkpoint. No broad unchanged suites repeated; earlier results remain dated evidence.
 
+## E1 secure intake — 2026-10-06
+
+`docker compose ... run --rm tests`: 76/76 OK (adds 8 SQLite + 8 PostgreSQL intake tests and the real upload-route API test on an Alembic-head schema). Validator PASS fresh and 0018 -> 0023. Covered: 11 rejection codes audited with nothing stored, 6 quarantine reasons, write-once read-only originals and tamper detection, idempotent same-workspace dedupe, conflict without leaking another member's document, independent copies across tenants, viewer/clearance/non-member/matter denials, audit-failure rollback, 413/422/403/404 HTTP mapping. Not covered: real malware engine (none configured), real-world PDF/DOCX corpora, extraction.
+
 ## D audited provisioning — 2026-10-06
 
 Branch `team/1-documents-contracts` (integrator; all three teammates unavailable). Disposable legal-core Compose project only; network removed after each run.

@@ -1,7 +1,8 @@
-"""Session/terms protected legal metadata, never a provisioning/intake endpoint."""
+"""Session/terms protected legal metadata and secure intake; never a provisioning endpoint."""
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -10,18 +11,20 @@ from app.core.config import settings
 from app.db.models import Document, User
 from app.db.models.legal_scope import LegalDocumentScope, Workspace
 from app.db.session import get_db
-from app.schemas.legal_scope import LegalDocumentMetadata, WorkspaceMetadata
+from app.schemas.legal_scope import IntakeResponse, LegalDocumentMetadata, WorkspaceMetadata
+from app.services import legal_intake
 from app.services.audit import append_event
 from app.services.legal_policy import LegalAccessDenied, authorize_document, authorize_workspace
 
 router = APIRouter(prefix="/v1/workspaces", tags=["legal scope"])
 
 
-def unavailable(db: Session, actor_id: UUID, workspace_id: UUID, document_id: UUID | None = None):
+def unavailable(db: Session, actor_id: UUID, workspace_id: UUID, document_id: UUID | None = None,
+                operation: str = "read"):
     # Requested IDs only, no source metadata/body or inferred tenant identity.
     append_event(db, event_type="SECURITY_POLICY_DENIED", actor_id=actor_id, actor_kind="user",
         payload={"policy_version": "legal-scope-v1", "requested_workspace_id": str(workspace_id),
-                 "requested_document_id": str(document_id) if document_id else None, "operation": "read"})
+                 "requested_document_id": str(document_id) if document_id else None, "operation": operation})
     db.commit()
     raise HTTPException(404, detail={"code": "legal_resource_unavailable"})
 
@@ -51,3 +54,40 @@ def document_metadata(workspace_id: UUID, document_id: UUID, db: Session = Depen
     ).join(LegalDocumentScope, LegalDocumentScope.document_id == Document.id)
         .where(Document.id == document_id, LegalDocumentScope.workspace_id == workspace_id)).one()
     return LegalDocumentMetadata(**row._mapping)
+
+
+@router.post("/{workspace_id}/documents", response_model=IntakeResponse, status_code=201)
+async def upload_document(workspace_id: UUID, request: Request,
+                          filename: str = Query(..., min_length=1, max_length=255),
+                          document_type: str = Query(..., min_length=2, max_length=50),
+                          classification: str = Query(..., max_length=20),
+                          matter_id: UUID | None = None,
+                          db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    """Raw request body is the file. Bounded read; bytes decide the format, not the client."""
+    declared = request.headers.get("content-length")
+    if declared and (not declared.isdigit() or int(declared) > legal_intake.MAX_BYTES):
+        raise HTTPException(413, detail={"code": "too_large"})
+    body = bytearray()
+    async for chunk in request.stream():
+        body += chunk
+        if len(body) > legal_intake.MAX_BYTES:
+            raise HTTPException(413, detail={"code": "too_large"})
+
+    def run():
+        try:
+            result = legal_intake.receive(
+                db, actor_id=user.id, workspace_id=workspace_id, filename=filename, document_type=document_type,
+                classification=classification, data=bytes(body), matter_id=matter_id,
+                current_terms_version=settings.current_terms_version, data_root=settings.data_root,
+                scanner=None)  # no malware scanner is configured: uploads stay quarantined
+        except LegalAccessDenied:
+            unavailable(db, user.id, workspace_id, operation="intake")
+        except legal_intake.IntakeRejected as rejected:
+            db.commit()  # keep the rejection audit event
+            raise HTTPException(422, detail={"code": rejected.code})
+        except legal_intake.IntakeConflict:
+            raise HTTPException(409, detail={"code": "duplicate_in_workspace"})
+        db.commit()
+        return IntakeResponse(document_id=result.document_id, version_id=result.version_id, status=result.status,
+                              duplicate=result.duplicate, quarantine_reasons=list(result.quarantine_reasons))
+    return await run_in_threadpool(run)
