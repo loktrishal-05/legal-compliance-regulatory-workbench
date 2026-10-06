@@ -199,3 +199,5 @@ D completed for development exit checks: PR #7 merged (provisioning, 0021). Foll
 ## Parts 1/2 to integrator, Part 3 with Cholan-kinnera — 2026-10-06
 
 Owner screenshot: integrator does Part 1 (#1) and Part 2 (#3); Cholan-kinnera (invitation accepted) owns Part 3 (#2) and asked to merge development into team/3 before work. Issues assigned. Development -> main promotion attempt denied again by the session permission classifier; owner action required. E1 secure intake built (0023); 76/76 scoped tests and validator pass. Migration allocation: integrator took 0023; Part 3 must request the next revision in its PR.
+
+Part 3 reassigned to an owner-run Codex agent (Cholan-kinnera unavailable). team/3 fast-forwarded to development 1e51029; isolated worktree prepared for the agent; issue #2 reassigned. E1 merged as PR #10. Migration rule: agents set down_revision to the current development head when adding a revision; the integrator re-chains at merge if both sides added one.
