@@ -65,7 +65,7 @@ Snapshot verified immediately before writing this handoff; re-query on resume.
 | Open PR | **[#4](https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/pull/4)**, head `team/handoff-review-evidence`, base development; OPEN / REVIEW_REQUIRED |
 | PR #4 scope | Handoff evidence + explicit credential-free/non-recursive CI checkout; no new backend feature/frontend implementation; this consolidation extends its documentation scope |
 | Team branches | `team/1-documents-contracts`, `team/2-regulatory-compliance`, `team/3-workflows-assurance`, all initially at 496f903 |
-| Issues/people | Part 1 #1 @Harsha-code-per, Part 2 #3 @Sanjjith27, Part 3 #2 @Cholan-kinnera (owner delegated the mapping; invitation order). Write invitations pending; assignment comments posted; set assignees after acceptance |
+| Issues/people | Part 1 #1 @Harsha-code-per, Part 2 #3 integrator/owner account (Sanjjith27 unavailable; PR #6 open), Part 3 #2 @Cholan-kinnera (owner delegated the mapping; invitation order). Write invitations pending; assignment comments posted; set assignees after acceptance |
 
 Important normal checkpoints (do not amend): `34dc7af` terms/auth preservation; `dfea5db` A custody/config/plan; `3f94383` B domain/FR contracts; `1968d2e` inherited frontend preservation; `770c834` identity RED checks; **`87cd2bd`** scoped backend + saved identity + three-team handoff; **`496f903`** published evidence/shared base; `30caf9c` protections evidence; `9cd84af` CI checkout custody fix. Preservation snapshots are not fresh legal acceptance.
 
@@ -179,7 +179,7 @@ Remote main has unrelated history. Show the actual graph/tree differences and pr
 ## 8. Exact next actions for Claude
 
 1. Read the required files and reverify all state above. This workspace is deliberately not clean; preserve user artifacts.
-2. Check invitation acceptance; set assignees #1 Harsha-code-per, #3 Sanjjith27, #2 Cholan-kinnera. Owner wants accepted work regularly reaching `main`; that requires the owner-approved one-time unrelated-history reconciliation first (see §7), then reviewed dev→main promotion PRs.
+2. Check invitation acceptance; set assignees #1 Harsha-code-per, #2 Cholan-kinnera (#3 is assigned to the owner account; Part 2 built by the integrator, PR #6). Owner wants accepted work regularly reaching `main`; that requires the owner-approved one-time unrelated-history reconciliation first (see §7), then reviewed dev→main promotion PRs.
 3. Inspect PR #4 and its latest documentation/CI checks. It is a handoff PR, not a completed legal implementation, and must get independent approval; do not self-approve/merge with admin override.
 4. Inspect new teammate PRs/commits during active review, coordinate their D/E/source/review/migration dependencies and required evidence, reproduce/fix reviewed defects, integrate accepted work on development base.
 5. Remaining D is the first implementation gate. All three backend streams are assigned; only take an explicit non-overlapping implementation task or integrator correction, never quietly duplicate a human teammate's branch.

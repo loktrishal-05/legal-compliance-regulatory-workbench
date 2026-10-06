@@ -11,14 +11,14 @@ Reviewed implementation checkpoint: `87cd2bd` on the shared development base. Th
 - Part 2 ticket: https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/issues/3
 - Part 3 ticket: https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/issues/2
 
-Owner delegated slot choice to the integrator (2026-10-06): Part 1 **@Harsha-code-per**, Part 2 **@Sanjjith27**, Part 3 **@Cholan-kinnera** (invitation order). Assignment comments are posted on #1/#3/#2; GitHub assignees are set once each write invitation is accepted (pending invitees are not assignable). Verified remote team baseline is `496f903`; all three assigned team branches exist at that commit. Latest baseline CI passed: https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/actions/runs/37492025870 . Both main and the shared development base are protected: required `legal-core`, up-to-date branch, one independent/latest-push approval, stale review dismissal, resolved conversations and admin enforcement; force pushes/deletions disabled. Main remains `d95dfc3`. Baseline CI success does not complete D or accept future teammate features.
+Owner delegated slot choice to the integrator (2026-10-06): Part 1 **@Harsha-code-per**, Part 2 **integrator (owner account; reassigned from @Sanjjith27, unavailable)**, Part 3 **@Cholan-kinnera** (invitation order). Assignment comments are posted on #1/#3/#2; GitHub assignees are set once each write invitation is accepted (pending invitees are not assignable). Verified remote team baseline is `496f903`; all three assigned team branches exist at that commit. Latest baseline CI passed: https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/actions/runs/37492025870 . Both main and the shared development base are protected: required `legal-core`, up-to-date branch, one independent/latest-push approval, stale review dismissal, resolved conversations and admin enforcement; force pushes/deletions disabled. Main remains `d95dfc3`. Baseline CI success does not complete D or accept future teammate features.
 
 ## Shared baseline and branches
 
 - Repository: `https://github.com/loktrishal-05/legal-compliance-regulatory-workbench.git` only.
 - Shared development base: `feat/legal-regulatory-platform-migration`. Clone that branch rather than `main` for this build.
 - GitHub default branch is `main`. As of this handoff it has **no merge base** with the local migration history. Do not force-push, overwrite `main`, or merge unrelated histories automatically. A reviewed reconciliation plan and owner approval are required before promotion to `main`.
-- Team member 1 = `Harsha-code-per`, Team member 2 = `Sanjjith27`, Team member 3 = `Cholan-kinnera`. Access is the owner's write invitation; do not change access further without the owner.
+- Team member 1 = `Harsha-code-per`, Team member 2 = integrator (Sanjjith27 unavailable; PRs need approval from Member 1 or 3), Team member 3 = `Cholan-kinnera`. Access is the owner's write invitation; do not change access further without the owner.
 - Use separate feature branches. Open PRs against the shared development base. No direct team pushes to `main` or the shared base.
 
 ```powershell
@@ -30,7 +30,7 @@ The assigned remote branches below already exist. Clone the assigned branch dire
 | Slot | Branch | Primary work |
 |---|---|---|
 | Team member 1 (@Harsha-code-per) | `team/1-documents-contracts` | Remaining D foundation, E secure intake/source lineage, F contracts/grounded summaries/search |
-| Team member 2 (@Sanjjith27) | `team/2-regulatory-compliance` | G regulation/source/version changes, H requirements/controls/evidence/assessment |
+| Team member 2 (integrator) | `team/2-regulatory-compliance` | G regulation/source/version changes, H requirements/controls/evidence/assessment |
 | Team member 3 (@Cholan-kinnera) | `team/3-workflows-assurance` | I obligations/timers, J review/remediation/audit, cross-team L security and M acceptance/recovery |
 
 The integrating assistant reviews incoming PRs, runs relevant checks, fixes reviewed defects on explicit contributor/integration branches, updates consolidated evidence, and merges accepted work into the development base. Promotion to `main` waits for history reconciliation and the complete acceptance report. Review is active during an assistant session; GitHub Actions checks run automatically between sessions. No unattended AI approval or continuous assistant monitoring is claimed.
@@ -68,7 +68,7 @@ Each PR includes: phase/FR IDs, exact paths, requirement basis, tests and comman
 
 ## Part 2 — regulatory intelligence and compliance assurance
 
-**Owner:** Team member 2 (@Sanjjith27). **Phases:** G/H and regulatory connector scope of FR-061. **Requirements:** FR-026..040; regulatory taxonomy/playbook configuration interface in FR-064. No live regulatory authority connector is claimed by manual import.
+**Owner:** integrator (reassigned 2026-10-06; Sanjjith27 unavailable). Independent approval from Member 1 or 3. **Phases:** G/H and regulatory connector scope of FR-061. **Requirements:** FR-026..040; regulatory taxonomy/playbook configuration interface in FR-064. No live regulatory authority connector is claimed by manual import.
 
 ### Ordered tasks
 
