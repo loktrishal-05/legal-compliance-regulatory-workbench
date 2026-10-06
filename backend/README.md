@@ -1,8 +1,12 @@
-# Backend — Phase 4A
+# Backend — Legal & Regulatory Assurance Platform
 
 Current local setup: [isolated legal runtime guide](../docs/LEGAL_RUNTIME_SETUP.md).
 The phase descriptions, commands and validation claims below are historical reference only;
 do not execute their old resource targets for this application. Follow the living migration plan.
+
+Current process identity: `/health` returns `{"status":"ok","service":"legal-compliance-regulatory-workbench-backend"}`. The API title is `Legal & Regulatory Assurance Platform`. Frontend/backend identity must be released together; old service identity is intentionally rejected. Process health does not prove legal workflows or runtime readiness. Legal models, permissions and specialists follow the approved build contracts.
+
+## Historical Phase 4A and foundation record
 
 A local model gateway abstracts a swappable local inference runtime (Ollama in
 development) behind a policy layer with no generation endpoint yet. See the

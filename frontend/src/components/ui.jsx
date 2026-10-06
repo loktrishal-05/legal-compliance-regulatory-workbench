@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Link, isRouteErrorResponse, useRouteError } from 'react-router'
+import { BRAND_MARK, BRAND_WORDMARK, PRODUCT_NAME } from '../product.js'
 
 const ICONS = {
   grid: 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',
@@ -39,18 +40,12 @@ export function Icon({ name, size = 20, ...props }) {
     strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" style={{ flexShrink: 0 }} {...props}><path d={ICONS[name] || ICONS.grid} /></svg>
 }
 
-// Cropped from the approved brand boards; never the full boards with captions.
-const BRAND = {
-  horizontal: ['/assets/branding/sovereign-logo-horizontal.png', 508, 169],
-  stacked: ['/assets/branding/sovereign-logo-stacked.png', 383, 299],
-  mark: ['/assets/branding/sovereign-mark.png', 458, 458],
-  primary: ['/assets/branding/sovereign-logo-primary.png', 768, 605],
-}
-
+// Neutral development assets; original industrial artwork remains archived unchanged.
 export function Logo({ variant = 'horizontal', className = '', decorative = false, ...props }) {
-  const [src, width, height] = BRAND[variant] || BRAND.horizontal
-  return <img className={`brand-img ${className}`} src={src} width={width} height={height}
-    alt={decorative ? '' : 'Sovereign AI Workbench'} decoding="async" {...props} />
+  const mark = variant === 'mark'
+  return <picture>{!mark && <source media="(max-width: 640px)" srcSet={BRAND_MARK} />}
+    <img className={`brand-img ${className}`} src={mark ? BRAND_MARK : BRAND_WORDMARK} width={mark ? 512 : 480} height={mark ? 512 : 100}
+      alt={decorative ? '' : PRODUCT_NAME} decoding="async" {...props} /></picture>
 }
 
 export function AgentAvatar({ size = 40, className = '' }) {
@@ -105,12 +100,12 @@ export function PlannedCapability({ title, phase, available, planned, requires }
   </section>
 }
 
-const useStatusTitle = text => useEffect(() => { document.title = `${text} · Sovereign AI Workbench` }, [text])
+const useStatusTitle = text => useEffect(() => { document.title = `${text} · ${PRODUCT_NAME}` }, [text])
 
 export function NotFound() {
   useStatusTitle('Page not found')
   return <div className="status-page"><h1 tabIndex={-1} data-page-title>Page not found</h1>
-    <p>This address does not exist in the Sovereign AI Workbench (error 404).</p>
+    <p>This address does not exist in the {PRODUCT_NAME} (error 404).</p>
     <div className="toolbar"><Link className="button" to="/app/dashboard">Go to dashboard</Link><Link className="button ghost" to="/">Home</Link></div></div>
 }
 

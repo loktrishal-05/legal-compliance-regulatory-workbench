@@ -1,0 +1,45 @@
+# User-approved disposable legal core tests. No host ports or persistent volumes.
+name: legal-compliance-regulatory-workbench-legal-core-test
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: legal_core_test
+      POSTGRES_PASSWORD: synthetic-legal-core-test-only
+      POSTGRES_DB: legal_core_test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U legal_core_test -d legal_core_test']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  tests:
+    image: legal-compliance-workbench-legal-core-test:py311
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.legal-core-test
+    environment:
+      DATABASE_URL: postgresql+psycopg://legal_core_test:synthetic-legal-core-test-only@postgres:5432/legal_core_test
+      LEGAL_TEST_DATABASE_URL: postgresql+psycopg://legal_core_test:synthetic-legal-core-test-only@postgres:5432/legal_core_test
+      MODEL_BASE_URL: http://127.0.0.1:9
+      MODEL_NAME: qwen3.5:9b
+      QDRANT_URL: http://127.0.0.1:9
+      WORKBENCH_DATA_ROOT: /tmp/legal-core-data
+      MODEL_LOG_PROMPTS: 'false'
+      AGENT_TRACE_STORE_QUERY: 'false'
+      HF_HUB_OFFLINE: '1'
+      TRANSFORMERS_OFFLINE: '1'
+    volumes:
+      - ../backend/app:/validation/backend/app:ro
+      - ../backend/alembic:/validation/backend/alembic:ro
+      - ../backend/alembic.ini:/validation/backend/alembic.ini:ro
+      - ../backend/tests:/validation/backend/tests:ro
+      - ../backend/scripts:/validation/backend/scripts:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: [python, -B, -m, unittest, discover, -s, tests, -p, 'test_legal_scope*.py', -v]
+networks:
+  default:
+    internal: true

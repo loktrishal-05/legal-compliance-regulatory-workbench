@@ -1,6 +1,23 @@
-# Validation report — discovery and Phases A/B
+# Validation report — discovery, A/B, Phase C identity and backend build
 
-Date: 2026-10-06. Overall: **Phase A source custody/configuration verified; Phase B development contracts reviewed; legal implementation and full runtime validation NOT COMPLETE**.
+Date: 2026-10-06. Overall: **C backend identity verified; frontend acceptance deferred to user; D backend work in progress; legal workflows/full runtime validation NOT COMPLETE**.
+
+## Current full migration status for team publication
+
+| Phase / area | Acceptance state |
+|---|---|
+| A/B | Source custody/configuration and approved development architecture complete; private deployment acceptance pending |
+| C | Backend identity verified; saved frontend identity checks green; frontend/design acceptance owner-managed |
+| D | Initial scoped models/policy/metadata APIs and migrations verified; provisioning/legacy-path isolation/tenant dedupe pending |
+| E/F | Secure intake/OCR/provenance, contract intelligence and cited summaries planned |
+| G/H | Regulatory versions/changes/applicability and compliance/evidence evaluations planned |
+| I/J | Durable obligations/timers, legal review/remediation/audit planned; old primitives do not complete these |
+| K | Owner-managed frontend; real legal journeys/usability acceptance remains required |
+| L/M | Cross-system security/legal evaluation, full runtime/recovery/restore and final FR reconciliation pending |
+| Pilot gates | Enterprise identity/MFA/re-auth, validated legal packs/terms/retention/hold, private resource ownership and recovery/SLO acceptance pending |
+| Publication | Development checkpoint requested; main has unrelated history/no merge base, promotion/reconciliation separate |
+
+All 66 FRs remain tracked. Three workstreams assign all backend work; none is dropped or accepted merely by publication. This is not a completed application or compliance claim.
 
 ## Discovery checks (historical baseline; Phase A supersedes custody/config state)
 
@@ -107,3 +124,41 @@ User approved neutral development branding with existing styles and exact legacy
 - `python -B -m unittest discover -s backend/tests -p test_product_identity.py -v`: two intended identity assertion failures before implementation.
 - `node --test src/productIdentity.test.js src/services/api.test.js` from frontend: five intended identity/copy/health failures and nine existing passes before implementation.
 - Native venv inspection: prefix is inside current application; FastAPI import fails because `ujson` DLL is blocked by Application Control. No app services imported, no model/DB execution and no security policy changed. AST-isolated health/title contract checks avoid that dependency; no full HTTP acceptance claimed.
+
+## Phase C GREEN and pause evidence — 2026-10-06
+
+| Check | Actual command / result |
+|---|---|
+| Focused identity/API | `node --test src/productIdentity.test.js src/services/api.test.js` from frontend: **14/14 pass** after implementation |
+| Complete frontend | `npm.cmd --prefix frontend test`: **44/44 pass**; existing Vite test WebSocket 24678 collision warnings |
+| Frontend lint | `npm.cmd --prefix frontend run lint`: 0 errors, 2 existing fast-refresh warnings in `session.jsx` |
+| Frontend build | `npm.cmd --prefix frontend run build`: pass, Vite 7.3.6, 159 modules; ignored build output, no deployment |
+| Backend pure identity | `python -B -m unittest discover -s backend/tests -p test_product_identity.py -v`: **2/2 pass**, no private Settings or native/server import |
+| Custody | `python -B -m unittest discover -s backend/tests -p test_legal_repository_custody.py -v`, `PYTHONPATH=backend`: **6/6 pass** |
+| Master PDF / legacy consent | SHA-256 unchanged: master `69ef7ab3f5299a765d641e1f55853dbb6d21cb0ff0610c6e6ff7846ec3b5f102`; terms DOCX `feef43e2378f40e48cd9cd5449d121c56fb2f9bd4dc47e860c87a8db2735bc6f`; exact-document frontend test passes |
+| Browser / final mechanical scan | **Not executed**: user paused before browser verification; do not claim responsive/visual/interaction acceptance |
+| Preview cleanup | Temporary frontend process 35516 and its children stopped successfully; no unrelated process or DB/model service stopped |
+
+Phase C pause checkpoint is a tested partial implementation, not completion. Native full backend/HTTP/migration/model acceptance remains unverified due blocked `ujson`; no OS policy changes or dependencies installed. Existing frozen benchmark mismatch remains unchanged. Resume steps/approvals/current hazards are durable in `SESSION_RESUME.md`.
+
+## Resume verification and user scope change — 2026-10-06
+
+Exact root/origin, migration branch at `770c834`, local common metadata and sample-only hooks verified. Historical worktrees remain untouched. Reviewed backend identity patch and frontend coupled health contract; no storage/schema rename introduced.
+
+Isolated frontend preview PID 14916 used proxy `http://127.0.0.1:9` and intercepted `/api/**` responses. Landing desktop 1440/mobile 390: assets loaded, no horizontal overflow, reduced-motion fallback and keyboard skip-link observed. Login desktop/mobile: assets loaded, no video, no overflow; unavailable/process-online labels matched mocks. Terms desktop/mobile: legacy v1.0 notice and original text present, acceptance disabled before acknowledgement. Help shell desktop/mobile: notices/legacy resource labels and assets present; stable layout has no overflow (immediate resize measurement caught a transient transition). DOM spot checks: no missing image alt attributes, unlabelled login inputs or unnamed visible help-shell buttons. No bundled mechanical detector was available. These are bounded observations, not a WCAG conformance audit or real backend/session acceptance.
+
+One unintended authenticated redirect reached the legacy dashboard with a generic `{}` mock and caused a rendering error; probe timeouts and this mock-shape failure are not passes. Dashboard is outside this bounded identity check and no frontend repair was made. User subsequently deferred frontend/landing/design acceptance and K to their own work; backend D may proceed. Existing frontend files remain preserved outside the backend checkpoint. No broad unchanged suites repeated; earlier results remain dated evidence.
+
+## Initial D verification — 2026-10-06
+
+- RED: native isolated target fails because the new scope module is intentionally absent. Initial in-memory policy/migration checks subsequently passed 12/12.
+- Approved dedicated legal-core Compose project: internal network, no host ports/persistent volumes, selected backend read-only mounts, no private `.env`/data/models. Bounded Linux Python 3.11 core dependency test image; no OCR/AI weights, not a release image.
+- First migration attempt failed before connection because Settings requires MODEL_NAME; explicit fixture tag supplied, model/vector URLs remain unused loopback port 9. No inference/private DB access.
+- `docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests`: **27/27 passed** (10 SQLite policy, 10 PostgreSQL policy, 4 bounded API, 3 migration/target checks).
+- `... run --rm tests python -B -m scripts.validate_legal_migrations`: fresh -> 0020 and 0018 -> 0020 PASS; Alembic parity/repeat upgrade PASS; legacy source/version hashes and audit hash/chain preserved; existing trigger definitions unchanged; zero automatic ownership mappings.
+- Actual scoped router + real session/terms dependencies on PostgreSQL; actual main middleware AST-loaded into a bounded app. No full industrial/AI root-router startup acceptance claim. Unknown/denied/cross-workspace IDs match; header spoof/revoked sessions/old terms deny; no source paths/body/hash response; denial audit contains requested IDs only.
+- Warnings: Starlette httpx TestClient deprecation; inherited SQLite expression-index reflection limitation. Duplicate-ownership ORM warning eliminated with Core insert; no dependency churn for the TestClient warning.
+- Final review adds cache/referrer headers to early origin denials; confirming suite required before checkpoint. Remaining D provision/legacy/retrieval/audit/dedupe gates and complete record-level governance preservation proof remain explicit.
+- Full backend/legal/model/recovery suite remains incomplete; native ujson limitation and unrelated frozen-readiness mismatch unchanged. New PR CI is baseline regression, not an autonomous reviewer or future-feature acceptance.
+
+Final checkpoint confirmation: after the header and negative-insert edits, 27/27 scoped checks and both fresh/0018-to-head migration paths passed again. Focused frontend paired identity/API 14/14, backend pure identity 2/2 and custody 6/6 passed. No unchanged full frontend suite/lint/build repeated; earlier 44/44/lint/build results remain historical evidence. User saw the current complete status report and explicitly approved development-base publication, the existing tested identity snapshot and PR protection on main/development. Main remains unchanged pending unrelated-history reconciliation; no deployment/live inference authorization.

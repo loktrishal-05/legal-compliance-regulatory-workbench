@@ -1,6 +1,6 @@
 # Migration progress
 
-Date: 2026-10-06. **Phase A committed; Phase B development contracts complete; Phase C next.**
+Date: 2026-10-06. **Backend build resumed; user owns frontend/landing. D in progress. Handoff: `SESSION_RESUME.md`.**
 
 ## Current state
 
@@ -8,8 +8,9 @@ Date: 2026-10-06. **Phase A committed; Phase B development contracts complete; P
 |---|---|
 | A custody/report/discovery | Complete: preserved branch activation, isolated defaults/CI/runbooks, offline regression/frontend checks |
 | B architecture/reuse | Complete: approved development baseline; domain/permission/state/provenance contracts and all 66 FR acceptance mappings |
-| C identity | In progress; neutral identity and legacy-terms treatment explicitly approved |
-| D-M implementation/validation | Not started |
+| C identity | Backend verified; frontend/design acceptance deferred to user |
+| D implementation | In progress: backend legal core and authorization |
+| E-M implementation/validation | Not started; frontend K deferred to user |
 
 Phase A changed configuration/backup guards and operational documentation; Phase B defined development contracts. Legal feature code/schema/migrations remain planned. Local checkpoints are now authorized and recorded below. No sibling/external repository, deployment, DB or model operation occurred; no push.
 
@@ -130,3 +131,41 @@ Current scope: health title/validator identity, package/HTML/manifest/assets, sh
 User separately approved frontend preservation. Commit `1968d2e` records 29 existing frontend/resource/help paths; 39/39 frontend tests passed immediately beforehand; unrelated binary diffs matched across commit. This snapshot is not legal-domain acceptance. Benchmark/private/runtime/nested-tool/cache work stayed excluded.
 
 Phase C RED: new backend identity target has two expected assertion failures; focused frontend identity/API target has five expected failures (metadata/logo/landing/auth/help/legal service mismatch) and nine existing passes. No missing dependency caused these failures. Current local venv's FastAPI import is blocked by OS Application Control on `ujson`; do not disable protection. Backend identity checks execute the actual pure health function via AST and inspect title metadata without private settings/services/native DLLs. Full backend HTTP/runtime acceptance remains a later supported-environment gate.
+
+## Phase C implementation / user-requested pause — 2026-10-06
+
+RED checkpoint `770c834` is committed. Implementation now uses the PDF product name and legal backend service identity, paired strict frontend health validation, shared identity constants, neutral SVG assets, active metadata/package/manifest/title updates and honest landing/auth/shell/help copy. Existing industrial screens are labelled legacy; terms DOCX/version/text/acknowledgements and receipts remain unchanged. README/PRODUCT/DESIGN/surface brief updated; original assets and motion/media infrastructure preserved.
+
+Files: backend main/init/health and foundation expectation; frontend identity module, three neutral branding SVGs, index/package/locks/manifest, UI logo/status titles, shell/routes/navigation/page descriptions, auth layout, landing model/page/CSS, resources/help/terms notices, root/backend README, PRODUCT/DESIGN and approved surface brief. No domain model/migration/authorization rewrite or existing storage rename.
+
+Latest GREEN evidence: backend identity 2/2; custody 6/6; focused frontend identity/API 14/14; full frontend 44/44; lint 0 errors/2 existing warnings; build passed (159 modules). Master PDF and terms hashes unchanged. Native backend import remains blocked by Application Control on `ujson`, explicitly not worked around.
+
+The user stopped the session immediately after frontend preview startup, before any browser inspection. Only temporary preview PID 35516 and its children were stopped successfully. No DB/model service started; no unrelated process stopped. **Phase C is not complete.** Remaining browser/detector/final diff checks and D-M build work are recorded in `SESSION_RESUME.md`. Save current green implementation as an honest partial pause checkpoint; do not amend history, push, or advance the phase on pause.
+
+## Phase C resumed — 2026-10-06
+
+User requested continuation while pause-checkpoint preparation was ongoing. Read the saved handoff and verified root/origin/branch/common Git metadata/status/guide. Latest committed HEAD is `770c834`; no pause commit exists, and current green implementation remains uncommitted. Original temporary preview is stopped. Resume only browser/final checks with mocked API; do not rerun unchanged broad suites or start live backend/DB/model services. A coherent completion commit will include the handoff and accurate pause/resume history.
+
+## Backend-only scope and Phase D start — 2026-10-06
+
+User explicitly requested no further frontend/landing work and will handle it later. Existing frontend changes remain preserved and outside the backend checkpoint. C backend identity reviewed; frontend C/K acceptance is deferred, not declared complete. D entry now proceeds under that explicit scope change.
+
+Bounded mocked browser observations before steering: landing/login/terms/help shell loaded at desktop/mobile sizes, neutral images loaded, reduced-motion landing fallback and skip-link worked; stable layouts had no horizontal overflow. Mock-only probes are not real authentication/backend acceptance. A generic `{}` dashboard mock produced a legacy dashboard rendering error during an unintended authenticated redirect; no dashboard acceptance claimed and no frontend fix attempted. No bundled mechanical detector found; bounded DOM checks found no missing image alts/unlabelled login inputs/unnamed help-shell buttons. Existing frontend automated evidence is retained without rerunning unchanged suites.
+
+D current scope: reuse existing UUID/auth/audit conventions for organization/workspace/membership/matter/document policy, additive migration after actual head, backend scoped authorization and runnable isolation checks. First inspect model registration, auth callers, migrations and disposable validation; no private DB/model access.
+
+User explicitly approved isolated tests: a dedicated disposable PostgreSQL container and bounded backend test runtime, synthetic data only. New legal-core test Compose project uses no host ports/persistent volumes, an internal network, scoped read-only source mounts (no private `.env`/data/models), and model/vector targets at unused loopback port 9. This approval does not authorize touching private resources, model execution, deployment or push.
+
+## Initial Phase D milestone and three-team handoff — 2026-10-06
+
+Delivered seven scope tables, centralized DB-derived role/clearance/matter/document-grant policy, two session/terms-protected `/v1/workspaces` metadata APIs, denied-access audit vocabulary and migrations 0019/0020. Existing UUID/auth/terms/audit envelopes reused. Legacy unmapped records have no legal API access; no intake/provisioning/release endpoint is enabled. Reviewer permission checks are prerequisites, not final release authority. Review corrected no-store/referrer headers on early origin denials.
+
+Files: new `app/db/models/legal_scope.py`, `app/services/legal_policy.py`, `app/schemas/legal_scope.py`, `app/api/routes/legal_scope.py`; model/router registration, audit vocabulary, main middleware/foundation expectations; migrations 0019/0020; `scripts/validate_legal_migrations.py`; four `test_legal_scope*` modules; dedicated legal-core Dockerfile/Compose; team allocation and PR baseline workflow. Full D remains open for audited provisioning, explicit legacy ownership/quarantine, tenant dedupe and legacy content/retrieval/review/audit isolation.
+
+Actual verification: 27/27 scoped tests (SQLite/PostgreSQL policy, bounded real-session API, migration/target guard); fresh and 0018-to-head upgrades, Alembic parity/idempotency, synthetic legacy source/version hashes, audit hash/chain and existing trigger definitions preserved. Initial Settings failure for absent MODEL_NAME fixed with explicit fixture tag; model/vector endpoints stay loopback port 9 and no inference occurs. Confirming checks are required after the final header/negative-insert review edits.
+
+User requests three human teammate workstreams without skipped requirements. `TEAM_WORK_ALLOCATION.md`: Part 1 remaining D/E/F/documents/contracts/search; Part 2 G/H/regulatory/compliance; Part 3 I/J/L/M/workflows/security/recovery. Frontend/K owner-managed; final frontend acceptance remains required. GitHub handles not supplied.
+
+Authorized GitHub repository: PUBLIC, viewer ADMIN, default main at d95dfc3, unprotected, zero open PRs at inspection. Authorized fetch found no merge base with migration history; no unrelated-history merge/reset/force push/main overwrite attempted. Publish the reviewed development base after current report/confirmation; main promotion requires reconciliation. New read-only GitHub-hosted baseline PR checks are automated; assistant review remains session-bound.
+
+Confirmed publication approval after report: user chose publishing the partial team base, including already-tested identity files and enabling main/development PR protection. No new frontend work. Final checks passed: 27 scoped tests, fresh/0018 migrations, focused frontend identity/API 14, backend identity 2, custody 6. Next: stage intended checkpoint paths only, preserve unrelated work, commit/push normal development branch, verify CI and create three work issues/branches. No main promotion yet.

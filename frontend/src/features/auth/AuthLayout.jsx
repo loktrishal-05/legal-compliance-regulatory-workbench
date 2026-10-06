@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useMatches } from 'react-router'
-import { authMediaSources, playbackMode, readMediaEnvironment } from './authModel.js'
+import { playbackMode, readMediaEnvironment } from './authModel.js'
 import { Icon, Logo } from '../../components/ui.jsx'
 import { useBackendHealth } from '../../hooks/useBackendHealth.js'
 import '../../styles/auth.css'
+import { DEVELOPMENT_AUTH_MEDIA, PRODUCT_NAME } from '../../product.js'
 
 // Moving between sign-in, sign-up and recovery crossfades the scene instead of cutting it.
 function useCrossfade(media) {
@@ -43,14 +44,14 @@ export function AuthBackdrop({ media, mode, onFailed, videoRef }) {
 
 // Only verified product facts; the live line reflects the real backend health probe.
 const STORIES = {
-  login: 'Governed answers from your own plant records.',
-  signup: 'Every account here is local to your site.',
-  recovery: 'Account recovery never leaves your site.',
+  login: 'Evidence first. Decisions stay with people.',
+  signup: 'Access starts with an authorized account.',
+  recovery: 'Recover access through configured account services.',
 }
 const PROOF = [
-  ['shield', '0 hosted AI calls', 'in the confidential path'],
-  ['agent', 'Local models', 'qwen3.5 9B and 4B on your hardware'],
-  ['check', 'Human approval', 'on every operational draft'],
+  ['shield', 'Private AI policy', 'local/private inference only; provisioning is required'],
+  ['agent', 'Development migration', 'legal workflows are not yet available'],
+  ['check', 'Human review', 'existing advisory review infrastructure is retained'],
 ]
 
 export default function AuthLayout() {
@@ -61,10 +62,10 @@ export default function AuthLayout() {
   const [userPaused, setUserPaused] = useState(false)
   const video = useRef(null)
   const { status } = useBackendHealth()
-  const media = authMediaSources(handle.authMedia, env?.narrow)
-  const mode = failed ? 'poster' : playbackMode(env)
+  const media = DEVELOPMENT_AUTH_MEDIA
+  const mode = failed || !media.video ? 'poster' : playbackMode(env)
 
-  useEffect(() => { document.title = `${handle.title || 'Sign in'} · Sovereign AI Workbench` }, [handle.title])
+  useEffect(() => { document.title = `${handle.title || 'Sign in'} · ${PRODUCT_NAME}` }, [handle.title])
   useEffect(() => {
     const update = () => setEnv(readMediaEnvironment())
     update()
@@ -93,22 +94,22 @@ export default function AuthLayout() {
   return <div className="auth-shell" data-theme="dark" data-placement={media.placement} data-still={userPaused || mode !== 'video' || undefined}>
     <AuthBackdrop media={media} mode={mode} videoRef={video} onFailed={setFailed} />
     <header className="auth-top">
-      <Link to="/" className="auth-brand" aria-label="Sovereign AI Workbench home"><Logo variant="horizontal" decorative /></Link>
+      <Link to="/" className="auth-brand" aria-label={`${PRODUCT_NAME} home`}><Logo variant="horizontal" decorative /></Link>
       <div className="auth-top-actions">
         <span className="auth-live" data-state={online ? 'ok' : status === 'Checking' ? 'pending' : 'bad'} role="status">
-          <span className="auth-live-dot" aria-hidden="true" /><span className="auth-live-long">{online ? 'Workbench online · local' : status === 'Checking' ? 'Checking backend…' : 'Backend unavailable'}</span><span className="auth-live-short" aria-hidden="true">{online ? 'Online' : status === 'Checking' ? 'Checking' : 'Offline'}</span></span>
+          <span className="auth-live-dot" aria-hidden="true" /><span className="auth-live-long">{online ? 'Backend process online' : status === 'Checking' ? 'Checking backend…' : 'Backend unavailable'}</span><span className="auth-live-short" aria-hidden="true">{online ? 'Online' : status === 'Checking' ? 'Checking' : 'Offline'}</span></span>
         {mode === 'video' && <button type="button" className="icon-button auth-pause" onClick={togglePause} aria-pressed={userPaused}
           aria-label={userPaused ? 'Play background video' : 'Pause background video'}><Icon name={userPaused ? 'play' : 'pause'} size={18} /></button>}
       </div>
     </header>
     <main id="main" className="auth-stage">
-      <section className="auth-story" aria-label="About Sovereign AI Workbench">
+      <section className="auth-story" aria-label={`About ${PRODUCT_NAME}`}>
         <p className="auth-story-title" key={handle.authMedia}>{STORIES[handle.authMedia] || STORIES.login}</p>
-        <p className="auth-story-lede">An on-premise, governed intelligence workbench. Every answer cites its evidence; nothing leaves your infrastructure.</p>
+        <p className="auth-story-lede">{PRODUCT_NAME}. Contract intelligence, compliance monitoring and cited summaries are the target; this build currently provides the reusable platform foundation.</p>
         <ul className="auth-proof">{PROOF.map(([icon, figure, text]) => <li key={figure}><Icon name={icon} size={18} /><span><strong>{figure}</strong> {text}</span></li>)}</ul>
       </section>
       <div className="auth-card"><Outlet /></div>
     </main>
-    <footer className="auth-foot">On-premise · local accounts · advisory recommendations only</footer>
+    <footer className="auth-foot">Development foundation · server-controlled accounts · no legal advice or compliance certification</footer>
   </div>
 }

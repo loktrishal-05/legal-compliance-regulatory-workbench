@@ -29,3 +29,6 @@ api_router.include_router(product.router)
 
 from app.api.routes import executions
 api_router.include_router(executions.router)
+
+from app.api.routes import legal_scope
+api_router.include_router(legal_scope.router)

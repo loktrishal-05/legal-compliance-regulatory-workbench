@@ -1,6 +1,6 @@
 // Landing content model and scroll/canvas maths. Pure and testable.
 
-// Verified facts only (backend freeze 2f52117, release validation 2026-09). No invented industry statistics.
+// Historical industrial acceptance facts only. Never market these as current legal-platform results.
 export const PRODUCT_FACTS = {
   hostedAiCalls: 0,
   localModels: 2,
@@ -16,26 +16,26 @@ export const PRODUCT_FACTS = {
 }
 
 export const STORY = [
-  { id: 'hero', tag: 'SW-00', title: 'Sovereign AI Workbench' },
-  { id: 'scattered', tag: 'SRC-01', title: 'Industrial knowledge is scattered' },
-  { id: 'unify', tag: 'CORE-02', title: 'One sovereign intelligence layer' },
-  { id: 'workflow', tag: 'FLOW-03', title: 'Retrieve · Verify · Reason · Review · Approve' },
-  { id: 'reveal', tag: 'UI-04', title: 'One governed workbench' },
-  { id: 'pid', tag: 'PID-05', title: 'P&ID evidence, never proof of plant state' },
-  { id: 'maintenance', tag: 'MNT-06', title: 'Maintenance and sensor intelligence' },
+  { id: 'hero', tag: 'LRA-00', title: 'Legal & Regulatory Assurance Platform' },
+  { id: 'scattered', tag: 'SRC-01', title: 'Legal evidence across documents' },
+  { id: 'unify', tag: 'CORE-02', title: 'A connected compliance model' },
+  { id: 'workflow', tag: 'FLOW-03', title: 'The target legal workflow' },
+  { id: 'reveal', tag: 'UI-04', title: 'A reusable governed foundation' },
+  { id: 'pid', tag: 'DOC-05', title: 'Contract intelligence — planned' },
+  { id: 'maintenance', tag: 'DUE-06', title: 'Obligations and evidence freshness — planned' },
   { id: 'governance', tag: 'HITL-07', title: 'Humans approve. The chain remembers.' },
-  { id: 'voice', tag: 'VOX-08', title: 'Speak locally. Review every identifier.' },
-  { id: 'sovereignty', tag: 'SOV-09', title: 'Your hardware. Your boundary.' },
-  { id: 'ecosystem', tag: 'GOV-10', title: 'Government ecosystem, accurately represented' },
-  { id: 'enter', tag: 'GO-11', title: 'Enter Sovereign Workbench' },
+  { id: 'voice', tag: 'REV-08', title: 'Source text before interpretation' },
+  { id: 'sovereignty', tag: 'RUN-09', title: 'Private runtime policy' },
+  { id: 'ecosystem', tag: 'GOV-10', title: 'Integration boundaries' },
+  { id: 'enter', tag: 'GO-11', title: 'Open the development workbench' },
 ]
 
 export const SOURCES = [
-  { id: 'sop', label: 'SOPs', detail: 'Procedures and manuals', color: '#35d7e8' },
-  { id: 'pid', label: 'P&IDs', detail: 'Drawings and tags', color: '#3d8bff' },
-  { id: 'sensors', label: 'Sensors', detail: 'Readings and trends', color: '#2fe0a4' },
-  { id: 'maintenance', label: 'Maintenance', detail: 'Work orders and history', color: '#f2a93b' },
-  { id: 'operators', label: 'Operator knowledge', detail: 'Shift notes and reports', color: '#8b6cff' },
+  { id: 'contracts', label: 'Contracts', detail: 'Planned: parties, clauses and obligations', color: '#35d7e8' },
+  { id: 'regulations', label: 'Regulations', detail: 'Planned: approved sources and effective versions', color: '#3d8bff' },
+  { id: 'policies', label: 'Policies', detail: 'Planned: requirements and control mappings', color: '#2fe0a4' },
+  { id: 'evidence', label: 'Evidence', detail: 'Planned: provenance and freshness', color: '#f2a93b' },
+  { id: 'reviews', label: 'Human decisions', detail: 'Existing review foundation; legal authority pending', color: '#8b6cff' },
 ]
 
 export const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value))

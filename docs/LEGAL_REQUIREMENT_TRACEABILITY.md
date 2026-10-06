@@ -1,8 +1,10 @@
 # Legal requirement traceability — Phase B baseline
 
-Date: 2026-10-06. Source: unchanged master PDF detailed catalogue pp.17-19. **All legal requirements below are planned, not delivered.** Phase A infrastructure reuse supports future delivery; industrial benchmarks do not establish legal correctness.
+Date: 2026-10-06. Source: unchanged master PDF detailed catalogue pp.17-19. **No legal FR is fully accepted yet.** Initial D implementation provides partial evidence for FR-002..004/054; remaining paths and phase gates stay planned. Industrial benchmarks do not establish legal correctness. Backend ownership is assigned in `TEAM_WORK_ALLOCATION.md`; frontend acceptance remains with the owner.
 
 Read `LEGAL_DOMAIN_BUILD_CONTRACTS.md` for approved development scope, role/state/source invariants and release boundaries. Priorities below reproduce the catalogue. Build labels: **Core** = initial development slice; **Extended** = later bounded development increment; **Pilot gate** = required before operational pilot; **Later** = post-core Should extension. These labels sequence work; they do not downgrade catalogue Must requirements or authorize calling an incomplete feature complete.
+
+Initial D evidence: `app/db/models/legal_scope.py`, `app/services/legal_policy.py`, `app/api/routes/legal_scope.py`, migrations 0019/0020 and four `test_legal_scope*` targets: 27/27 scoped tests; fresh/0018-to-head parity/idempotency/source/audit/trigger preservation pass. Demonstration is bounded synthetic metadata/session/denial tests, not full document/search/review/recovery journeys. Provisioning, tenant dedupe, legacy-path isolation and legal hold/retention policy acceptance remain unfinished.
 
 | Requirement | Priority | Build label / phases | Deliverable and acceptance evidence (planned) |
 |---|---|---|---|

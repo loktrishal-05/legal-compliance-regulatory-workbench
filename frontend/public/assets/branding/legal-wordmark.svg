@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="100" viewBox="0 0 480 100">
+  <title>Legal &amp; Regulatory Assurance Platform</title>
+  <rect x="2" y="6" width="88" height="88" rx="16" fill="#020e21" stroke="#35d7e8" stroke-width="2"/>
+  <text x="46" y="61" text-anchor="middle" fill="#f5f9fe" font-family="Arial, sans-serif" font-size="29" font-weight="700" letter-spacing="1">LRA</text>
+  <g fill="#f5f9fe" font-family="Arial, sans-serif" font-size="30" font-weight="700">
+    <text x="110" y="42">Legal &amp; Regulatory</text>
+    <text x="110" y="79">Assurance Platform</text>
+  </g>
+</svg>

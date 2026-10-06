@@ -1,16 +1,25 @@
-# Sovereign On-Premise Agentic AI Workbench
+# Legal & Regulatory Assurance Platform
 
 Application repository: [legal-compliance-regulatory-workbench](https://github.com/loktrishal-05/legal-compliance-regulatory-workbench).
 Use this repository for all application changes and pushes. See [repository instructions](AGENTS.md).
 
 Current workspace setup: [isolated legal runtime guide](docs/LEGAL_RUNTIME_SETUP.md).
 Build status and required phase checks: [living migration plan](docs/LEGAL_DOMAIN_MIGRATION_PLAN.md).
-The industrial phase descriptions and commands below are historical reference, not current setup instructions or legal-platform acceptance.
+**Development migration:** contract intelligence, legal compliance monitoring and legal summaries are not yet available. Phases A/B established custody and build contracts; Phase C migrates identity. Existing industrial views are retained as clearly labelled platform regressions until their legal replacements are validated.
 
-SIH 2026 project. Phases 0–5B provide FastAPI, a React/Vite dashboard,
-PostgreSQL/SQLAlchemy, local PDF/P&ID evidence retrieval with Docling, BGE, and
-Qdrant, structured maintenance/sensor data ingestion and query, and a local
-model gateway abstraction over Ollama.
+## Specification and build guide
+
+The unchanged [master report](docs/Legal_Regulatory_Assurance_Platform_Master_Report.pdf) is the product authority. Read the [build contracts](docs/LEGAL_DOMAIN_BUILD_CONTRACTS.md), [requirement registry](docs/LEGAL_REQUIREMENT_TRACEABILITY.md), [progress](docs/MIGRATION_PROGRESS.md) and [validation evidence](docs/VALIDATION_REPORT.md) before each phase. Planning does not establish legal accuracy or implemented requirements.
+
+## Reusable foundation
+
+React/Vite → FastAPI → scoped workflows and local/private model gateway → evidence validation → immutable advisory revision → independent human review.
+
+Source-level infrastructure includes PostgreSQL/SQLAlchemy/Alembic, Qdrant hybrid retrieval and reranking, PDF/OCR provenance, opaque cookie sessions, durable LangGraph recovery, evidence integrity and deterministic tamper-evident audit. Tenant/matter ACLs and legal bounded modules are still planned. Ollama is implemented; vLLM remains a placeholder.
+
+## Historical platform records
+
+Earlier industrial implementation and validation documents are preserved as provenance, not current setup instructions or legal acceptance:
 See [Phase 3A guide](docs/phase3a.md) for ingestion and retrieval setup.
 See [Phase 3B1 guide](docs/phase3b1.md) for local P&ID/image OCR preparation.
 See [Phase 3B2 guide](docs/phase3b2.md) for hybrid retrieval, the explicit Qdrant
@@ -27,45 +36,16 @@ See [Phase 5B approval workflow](docs/phase5b.md) and its
 [validation record](docs/phase5b-validation.md) for local authentication and
 the authenticated approve/reject/revoke/release workflow.
 
-## Fixed architecture
+## Runtime and authority boundary
 
-React frontend → FastAPI backend → LangGraph Orchestrator → Domain Agents →
-Guardrail Agent → Human Approval
+Use [current runtime instructions](docs/LEGAL_RUNTIME_SETUP.md), not old ports/worktree commands. Preserve and privately review any existing `.env`; never overwrite it or point to another application's services. No database, volume or existing index is renamed by the identity phase.
 
-Planned supporting components: PostgreSQL for structured data, Qdrant for vector
-storage, Ollama for local development, vLLM as a future deployment option, and
-Docker Compose. Only local/open-weight models will be used; hosted model APIs
-are excluded.
+Deploy the backend and frontend identity change together. `/health` retains its process-liveness shape but now identifies this legal backend; the frontend deliberately rejects the old industrial identity rather than connecting to an unrelated application. Health is not database/model readiness or legal acceptance.
 
-## Current scope — Phase 5B
-
-The frontend dashboard preserves its backend health connection. PostgreSQL and
-Qdrant run through `infra/docker-compose.yml`. PDFs and P&IDs are extracted,
-chunked/OCR'd, embedded locally, and retrieved with source citations; maintenance
-and sensor CSVs are ingested and queryable with deterministic feature extraction
-and factual anomaly observations. Final runtime uses local embeddings and local
-model inference (Ollama, development). No hosted inference API is required or
-permitted. Phase 4R includes the local model gateway and LangGraph specialist
-routes for advisory knowledge, safety, maintenance, and optimization outputs.
-Phase 5A added immutable governed revisions and server-owned pending review
-after specialist validation. Phase 5B adds local Argon2id-backed
-username/password authentication and a real authenticated reviewer who can
-approve/reject/revoke the exact immutable revision they inspected, with a
-fail-closed advisory release gate; approval never grants plant-control
-capability. Phase 4 is accepted with conditions; Phase 5A and 5B are complete
-with live PostgreSQL validation. Phase 5C (tamper-evident audit chain) has not
-started.
-Audit hash chaining, cryptographic evidence integrity, pre-routing guardrails,
-and plant-control capabilities remain absent. OCR does not establish process
-topology or pipe connectivity, and sensor anomaly observations are factual,
-never diagnoses.
-
-See [backend setup instructions](backend/README.md) for Windows commands.
-Copy `.env.example` to a local root `.env` if configuration is needed; never
-commit real secrets or local model weights.
-
-Health endpoint: `GET http://127.0.0.1:8000/health`
+Health endpoint after approved startup: `GET http://127.0.0.1:18000/health`
 
 ```json
-{"status":"ok","service":"sovereign-agentic-workbench-backend"}
+{"status":"ok","service":"legal-compliance-regulatory-workbench-backend"}
 ```
+
+AI remains advisory. No contract signing/filing, legal advice, compliance certification or live regulatory connector is claimed. Legacy v1.0 terms and receipts stay unchanged and labelled during development; a new legal-platform terms version requires approval. Qualified owners must approve deployment-specific legal packs, identity, retention/hold and recovery policies before operational pilot readiness. Local checkpoint commits are authorized; pushes remain separately gated.

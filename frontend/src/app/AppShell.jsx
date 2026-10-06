@@ -9,6 +9,7 @@ import { LanguageSelector } from '../ProductPages.jsx'
 import { useBackendHealth } from '../hooks/useBackendHealth.js'
 import { useResource } from '../hooks/useApi.js'
 import { useLanguage } from '../language.js'
+import { DEVELOPMENT_NOTICE, PRODUCT_NAME } from '../product.js'
 
 const THEME_KEY = 'workbench-theme'
 function useTheme() {
@@ -40,7 +41,7 @@ export default function AppShell() {
   useEffect(() => {
     // Title follows what actually rendered, so a guarded route reads "Access restricted", not its own name.
     const heading = main.current?.querySelector('[data-page-title]')
-    document.title = `${heading?.textContent || title} · Sovereign AI Workbench`
+    document.title = `${heading?.textContent || title} · ${PRODUCT_NAME}`
     ;(heading || main.current)?.focus({ preventScroll: true })
     if (menu.current) menu.current.open = false
   }, [location.pathname, title])
@@ -92,7 +93,7 @@ export default function AppShell() {
       <button type="button" ref={toggle} className="icon-button nav-toggle" aria-expanded={navOpen} aria-controls="shell-nav"
         aria-label={navOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setNavOpen(value => !value)}>
         <Icon name={navOpen ? 'close' : 'menu'} /></button>
-      <Link to="/app/dashboard" className="shell-brand" aria-label="Sovereign AI Workbench dashboard"><Logo variant="horizontal" decorative /></Link>
+      <Link to="/app/dashboard" className="shell-brand" aria-label={`${PRODUCT_NAME} dashboard`}><Logo variant="horizontal" decorative /></Link>
       <button type="button" className="search-trigger" onClick={() => setPaletteOpen(true)} aria-keyshortcuts={isMac ? 'Meta+K' : 'Control+K'}>
         <Icon name="search" size={17} /><span>Jump to…</span><kbd>{isMac ? '⌘' : 'Ctrl'} K</kbd></button>
       <div className="topbar-status">
@@ -122,10 +123,10 @@ export default function AppShell() {
           <NavLink to={`/app/${item.path}`} end={item.path === 'workspace'} className="nav-link" viewTransition onClick={() => setNavOpen(false)}><Icon name={item.icon} />{t(item.label)}</NavLink>
         </li>)}</ul>
       </div>)}
-      <div className="nav-note"><Icon name="shield" /><p><strong>On-premise by design.</strong> Local inference; recommendations are advisory and never operate equipment.</p></div>
+      <div className="nav-note"><Icon name="shield" /><p><strong>Development foundation.</strong> Local/private AI; outputs are advisory and require independent review.</p></div>
     </nav>
     <button type="button" className="nav-scrim" aria-hidden="true" tabIndex={-1} onClick={() => setNavOpen(false)} />
-    <main id="main" ref={main} tabIndex={-1} className="shell-main"><Outlet /></main>
+    <main id="main" ref={main} tabIndex={-1} className="shell-main"><p className="review-notice">{DEVELOPMENT_NOTICE}</p><Outlet /></main>
     <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={commands} />
   </div>
 }

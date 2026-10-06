@@ -31,3 +31,7 @@ from app.db.models.knowledge_pack import KnowledgePack
 from app.db.models.operator_note import OperatorNote
 from app.db.models.automation_receipt import AutomationReceipt
 from app.db.models.durable_execution import DurableExecution, GraphCheckpoint, GraphWrite, ExecutionOperation
+
+from app.db.models.legal_scope import (
+    Organization, Workspace, WorkspaceMembership, Matter, MatterAccess, LegalDocumentScope, DocumentAccess,
+)

@@ -1,6 +1,6 @@
 # Controlled legal-domain migration plan
 
-Status: phased building and regular local checkpoint commits authorized by the user on 2026-10-06; Phases A/B development foundations complete. Phase C is next; operational-pilot policies and actual legal implementation remain unfinished. No push authorized. Preserve all existing user work, historic migrations, immutable records and frozen industrial evidence.
+Status: **three-team backend handoff preparation on 2026-10-06**. A/B complete; C backend identity verified; initial D slice tested, phase still in progress. User owns frontend/landing and requests publication and three human teammate workstreams. Follow `TEAM_WORK_ALLOCATION.md`. Publish reviewed development checkpoint after report/confirmation; main history reconciliation is separate.
 
 ## How this guide must be used
 
@@ -26,8 +26,8 @@ Phase B's detailed [domain/permission/workflow/source contracts](LEGAL_DOMAIN_BU
 |---|---|---|
 | A | Complete: source custody, isolated defaults/CI, offline checks | Private runtime provisioning and acceptance remain gated for later phases |
 | B | Complete: approved development scope and domain/FR contracts | Operational-pilot pack/IdP/retention/recovery approvals remain release gates |
-| C | In progress | Coherent health/product identity, neutral development branding and truthful migration copy |
-| D | Not started | Scoped legal core and additive migrations |
+| C | Backend identity verified; frontend acceptance deferred to user | Preserve existing frontend changes; no further frontend implementation |
+| D | In progress — initial scope/API/migrations tested | Finish audited provisioning, legacy access isolation and scoped deduplication |
 | E | Not started | Secure generic document intake and provenance |
 | F | Not started | Contract analysis and grounded summaries |
 | G | Not started | Approved regulatory imports and version changes |
@@ -38,7 +38,7 @@ Phase B's detailed [domain/permission/workflow/source contracts](LEGAL_DOMAIN_BU
 | L | Not started | Legal evaluation and security hardening |
 | M | Not started | Full isolated acceptance and recovery validation |
 
-**Resume within C.** A/B are complete (`3f94383` is the B checkpoint). User approved preserving existing layout/fonts/palette, neutral LRA development branding and removal of active industrial branding/footage, with original assets retained. Existing v1.0 industrial terms stay byte-for-byte unchanged and enforced, explicitly labelled legacy migration terms until a separately approved new version. No private runtime targets are yet accepted: follow the runtime guide before live DB/model operations.
+**Current instruction:** proceed with backend changes; the user will handle frontend and landing later. C frontend exit/design acceptance and K remain deferred, not passed. D backend work may proceed under this explicit scope change. Private service targets remain unaccepted.
 
 Approved B baseline (2026-10-06): retain React/Vite and local/private AI; public/synthetic fixtures clearly labelled; no validated jurisdiction-compliance claim; local session auth for development only, enterprise SSO/MFA required for operational pilot; manual approved regulatory imports first; no automatic deletion/signing/filing. Deployment-specific legal packs, identity provider, retention and recovery acceptance stay release gates. This approval does not enable live services/models, deployment or a push.
 
@@ -94,18 +94,22 @@ Phase B exit: user-approved development profile; inspected mature session/revisi
 
 ### Phase C — safe identity and configuration
 
-- [ ] Trace backend health identity through frontend validation and tests; change the coupled contract coherently.
-- [ ] Update active titles, package/lock metadata, public manifest, navigation/copy/help and product/design documentation using the PDF name.
-- [ ] Decide replacement branding assets and versioned legal terms; retain prior acceptance/history and truthful provenance.
+- [x] Trace backend health identity through frontend validation and tests; change the coupled contract coherently.
+- [x] Update active titles, package/lock metadata, public manifest, navigation/copy/help and product/design documentation using the PDF name. Browser fit/interaction acceptance is still pending.
+- [x] Decide replacement branding assets and versioned legal terms; user approved neutral LRA assets and exact legacy terms preservation/labeling; new legal-platform terms remain a separate approval gate.
 - [x] Configure independently named Compose resources, ports, DB/index targets, launcher/proxy/CORS and CI without touching existing shared resources. Delivered early in A because shared defaults were a custody risk; actual provisioning remains gated.
 - [ ] Run relevant regression/frontend checks; verify no functional legal claims or cosmetic destructive storage renames were introduced.
 
+C pause evidence: isolated backend identity 2/2, custody 6/6, focused frontend 14/14 and full frontend 44/44 pass; lint passes with two existing warnings; build passes. Last checklist item stays open for desktop/mobile browser review, final source checks and honest native-backend limitation recording. Temporary preview was stopped on pause. Do not proceed to D before completing C's remaining gates.
+
 ### Phase D — legal core and access control
+
+Current step: checkpoint seven scoped ORM tables, DB-derived role/clearance/grant policy, two metadata APIs and migrations 0019/0020. 27 targeted checks and disposable fresh/0018-to-head upgrades pass. Remaining D: audited provisioning, explicit ownership/quarantine, tenant dedupe and old content/retrieval/review/audit isolation. No legal intake/pilot acceptance yet. Frontend implementation belongs to the user; publishing existing tested identity files needs a coherent snapshot decision.
 
 - [ ] Reuse UUID/version/audit conventions; add Organization/Workspace/Membership/Matter and document-level access policy.
 - [ ] Add scoped source/domain references and validated API schemas; enforce server-derived context and tenant-qualified relationships.
 - [ ] Design explicit legacy ownership/quarantine and tenant-scoped deduplication; never guess private ownership.
-- [ ] Create reviewed additive migrations after the actual existing head; register ORM models without rewriting prior migrations.
+- [x] Create reviewed additive migrations after baseline 0018 and register ORM models. Delivered 0019 legal scope and 0020 policy-denial audit vocabulary; source head is 0020.
 - [ ] Test fresh/current-to-head upgrades, cross-workspace access/mapping denial and old immutable/audit record preservation in a disposable database.
 
 ### Phase E — document intelligence
@@ -188,6 +192,9 @@ Phase B exit: user-approved development profile; inspected mature session/revisi
 | 2026-10-06 | User requested a permanent phased build document that must be read before each phase and kept synchronized during building; expanded existing plan into an execution checklist and added AGENTS instructions | A-M; process for all FRs | Documentation workflow requested; implementation not started; existing custody/product-policy decisions remain open |
 | 2026-10-06 | User authorized building and explicitly approved quit-with-preservation/branch activation. Moved C's service/proxy/default isolation into A, added offline custody regression and current runtime guide; quarantined nested tools instead of altering metadata | A/C/M; security/isolation NFRs, FR-065/066 operational support (not full delivery) | A source/config exit checks passed; no deployment/private configuration acceptance; B product-policy decisions still pending |
 | 2026-10-06 | User authorized regular local commits and separately approved preserved staged work; explicitly approved B development baseline. Added detailed domain contracts and 66-row FR registry; resolved development sequencing while retaining enterprise/legal/deployment gates | B/C-M; FR-001..066 and NFRs | Development architecture/contract checkpoint complete; no new legal feature/runtime pass; next C |
+| 2026-10-06 | User takes ownership of frontend/landing and requests other changes only. Split C backend exit from deferred frontend acceptance so backend D-M can proceed without a frontend redesign; K deferred to user | C/D/K; identity/isolation FR-001..005 | Explicit user scope change; preserve frontend work, no further frontend edits; runtime/security gates remain |
+| 2026-10-06 | User approved disposable PostgreSQL/backend tests; initial scope/API/policy and migrations 0019/0020 implemented | D/J/L; partial FR-002..004/054 | Initial slice tested; remaining D/intake/pilot gates stay open |
+| 2026-10-06 | User requests three human teammate workstreams and publishing/review; remote main has unrelated history | D-M/all FRs, owner-managed K | `TEAM_WORK_ALLOCATION.md` defines ownership/dependencies/PR checks; no skipped gates, no force-push/main overwrite |
 
 Append a row when an implementation discovery changes the plan. Include the reason, old/new decision or step, affected FRs/phases, and any approval dependency. Routine progress belongs in `MIGRATION_PROGRESS.md`; actual verification belongs in `VALIDATION_REPORT.md`.
 

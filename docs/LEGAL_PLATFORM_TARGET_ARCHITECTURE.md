@@ -1,6 +1,6 @@
 # Legal & Regulatory Assurance Platform — target architecture
 
-Status: **development baseline approved in Phase B; domain implementation not delivered**. Product name follows PDF pp. 1, 5 and 69. Primary intent: contract analysis, compliance monitoring and document summarization as one persistent, governed operational lifecycle. Blueprint v1.0 has 66 FRs; distinguish recommendations and jurisdiction-dependent validation from verified delivery.
+Status: **development baseline approved; initial D scope/API/migrations tested; remaining domain implementation planned**. Product name follows PDF pp. 1, 5 and 69. Primary intent: contract analysis, compliance monitoring and document summarization as one persistent, governed operational lifecycle. Blueprint v1.0 has 66 FRs; distinguish recommendations and jurisdiction-dependent validation from verified delivery.
 
 Detailed execution contracts: [domain/permission/workflow/source contracts](LEGAL_DOMAIN_BUILD_CONTRACTS.md) and [all 66 FR acceptance mappings](LEGAL_REQUIREMENT_TRACEABILITY.md). Existing reusable IDs/schema/hash patterns were inspected when defining these contracts; no applied migration or stored immutable row is rewritten by planning.
 
@@ -95,5 +95,7 @@ First runtime uses independently named local Compose resources and private model
 Explicit user-approved development handling for item 4: public/synthetic fixtures and manual approved imports, no jurisdiction-compliance claims, local/private AI and no automatic deletion/signing/filing. Deployment-specific packs/IdP/retention/recovery policies stay unconfigured approval gates. This keeps development moving without fabricating legal facts or lowering pilot acceptance.
 
 ## Implemented foundation — Phase A
+
+Latest D update: seven additive scope tables reuse UUIDs/auth/terms/audit envelopes; centralized grant/role/clearance policy and metadata APIs verified with 27 bounded tests and fresh/0018-to-head migrations 0019/0020. Provisioning, dedupe and legacy/retrieval/audit content isolation remain gates before intake. Development classification labels are not validated privilege/jurisdiction policies. Team ownership follows `TEAM_WORK_ALLOCATION.md`; frontend implementation is user-owned. New PR baseline CI is automatic, older full regression remains manual. Unrelated main history requires reviewed reconciliation before promotion.
 
 Source configuration now uses an isolated legal Compose project, DB and index namespace; ports 55432 (DB), 16333/16334 (Qdrant), 18000 (backend), 15173 (frontend) and dedicated local model candidate 21434. Container model access requires explicit private endpoint/host values. CI is manual-only and exact-repository gated; foreign-target Compose backups fail closed. These replace hazardous inherited defaults, not existing storage resources. Runtime and legal feature capabilities remain proposed; private config/instance ownership must be accepted before provisioning. See the current runtime guide and validation evidence.

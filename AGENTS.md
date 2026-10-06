@@ -13,6 +13,10 @@
 
 ## Mandatory phased build workflow
 
+- Team handoff authorization (2026-10-06): the user approved publishing the reviewed partial checkpoint to `feat/legal-regulatory-platform-migration`, including the already-tested identity snapshot, and enabling PR review protection on that branch and `main`. No new frontend implementation is authorized. Follow `docs/TEAM_WORK_ALLOCATION.md`; all backend requirements remain assigned. Remote `main` has unrelated history; reconciliation/promotion must be reviewed separately, never force-push/overwrite it. AI review is session-bound; baseline CI alone is not feature acceptance.
+
+- When resuming a paused session, read `docs/SESSION_RESUME.md` first if present, then verify its recorded state against Git and the living guide. A pause checkpoint is not phase completion; do not resume implementation until the user asks.
+
 - `docs/LEGAL_DOMAIN_MIGRATION_PLAN.md` is the living step-by-step build guide. Read it before starting or resuming any migration phase, together with `docs/MIGRATION_PROGRESS.md`, `docs/VALIDATION_REPORT.md`, and the relevant master-report requirements.
 - Follow the guide's phase dependencies, entry blockers, scope and exit checks. Inspect existing implementation and callers before editing; reuse mature components before replacing them.
 - Keep the guide synchronized as part of the same work whenever implementation, requirements, architecture, dependencies, scope or validation changes. Record the reason, affected phases/requirement IDs and approval needs; update related architecture/reuse documents when affected. Do not change the master PDF.

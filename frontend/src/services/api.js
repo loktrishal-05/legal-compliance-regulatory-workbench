@@ -1,4 +1,5 @@
 // Same-origin by default (Vite proxy in development, site reverse proxy in production).
+import { BACKEND_SERVICE } from '../product.js'
 export const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL || '/api').replace(/\/+$/, '')
 
 // Protected APIs answer 403 with this code until the current terms version is accepted (docs/terms_acceptance.md).
@@ -68,7 +69,7 @@ export async function apiRequest(path, { signal, method = 'GET', body, timeout =
 
 export async function getBackendHealth(signal) {
   const health = await apiRequest('/health', { signal, timeout: 5000 })
-  if (health.status !== 'ok' || health.service !== 'sovereign-agentic-workbench-backend') {
+  if (health.status !== 'ok' || health.service !== BACKEND_SERVICE) {
     throw new Error('Unexpected backend health response')
   }
   return health

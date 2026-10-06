@@ -1,1 +1,1 @@
-"""Sovereign Agentic Workbench backend."""
+"""Legal & Regulatory Assurance Platform backend."""
