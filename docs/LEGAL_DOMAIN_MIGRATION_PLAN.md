@@ -27,7 +27,7 @@ Phase B's detailed [domain/permission/workflow/source contracts](LEGAL_DOMAIN_BU
 | A | Complete: source custody, isolated defaults/CI, offline checks | Private runtime provisioning and acceptance remain gated for later phases |
 | B | Complete: approved development scope and domain/FR contracts | Operational-pilot pack/IdP/retention/recovery approvals remain release gates |
 | C | Backend identity verified; frontend acceptance deferred to user | Preserve existing frontend changes; no further frontend implementation |
-| D | In progress — initial scope/API/migrations tested | Finish audited provisioning, legacy access isolation and scoped deduplication |
+| D | In progress — scope, policy, audited provisioning and explicit legacy mapping tested (head 0021) | Workspace-scoped dedupe and old content/retrieval/review/audit route isolation |
 | E | Not started | Secure generic document intake and provenance |
 | F | Not started | Contract analysis and grounded summaries |
 | G | In progress — deterministic core tested (Part 2, integrator) | Registry/import/version persistence in migration 0022 after Part 1's 0021 |
@@ -104,11 +104,12 @@ C historical pause evidence: isolated backend identity 2/2, custody 6/6, focused
 
 ### Phase D — legal core and access control
 
-Current step: coordinate/review remaining D gates. Seven scoped ORM tables, DB-derived policy, two metadata APIs and migrations 0019/0020 were checkpointed/published in 87cd2bd; shared base is 496f903. 27 targeted checks and fresh/0018-to-head upgrades pass. Remaining D: audited provisioning, explicit ownership/quarantine, tenant dedupe and old content/retrieval/review/audit isolation. No legal intake/pilot acceptance yet. The user approved the existing tested identity snapshot; no new frontend implementation.
+Current step: coordinate/review remaining D gates. Seven scoped ORM tables, DB-derived policy, two metadata APIs and migrations 0019/0020 were checkpointed/published in 87cd2bd; shared base is 496f903. 27 targeted checks and fresh/0018-to-head upgrades pass. 2026-10-06 (integrator, all teams unavailable): audited independent provisioning, operator bootstrap and explicit legacy mapping delivered with migration 0021 (`legal_provisioning.py`, `scripts/legal_provisioning_cli.py`); 41 scoped tests + migration validator pass on disposable PostgreSQL. Remaining D: tenant dedupe and old content/retrieval/review/audit isolation. No legal intake/pilot acceptance yet. The user approved the existing tested identity snapshot; no new frontend implementation.
 
 - [ ] Reuse UUID/version/audit conventions; add Organization/Workspace/Membership/Matter and document-level access policy.
 - [ ] Add scoped source/domain references and validated API schemas; enforce server-derived context and tenant-qualified relationships.
-- [ ] Design explicit legacy ownership/quarantine and tenant-scoped deduplication; never guess private ownership.
+- [ ] Design explicit legacy ownership/quarantine and tenant-scoped deduplication; never guess private ownership. Legacy part done: unmapped documents stay denied; mapping is an audited operator command refusing re-mapping/foreign matters. Dedupe pending.
+- [x] Audited independent provisioning: workspace admins grant/revoke others only, never self, never above own clearance, never beyond role operations; operator-only bootstrap; state + audit share one transaction (rollback tested).
 - [x] Create reviewed additive migrations after baseline 0018 and register ORM models. Delivered 0019 legal scope and 0020 policy-denial audit vocabulary; source head is 0020.
 - [ ] Test fresh/current-to-head upgrades, cross-workspace access/mapping denial and old immutable/audit record preservation in a disposable database.
 

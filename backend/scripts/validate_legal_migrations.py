@@ -26,7 +26,7 @@ def main():
     url = disposable_url()  # Reject before settings import, engine or connection.
     from app.core.config import settings
     from app.db.models import AuditEvent, Document, DocumentVersion
-    from app.services.audit import append_event, verify_chain
+    from app.services.audit import AuditChainError, append_event, verify_chain
     config = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
     engine = create_engine(url, connect_args={"connect_timeout": 5})
     try:
@@ -69,7 +69,29 @@ def main():
                         with scoped_engine.connect() as conn:
                             assert triggers == conn.execute(text("SELECT tgname, pg_get_triggerdef(oid) FROM pg_trigger "
                                 "WHERE NOT tgisinternal ORDER BY tgname")).all()
-                print(f"PASS: {baseline or 'fresh'} -> head, metadata parity, idempotent upgrade")
+                    # 0021: reversible without history, accepts provisioning events, refuses lossy downgrade.
+                    command.downgrade(config, "0020_legal_policy_audit")
+                    command.upgrade(config, "head")
+                    with Session(scoped_engine) as db:
+                        append_event(db, event_type="LEGAL_ACCESS_GRANTED", actor_id=None, actor_kind="system",
+                                     payload={"fixture": "synthetic 0021"})
+                        db.commit()
+                        try:
+                            append_event(db, event_type="UNKNOWN_SYNTHETIC_EVENT", actor_id=None,
+                                         actor_kind="system", payload={})
+                            db.commit()
+                            unknown_accepted = True
+                        except AuditChainError:
+                            db.rollback()
+                            unknown_accepted = False
+                        assert not unknown_accepted, "unknown audit event type accepted"
+                    try:
+                        command.downgrade(config, "0020_legal_policy_audit")
+                        lossy_downgrade = True
+                    except Exception:
+                        lossy_downgrade = False
+                    assert not lossy_downgrade, "downgrade dropped provisioning audit vocabulary with history"
+                print(f"PASS: {baseline or 'fresh'} -> head, metadata parity, idempotent upgrade, 0021 audit vocabulary")
             finally:
                 scoped_engine.dispose()
                 with engine.begin() as conn:
