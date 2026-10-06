@@ -17,6 +17,7 @@ from app.db.models import AuditEvent, User, VerifiedKnowledge
 from app.db.session import get_db
 from app.schemas.audit import AuditEventResponse, AuditVerifyResponse
 from app.services.audit import CHAIN_ID, verify_chain
+from app.services.legal_policy import without_legal_audit
 
 router = APIRouter(tags=["audit"])
 
@@ -30,7 +31,7 @@ def audit_log(response: Response, limit: int = Query(100, ge=1, le=500),
               user: User = Depends(require_role("reviewer", "admin")),
               session: Session = Depends(get_db)) -> list[AuditEventResponse]:
     start, end = ui_reads.validate_range(start, end)
-    query = select(AuditEvent).where(AuditEvent.chain_id == CHAIN_ID)
+    query = without_legal_audit(select(AuditEvent).where(AuditEvent.chain_id == CHAIN_ID))
     for column, value in ((AuditEvent.event_type, event_type), (AuditEvent.actor_id, user_id),
                           (AuditEvent.action_revision_id, approval_id)):
         if value is not None:

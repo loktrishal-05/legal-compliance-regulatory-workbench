@@ -6,6 +6,7 @@ import json
 from sqlalchemy import text
 from app.core.config import settings
 from app.db.models.document_version import DocumentVersion
+from app.services.legal_policy import is_legacy_version
 from app.schemas.pid import PIDManifest, OCRRegion
 from app.schemas.knowledge import ChunkMetadata
 from app.services.extraction import Block, source_sha256
@@ -72,7 +73,7 @@ def index_pid(version_id, session, embeddings=None, qdrant=None):
     if not session.scalar(text("SELECT pg_try_advisory_xact_lock_shared(3302001)")):
         raise IngestionConflict("Retrieval migration is active; retry later")
     version = session.get(DocumentVersion, version_id)
-    if version is None or version.ingestion_metadata.get("kind") != "pid" or version.status not in ("pid_processed", "pid_indexed", "pid_index_failed"):
+    if not is_legacy_version(session, version) or version.ingestion_metadata.get("kind") != "pid" or version.status not in ("pid_processed", "pid_indexed", "pid_index_failed"):
         raise ValueError("Expected an existing processed P&ID version")
     key = int.from_bytes(bytes.fromhex(version.source_sha256[:16]), "big", signed=True)
     if not session.scalar(text("SELECT pg_try_advisory_xact_lock(:key)"), {"key": key}):

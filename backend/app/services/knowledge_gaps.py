@@ -126,6 +126,7 @@ def transition(session, gap_id, payload, actor, operation):
     from datetime import datetime, timezone
     from sqlalchemy import select
     from app.db.models import DocumentVersion, KnowledgeGap, User
+    from app.services.legal_policy import is_legacy_version
     from app.services.approval import DecisionNotAllowed
     from app.services.verified_knowledge import KnowledgeConflict, authorize, inspect_item
     role = authorize(session, actor, review=True)
@@ -167,7 +168,8 @@ def transition(session, gap_id, payload, actor, operation):
                 newer = version is not None and version.created_at is not None and session.scalar(
                     select(DocumentVersion.id).where(DocumentVersion.document_id == version.document_id,
                         DocumentVersion.id != version.id, DocumentVersion.created_at >= version.created_at).limit(1))
-                if version is None or version.status != "indexed" or newer:
+                if (version is None or version.status != "indexed" or newer
+                        or not is_legacy_version(session, version)):
                     raise KnowledgeConflict("Resolution source is not a current indexed revision")
             else:
                 raise KnowledgeConflict("Resolution requires verified knowledge or an authoritative source")

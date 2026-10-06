@@ -10,9 +10,11 @@ from uuid import uuid4
 
 from sqlalchemy import create_engine, event, select, text
 from sqlalchemy.orm import Session
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.compiler import compiles
 
 from app.db.base import Base
-from app.db.models import AuditChainHead, AuditEvent, Document, User
+from app.db.models import AuditChainHead, AuditEvent, Document, DocumentVersion, User
 from app.db.models.legal_scope import (
     DocumentAccess, LegalDocumentScope, Matter, MatterAccess, Organization, Workspace, WorkspaceMembership,
 )
@@ -23,6 +25,11 @@ from app.services.legal_policy import LegalAccessDenied, authorize_document, aut
 TERMS = "1.0"
 
 
+@compiles(JSONB, "sqlite")
+def _jsonb_on_sqlite(type_, compiler, **kw):  # test-only: PostgreSQL subclass covers real JSONB
+    return "JSON"
+
+
 class LegalProvisioningTests(unittest.TestCase):
     def make_engine(self):
         engine = create_engine("sqlite:///:memory:")
@@ -31,7 +38,7 @@ class LegalProvisioningTests(unittest.TestCase):
 
     def setUp(self):
         self.engine = self.make_engine()
-        tables = {m.__table__ for m in (User, Document, AuditEvent, AuditChainHead, Organization, Workspace,
+        tables = {m.__table__ for m in (User, Document, DocumentVersion, AuditEvent, AuditChainHead, Organization, Workspace,
                                         WorkspaceMembership, Matter, MatterAccess, LegalDocumentScope, DocumentAccess)}
         pending = list(tables)
         while pending:  # audit events reference approval tables; include every FK target

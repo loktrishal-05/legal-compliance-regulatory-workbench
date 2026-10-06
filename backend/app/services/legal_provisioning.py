@@ -7,9 +7,10 @@ the caller's transaction with its audit event; callers commit, failures roll bot
 """
 from uuid import UUID, uuid4
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db.models import Document, User
+from app.db.models import Document, DocumentVersion, User
 from app.db.models.legal_scope import (
     DocumentAccess, LegalDocumentScope, Matter, MatterAccess, Organization, Workspace, WorkspaceMembership,
 )
@@ -157,10 +158,19 @@ def map_legacy_document(db: Session, *, operator_label: str, workspace_id: UUID,
         matter = db.get(Matter, matter_id)
         if matter is None or matter.workspace_id != workspace_id:
             raise LegalAccessDenied()
+    versions = list(db.scalars(select(DocumentVersion).where(DocumentVersion.document_id == document_id)))
+    if versions and db.scalar(select(DocumentVersion.id).where(
+            DocumentVersion.workspace_id == workspace_id,
+            DocumentVersion.source_sha256.in_([v.source_sha256 for v in versions])).limit(1)):
+        raise ValueError("workspace already holds a version with the same source bytes")
     scope = LegalDocumentScope(document_id=document_id, organization_id=workspace.organization_id,
                                workspace_id=workspace_id, matter_id=matter_id, classification=classification)
     db.add(scope)
     db.flush()
+    for version in versions:  # leave the legacy dedupe namespace; legacy paths stop seeing them
+        version.organization_id, version.workspace_id = workspace.organization_id, workspace_id
+    db.flush()
     _audit(db, "LEGAL_LEGACY_DOCUMENT_MAPPED", None, workspace, operator_label=operator_label,
-           document_id=document_id, matter_id=matter_id, classification=classification)
+           document_id=document_id, matter_id=matter_id, classification=classification,
+           version_ids=sorted(str(v.id) for v in versions))
     return scope

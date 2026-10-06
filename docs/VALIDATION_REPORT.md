@@ -160,7 +160,9 @@ Branch `team/1-documents-contracts` (integrator; all three teammates unavailable
 | `docker compose ... run --rm tests python -B -m scripts.validate_legal_migrations` | PASS fresh and 0018 -> 0021: parity, idempotent, reversible without history, provisioning event accepted, unknown event rejected, lossy downgrade refused |
 | CLI `--help` / invalid UUID | parses; rejects before settings/DB import |
 
-Not covered: workspace-scoped dedupe, legacy route isolation, HTTP provisioning UI (intentionally none).
+Not covered by the first slice: dedupe/isolation (added below); HTTP provisioning UI (intentionally none).
+
+D dedupe/isolation follow-up (same branch): 0022 plus guards. `docker compose ... run --rm tests` 57/57 OK; validator PASS fresh and 0018 -> 0022 incl. `alembic check` parity, reversibility without scoped rows, per-namespace duplicate rejection and lossy-downgrade refusal. Mutation (drop document-ownership half of the guard) is caught by `test_owned_document_hides_unstamped_legacy_namespace_version`. Industrial regression: 24 affected modules run on baseline and branch; identical results — runnable modules pass the same (agents_knowledge 25, knowledge 11, release_retrieval 7 OK; model_routing 4 pre-existing errors); the other 20 cannot import in either runtime (bounded image lacks qdrant_client/langgraph; Windows Application Control blocks psycopg/ujson). This is a recorded gap, not a pass.
 
 ## Part 2 deterministic G/H core — 2026-10-06
 

@@ -5,6 +5,7 @@ from fastapi.responses import Response
 from sqlalchemy import select
 from app.core.config import settings
 from app.db.models import Document, DocumentVersion
+from app.services.legal_policy import legacy_version_clause
 from app.schemas.pid import PIDManifest
 from app.services.pid_evidence import load_pid_evidence
 from app.services.pid_fusion import LIMITATION
@@ -14,7 +15,8 @@ def query():
     return select(DocumentVersion, Document).join(Document, Document.id == DocumentVersion.document_id).where(
         Document.document_type == "pid", Document.classification == "internal",
         DocumentVersion.ingestion_metadata["kind"].as_string() == "pid",
-        DocumentVersion.ingestion_metadata["request"]["access_scope"].as_string() == "internal")
+        DocumentVersion.ingestion_metadata["request"]["access_scope"].as_string() == "internal",
+        legacy_version_clause())
 
 def version(session, ident):
     row = session.execute(query().where(DocumentVersion.id == ident)).one_or_none()
