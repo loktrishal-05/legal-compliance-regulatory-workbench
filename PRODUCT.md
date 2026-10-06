@@ -8,24 +8,23 @@ web
 
 ## Users
 
-- Plant engineers, operators and maintenance staff at industrial sites who ask questions of their own procedures, drawings, sensor data and maintenance history (requester role).
-- Reviewers and administrators who approve or reject advisory recommendations and audit what happened (reviewer / admin roles, assigned by the server).
-- Hackathon judges and evaluators, who meet the product first through the public landing page and a guided walk through the workbench. (Confirmed: the landing page must impress judges.)
+- Target: legal counsel/contract reviewers, compliance officers, business owners and auditors; risk, administration, security and executive roles expand with the operating model.
+- Current foundation: server-owned requester/reviewer/admin accounts. Scoped legal memberships and matter/document permissions are planned in Phase D, not delivered by rebranding.
 
 ## Product Purpose
 
-Sovereign AI Workbench is an on-premise, governed industrial intelligence workbench. It answers questions with cited evidence from locally indexed documents, P&IDs, sensor readings and maintenance records; anything that could influence operations is held as a draft for human approval; every decision joins a hash-linked audit chain. Success is a trustworthy, fast, legible answer that a human can verify and govern, with no data leaving the site.
+Legal & Regulatory Assurance Platform connects contract analysis, compliance monitoring and document summarization into an evidence-first, human-governed lifecycle. The immutable master report is the product authority. This is a controlled development migration: legal workflows are not yet available; existing industrial views are labelled legacy regressions until validated replacements land.
 
 ## Positioning
 
-Local, sovereign and governed by construction: inference runs on the site's own hardware (Ollama, qwen3.5:9b and qwen3.5:4b), hosted AI calls in the confidential path are zero, recommendations are advisory only and never operate equipment, and human approval plus a tamper-evident (not tamper-proof) audit chain govern every operational draft.
+Source-grounded proposals, deterministic permissions/state/timers/audit and independent human decisions. Reuse the local/private gateway and mature platform infrastructure; do not claim a provisioned deployment, legal accuracy, compliance certification, signing/filing authority or live regulatory integration.
 
 ## Operating Context
 
-- Query workspace (text and local voice in English, Hindi and Tamil), with H3 human review of every voice transcript before submission.
-- Evidence: SOPs and manuals, P&ID drawings (as-drawn evidence only, never proof of plant state), sensor readings, maintenance work orders, operator notes.
-- Governance: approval queue, durable executions, audit log with chain verification, sovereignty proof.
-- Deployment: Docker backend with PostgreSQL, Qdrant, local speech and Ollama; offline-capable, not automatically air-gapped.
+- Planned sources: contracts, approved regulations, policies, controls and evidence; exact source/version/page/section/quote provenance.
+- Planned workflow: proposed clauses/obligations/assessments → independent review → accepted duties/tasks → freshness/change/retest → audit replay.
+- Current source-level foundation: sessions, PDF/RAG/OCR infrastructure, advisory review, durable execution and tamper-evident audit. Industrial specialists are not legal agents.
+- Deployment remains unprovisioned/unaccepted; isolated configuration is documented. Offline-capable does not mean automatically air-gapped.
 
 ## Capabilities and Constraints
 
@@ -34,28 +33,31 @@ Local, sovereign and governed by construction: inference runs on the site's own 
 - Charts, boards and metrics show live backend data only; empty states where nothing exists; no fabricated values (confirmed).
 - Self-service sign-up, email/OTP recovery and Google sign-in are disabled until the separate auth backend reports those capabilities; the UI must stay honest about that.
 - Approval decisions happen only through the review flow; no drag-to-approve or other shortcut that bypasses it.
-- Undecided: auth backend capabilities (being built in a separate worktree), P&ID viewer and maintenance workspace (planned F6), administration (planned F7).
+- Retain existing role/terms guards and backend-reported capabilities. No unrelated worktree is a build target.
+- Scope, approvals, states and requirements: `docs/LEGAL_DOMAIN_BUILD_CONTRACTS.md` and `docs/LEGAL_REQUIREMENT_TRACEABILITY.md`; read the living guide before every phase.
 
 ## Brand Commitments
 
-- Name: Sovereign AI Workbench. Approved assets: `frontend/public/assets/branding/` (Sovereign mark, horizontal/stacked/primary logos, app icons; agent mark) and the three approved auth videos in `frontend/public/assets/auth/`. Logos are used as supplied, never redrawn.
+- Name: Legal & Regulatory Assurance Platform, as defined by the master report. User-approved Phase C identity: neutral LRA development SVG mark/wordmark, existing fonts/palette/layout; no new visual world.
+- Original industrial logos, screenshots and footage remain archived unchanged. Active landing/sign-in use neutral branding/static media; preserved motion/media infrastructure remains available for separately approved assets.
+- Exact industrial v1.0 terms/document/acknowledgements/receipts remain unchanged and enforced, visibly labelled legacy migration terms. New legal-platform terms are pending approval; no silent reuse/rewrite of an accepted version.
 - Voice: precise, sober, evidence-first; claims must be verifiable (e.g. "not automatically air-gapped", "tamper-evident, not tamper-proof").
 
 ## Evidence on Hand
 
-- Verified facts (September 2026): 0 hosted AI calls in the confidential path, 2 local models, 3 languages, 890 automated backend tests, 75-case benchmark, 168 hash-verified frozen benchmark files.
-- Dev database holds synthetic, cited records: sensor readings (e.g. P-204 vibration), maintenance work orders (e.g. WO-7714), audit events, pending approvals.
-- Absent and never to be fabricated: customer names, testimonials, deployments, performance numbers beyond the facts above, live integrations with BHASHINI / API Setu / DigiLocker.
+- Current verification evidence is `docs/VALIDATION_REPORT.md`. Historical industrial test/benchmark counts do not establish legal correctness and are not active marketing metrics.
+- No approved live legal dataset, jurisdiction pack, connected authority source or customer deployment is claimed. Development fixtures must be public/synthetic and labelled.
+- Never fabricate customer names, compliance scores, legal findings, benchmark outcomes, source authority, connector status or deployment performance.
 
 ## Product Principles
 
 1. Evidence before answers: every claim shows where it came from.
 2. Humans govern: advisory output only; approval is explicit and audited.
-3. Sovereign by default: local inference, no silent network dependency.
+3. Private by policy: local/private inference, no silent hosted fallback or assumed service ownership.
 4. Honest state: loading, empty, unavailable and planned are always stated plainly.
-5. Calm under pressure: the workbench is built for long shifts, not spectacle.
+5. Calm evidence review: preserve usable shell/form/source-review patterns; change domain screens only with their backend contracts.
 
 ## Accessibility & Inclusion
 
-- Multilingual UI and evidence (English, हिन्दी, தமிழ்); original-language text shown exactly.
+- Preserve language preferences and original source text; multilingual legal understanding is not yet evaluated.
 - Keyboard operable, visible focus, reduced-motion and Save-Data respected, WCAG AA contrast on workbench surfaces.

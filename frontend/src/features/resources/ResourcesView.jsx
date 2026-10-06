@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { Icon } from '../../components/ui.jsx'
 import { TERMS_V1 } from './termsV1.js'
 import { TERMS_DOCUMENT } from './termsModel.js'
+import { DEVELOPMENT_NOTICE, LEGACY_TERMS_NOTICE } from '../../product.js'
 
 export const GUIDE = '/resources/application-user-guide.pdf'
 const VIDEO = '/resources/guidance-video.mp4'
@@ -32,12 +33,13 @@ export function ResourcesView() {
   // Jump links move focus to the section heading so keyboard and screen-reader users land where they asked.
   const go = id => event => { event.preventDefault(); const el = document.getElementById(id); el?.scrollIntoView({ block: 'start' }); el?.focus({ preventScroll: true }) }
   return <>
+    <p className="review-notice">{DEVELOPMENT_NOTICE}</p>
     <nav className="help-starts" aria-label="Getting started">{STARTS.map(([id, title, hint, icon]) =>
       <a key={id} href={`#help-${id}`} onClick={go(`help-${id}`)}><Icon name={icon} size={22} /><span><strong>{title}</strong><small>{hint}</small></span></a>)}</nav>
 
     <section className="panel" aria-labelledby="help-video">
-      <h2 id="help-video" tabIndex={-1}>Guidance video</h2>
-      <p className="muted">A short walkthrough of asking a governed question, reading cited evidence and human approval. It plays only when you start it.</p>
+      <h2 id="help-video" tabIndex={-1}>Legacy industrial guidance video</h2>
+      <p className="muted">Preserved historical walkthrough, not current legal-platform guidance. It plays only when you start it.</p>
       <figure className="help-video">
         <video controls preload="metadata" playsInline poster="/resources/guidance-video-poster.webp" aria-describedby="help-video-caption">
           <source src={VIDEO} type="video/mp4" />
@@ -48,8 +50,8 @@ export function ResourcesView() {
     </section>
 
     <section className="panel" aria-labelledby="help-guide">
-      <h2 id="help-guide" tabIndex={-1}>Application user guide</h2>
-      <p>Step-by-step use of the Workbench: signing in, asking questions, reading evidence, approvals, voice review and troubleshooting.</p>
+      <h2 id="help-guide" tabIndex={-1}>Legacy application user guide</h2>
+      <p>Historical industrial-platform instructions, preserved unchanged. Legal-platform user guidance will follow the implemented workflows.</p>
       <div className="toolbar">
         <a className="button primary" href={GUIDE} target="_blank" rel="noopener">Open user guide (PDF, opens in a new tab)</a>
         <a className="button ghost" href={GUIDE} download>Download user guide (PDF)</a>
@@ -59,7 +61,7 @@ export function ResourcesView() {
 
     <section className="panel" aria-labelledby="help-terms">
       <div className="section-heading"><h2 id="help-terms" tabIndex={-1}>{TERMS_V1.title}</h2><span className="badge">Version {TERMS_V1.version}</span></div>
-      <p className="muted">The same terms you accept on first sign-in. The downloadable document is the authoritative original.</p>
+      <p className="review-notice">{LEGACY_TERMS_NOTICE}</p>
       <TermsDocument />
       <div className="toolbar"><TermsDownload /></div>
     </section>
@@ -67,14 +69,14 @@ export function ResourcesView() {
     <section className="panel" aria-labelledby="help-system">
       <h2 id="help-system" tabIndex={-1}>Application guidance</h2>
       <ul className="help-rules">
-        <li><strong>Advisory only.</strong> Answers, recommendations and summaries must be independently verified. The AI never starts, stops, isolates, bypasses or controls plant equipment.</li>
+        <li><strong>Advisory only.</strong> Independently verify every output. This development build does not provide legal advice, sign contracts or certify compliance.</li>
         <li><strong>Humans approve.</strong> Anything that could influence operations is held as a draft for a reviewer. Approval releases advisory output only, and requesters cannot approve their own drafts.</li>
-        <li><strong>Evidence has limits.</strong> Citations can be incomplete or outdated. P&amp;ID and OCR evidence is as drawn only and never proves valve state, isolation, permits or readiness.</li>
-        <li><strong>Sovereign by design.</strong> Inference, retrieval and storage run on local services; no hosted AI is used for confidential work. Network isolation is enforced by your site controls.</li>
-        <li><strong>Everything is recorded.</strong> Queries, decisions and approvals join a tamper-evident audit chain.</li>
+        <li><strong>Evidence has limits.</strong> Legal source/version/authority checks and extraction review are still being built. Existing industrial citations do not establish legal compliance.</li>
+        <li><strong>Private runtime policy.</strong> The gateway restricts inference to local/private endpoints. Service ownership, network isolation and deployment configuration still require verification.</li>
+        <li><strong>Audit scope.</strong> Existing material review decisions join a tamper-evident chain. Legal event coverage arrives with legal workflows.</li>
         <li><strong>What you can see.</strong> Feature availability depends on role, deployment mode, configured data and enabled local services. Where something is not available, the Workbench says so rather than showing placeholder data.</li>
       </ul>
-      <p className="muted small">Live service status: <Link to="/app/sovereignty">Sovereignty</Link> · configured routes: <Link to="/app/agents">Agents</Link> · resource policy: <Link to="/app/resources">Government resources</Link>.</p>
+      <p className="muted small">Process observations: <Link to="/app/sovereignty">Private runtime</Link> · configured routes: <Link to="/app/agents">Agents</Link> · resource policy: <Link to="/app/resources">Government resources</Link>.</p>
     </section>
   </>
 }

@@ -61,7 +61,7 @@ class FoundationTests(unittest.TestCase):
 
     def test_health(self):
         self.assertEqual(self.request("/health"), {
-            "status": "ok", "service": "sovereign-agentic-workbench-backend",
+            "status": "ok", "service": "legal-compliance-regulatory-workbench-backend",
         })
 
     @unittest.skipUnless(os.environ.get("WORKBENCH_TEST_LIVE_MODEL") == "1",
@@ -158,7 +158,7 @@ class FoundationTests(unittest.TestCase):
     def test_metadata_and_offline_migration(self):
         configure_mappers()
         self.assertEqual(len(models.__all__), 23)
-        self.assertEqual(len(Base.metadata.tables), 37)
+        self.assertEqual(len(Base.metadata.tables), 44)
         self.assertEqual(engine.dialect.name, "postgresql")
         self.assertEqual(engine.dialect.driver, "psycopg")
         self.assertIn("/health", app.openapi()["paths"])
@@ -167,6 +167,10 @@ class FoundationTests(unittest.TestCase):
         command.upgrade(config, "head", sql=True)
         sql = output.getvalue()
         recovery_keys = {
+            "legal_workspace_memberships": ["workspace_id", "user_id"],
+            "legal_matter_access": ["matter_id", "user_id"],
+            "legal_document_scopes": ["document_id"],
+            "legal_document_access": ["document_id", "user_id", "operation"],
             "auth_attempts": ["key"],
             "graph_checkpoints": ["execution_id", "namespace", "checkpoint_id"],
             "graph_writes": ["execution_id", "namespace", "checkpoint_id", "task_id", "idx"],

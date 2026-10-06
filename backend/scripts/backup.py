@@ -52,6 +52,17 @@ def verify(folder):
     return manifest
 
 
+def compose_command(url):
+    """Refuse historical/foreign resources before constructing a Compose backup command."""
+    if (url.host not in {"localhost", "127.0.0.1"} or url.port != 55432
+            or url.database != "legal_compliance_workbench" or url.query):
+        raise ValueError("--compose requires this application's isolated loopback database")
+    return ["docker", "compose", "--project-name", "legal-compliance-regulatory-workbench",
+            "--env-file", str(ROOT / ".env"), "-f", str(ROOT / "infra/docker-compose.yml"),
+            "exec", "-T", "postgres", "pg_dump", "-U", "postgres", "-d", url.database,
+            "--format=custom", "--no-owner", "--no-acl"]
+
+
 def create(destination, *, quiesced=False, compose=False):
     import httpx
     from sqlalchemy.engine import make_url
@@ -68,10 +79,9 @@ def create(destination, *, quiesced=False, compose=False):
                PGPASSWORD=url.password or "", PGDATABASE=url.database or "", PGCONNECT_TIMEOUT="5")
     command = ["pg_dump", "--format=custom", "--no-owner", "--no-acl"]
     if compose:
-        if url.host not in {"localhost", "127.0.0.1"} or url.port not in {None, 5432}:
-            raise ValueError("--compose is only for the bundled loopback PostgreSQL")
-        command = ["docker", "compose", "-f", str(ROOT / "infra/docker-compose.yml"), "exec", "-T", "postgres",
-                   "pg_dump", "-U", "postgres", "-d", url.database, "--format=custom", "--no-owner", "--no-acl"]
+        command = compose_command(url)
+        if s.qdrant_url.rstrip("/") not in {"http://127.0.0.1:16333", "http://localhost:16333"}:
+            raise ValueError("--compose requires this application's isolated Qdrant endpoint")
     elif not shutil.which("pg_dump"):
         raise ValueError("Install PostgreSQL 17 client tools or use --compose for the bundled service")
     require_private_resolution(s.qdrant_url)

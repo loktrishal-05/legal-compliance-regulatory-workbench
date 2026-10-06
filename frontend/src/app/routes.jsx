@@ -2,6 +2,7 @@ import { Navigate } from 'react-router'
 import { RequireAuth, RootLayout } from './session.jsx'
 import { Forbidden, LoadingState, NotFound, RouteError } from '../components/ui.jsx'
 import { ADMINS, REVIEWERS } from './navigation.js'
+import { PRODUCT_NAME } from '../product.js'
 
 // Each area is a lazy chunk: landing (GSAP), auth (video), shell and pages load independently.
 const lazyNamed = (loader, name) => async () => ({ Component: (await loader())[name] })
@@ -15,9 +16,9 @@ export const routes = [{
   id: 'root',
   element: <RootLayout />,
   errorElement: <RouteError />,
-  hydrateFallbackElement: <LoadingState label="Loading Sovereign AI Workbench…" />,
+  hydrateFallbackElement: <LoadingState label={`Loading ${PRODUCT_NAME}…`} />,
   children: [
-    { index: true, lazy: lazyNamed(() => import('../features/landing/LandingPage.jsx'), 'default'), handle: { title: 'Sovereign AI Workbench' } },
+    { index: true, lazy: lazyNamed(() => import('../features/landing/LandingPage.jsx'), 'default'), handle: { title: PRODUCT_NAME } },
     {
       lazy: lazyNamed(() => import('../features/auth/AuthLayout.jsx'), 'default'),
       children: [
@@ -52,7 +53,7 @@ export const routes = [{
           page('approvals', 'ApprovalsPage', 'Approvals'),
           page('executions', 'ExecutionsPage', 'Executions'),
           { path: 'audit', element: <RequireAuth roles={REVIEWERS} />, children: [indexPage('AuditPage', 'Audit')] },
-          page('sovereignty', 'SovereigntyPage', 'Sovereignty'),
+          page('sovereignty', 'SovereigntyPage', 'Private runtime'),
           page('resources', 'ResourcesPage', 'Government Resources'),
           page('help', 'HelpPage', 'Help & Resources'),
           { path: 'admin', element: <RequireAuth roles={ADMINS} />, children: [

@@ -65,29 +65,3 @@ Thumbs.db
 *.log
 *.sqlite
 *.sqlite3
-
-# Isolated repository: never inherit hosting credentials or machine permissions.
-.vercel/
-.wrangler/
-.dev.vars
-.claude/settings.local.json
-.codex/hooks.json
-.impeccable/review/
-*.p12
-*.pfx
-*.crt
-*.dump
-*.snapshot
-*.bundle
-
-# Preserve useful development/recovery source from the old working directory.
-!/data/**/*.py
-!/data/**/*.js
-!/data/**/*.mjs
-!/data/**/*.ps1
-!/data/**/*.sh
-!/data/**/*.yml
-!/data/**/*.yaml
-
-# Frozen historical benchmark snapshots are source/evidence, not live backups.
-!/benchmark/**

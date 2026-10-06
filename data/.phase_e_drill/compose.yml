@@ -1,8 +1,0 @@
-services:
-  qdrant:
-    image: qdrant/qdrant:v1.17.0
-    pull_policy: never
-    ports:
-      - '127.0.0.1:16333:6333'
-    environment:
-      QDRANT__TELEMETRY_DISABLED: 'true'

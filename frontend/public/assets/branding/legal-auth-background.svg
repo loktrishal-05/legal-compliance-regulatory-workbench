@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <title>Neutral development sign-in background</title>
+  <rect width="1920" height="1080" fill="#020e21"/>
+  <rect x="1080" y="190" width="620" height="700" rx="32" fill="#041329" stroke="#0e2a4c" stroke-width="2"/>
+  <text x="1390" y="565" text-anchor="middle" fill="#0e2a4c" font-family="Arial, sans-serif" font-size="130" font-weight="700" letter-spacing="8">LRA</text>
+</svg>

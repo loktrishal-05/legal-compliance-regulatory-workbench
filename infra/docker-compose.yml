@@ -1,10 +1,9 @@
 name: legal-compliance-regulatory-workbench
-
 services:
   postgres:
     image: postgres:17
     environment:
-      POSTGRES_DB: sovereign_workbench
+      POSTGRES_DB: legal_compliance_workbench
       POSTGRES_USER: postgres
       # Local development only. Override for any deployment.
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -13,7 +12,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d sovereign_workbench"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d legal_compliance_workbench"]
       interval: 5s
       timeout: 5s
       retries: 10

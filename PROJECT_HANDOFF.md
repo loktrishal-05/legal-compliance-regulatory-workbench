@@ -1,5 +1,10 @@
 # Legal, Compliance & Regulatory Workbench — project handoff
 
+> Current custody update (2026-10-06): this handoff is retained as historical provenance.
+> Discovery found inherited Git/runtime state that differs from its isolation claims.
+> Use `docs/REPOSITORY_BOUNDARY_AUDIT.md` for current custody, `docs/LEGAL_DOMAIN_MIGRATION_PLAN.md`
+> for build status, and `docs/LEGAL_RUNTIME_SETUP.md` for operational instructions.
+
 ## Start here
 
 This is an isolated technical foundation for a new hackathon problem statement:

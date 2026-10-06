@@ -1,0 +1,7 @@
+# Bounded backend test runtime; pins follow requirements-linux.lock, no OCR/AI models.
+FROM python:3.11-slim
+RUN pip install --no-cache-dir fastapi==0.141.1 starlette==1.7.0 pydantic==2.13.5 \
+    pydantic-settings==2.15.0 SQLAlchemy==2.0.54 alembic==1.20.0 \
+    psycopg[binary]==3.3.6 httpx==0.28.1 argon2-cffi==23.1.0
+WORKDIR /validation/backend
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/validation/backend

@@ -9,14 +9,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     database_url: str = Field(
-        default="postgresql+psycopg://postgres:postgres@127.0.0.1:5432/sovereign_workbench",
+        default="postgresql+psycopg://postgres:postgres@127.0.0.1:55432/legal_compliance_workbench",
         validation_alias="DATABASE_URL",
         repr=False,
     )
 
     database_connect_timeout: int = Field(default=5, ge=1, le=30)
-    qdrant_url: str = Field(default="http://127.0.0.1:6333", validation_alias="QDRANT_URL")
-    qdrant_collection: str = Field(default="knowledge_chunks_v1", validation_alias="QDRANT_COLLECTION")
+    qdrant_url: str = Field(default="http://127.0.0.1:16333", validation_alias="QDRANT_URL")
+    qdrant_collection: str = Field(default="legal_knowledge_chunks_v1", validation_alias="QDRANT_COLLECTION")
     embedding_model: str = Field(default="BAAI/bge-base-en-v1.5", validation_alias="EMBEDDING_MODEL")
     embedding_dimension: int = Field(default=768, validation_alias="EMBEDDING_DIMENSION")
     chunk_target_tokens: int = Field(default=400, validation_alias="CHUNK_TARGET_TOKENS")
@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     structured_query_max_limit: int = Field(default=2000, ge=1, validation_alias="STRUCTURED_QUERY_MAX_LIMIT")
 
     model_runtime: Literal["ollama", "vllm"] = Field(default="ollama", validation_alias="MODEL_RUNTIME")
-    model_base_url: str = Field(default="http://127.0.0.1:11434", validation_alias="MODEL_BASE_URL")
+    model_base_url: str = Field(default="http://127.0.0.1:21434", validation_alias="MODEL_BASE_URL")
     # No default: a guessed model tag would silently benchmark the wrong model.
     model_name: str = Field(default="", validation_alias="MODEL_NAME")
     model_allowed_hosts: str = Field(
@@ -171,10 +171,8 @@ class Settings(BaseSettings):
     )
 
     cors_origins: list[str] = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
+        "http://localhost:15173",
+        "http://127.0.0.1:15173",
     ]
 
 

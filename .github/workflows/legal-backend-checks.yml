@@ -1,0 +1,36 @@
+name: Legal backend checks
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feat/legal-regulatory-platform-migration', 'team/**']
+  pull_request:
+    branches: ['main', 'feat/legal-regulatory-platform-migration']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: legal-backend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  legal-core:
+    if: github.repository == 'loktrishal-05/legal-compliance-regulatory-workbench'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate isolated test configuration
+        run: docker compose -f infra/docker-compose.legal-core-test.yml config --quiet
+      - name: Build bounded backend test runtime
+        run: docker compose -f infra/docker-compose.legal-core-test.yml build tests
+      - name: Legal scope, real session API and PostgreSQL policy checks
+        run: docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests
+      - name: Fresh and existing-schema migration acceptance
+        run: docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests python -B -m scripts.validate_legal_migrations
+      - name: Whitespace check
+        run: git -c core.whitespace=cr-at-eol diff --check
+      - name: Dispose only this test project
+        if: always()
+        run: docker compose -f infra/docker-compose.legal-core-test.yml down --volumes

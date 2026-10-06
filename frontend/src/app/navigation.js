@@ -10,7 +10,7 @@ export const APP_SECTIONS = [
     { path: 'workspace/voice', label: 'Voice query', icon: 'mic' },
     { path: 'agents', label: 'Agents', icon: 'agent' },
   ] },
-  { group: 'Evidence', items: [
+  { group: 'Legacy industrial', items: [
     { path: 'pid', label: 'P&ID Intelligence', icon: 'drawing' },
     { path: 'maintenance', label: 'Maintenance & Sensors', icon: 'pulse' },
     { path: 'operations', label: 'Operations', icon: 'tool' },
@@ -25,7 +25,7 @@ export const APP_SECTIONS = [
     { path: 'audit', label: 'Audit', icon: 'list', roles: REVIEWERS },
   ] },
   { group: 'Trust', items: [
-    { path: 'sovereignty', label: 'Sovereignty', icon: 'shield' },
+    { path: 'sovereignty', label: 'Private runtime', icon: 'shield' },
     { path: 'resources', label: 'Government Resources', icon: 'globe' },
     { path: 'help', label: 'Help & Resources', icon: 'help' },
   ] },
