@@ -1,5 +1,8 @@
 # Sovereign On-Premise Agentic AI Workbench
 
+Application repository: [legal-compliance-regulatory-workbench](https://github.com/loktrishal-05/legal-compliance-regulatory-workbench).
+Use this repository for all application changes and pushes. See [repository instructions](AGENTS.md).
+
 Current local deployment and runtime validation: [Phase 7 PowerShell guide](docs/phase7.md).
 
 SIH 2026 project. Phases 0–5B provide FastAPI, a React/Vite dashboard,
