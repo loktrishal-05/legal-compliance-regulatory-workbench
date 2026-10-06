@@ -1,6 +1,6 @@
 # Controlled legal-domain migration plan
 
-Status: **three-team backend handoff preparation on 2026-10-06**. A/B complete; C backend identity verified; initial D slice tested, phase still in progress. User owns frontend/landing and requests publication and three human teammate workstreams. Follow `TEAM_WORK_ALLOCATION.md`. Publish reviewed development checkpoint after report/confirmation; main history reconciliation is separate.
+Status: **three-team backend checkpoint published on 2026-10-06**. A/B complete; C backend identity verified; initial D slice tested, phase still in progress. User owns frontend/landing. Shared base 496f903 is published; three team branches/issues exist; main/development are protected. PR #4 holds handoff/CI corrections pending independent approval. Read `SESSION_RESUME.md` -> `CLAUDE_HANDOFF.md` and `TEAM_WORK_ALLOCATION.md`; main reconciliation is separate.
 
 ## How this guide must be used
 
@@ -34,7 +34,7 @@ Phase B's detailed [domain/permission/workflow/source contracts](LEGAL_DOMAIN_BU
 | H | In progress — deterministic core tested (Part 2, integrator) | Persist entities/mappings/assessments in 0022; review binding with Part 3 |
 | I | Not started | Durable obligations, deadlines and notifications |
 | J | Not started | Expanded legal review, remediation and audit |
-| K | Not started | Incremental real-data legal frontend |
+| K | Owner-managed, not accepted | User builds frontend; real-data/accessibility/end-to-end exit checks remain required |
 | L | Not started | Legal evaluation and security hardening |
 | M | Not started | Full isolated acceptance and recovery validation |
 
@@ -100,11 +100,11 @@ Phase B exit: user-approved development profile; inspected mature session/revisi
 - [x] Configure independently named Compose resources, ports, DB/index targets, launcher/proxy/CORS and CI without touching existing shared resources. Delivered early in A because shared defaults were a custody risk; actual provisioning remains gated.
 - [ ] Run relevant regression/frontend checks; verify no functional legal claims or cosmetic destructive storage renames were introduced.
 
-C pause evidence: isolated backend identity 2/2, custody 6/6, focused frontend 14/14 and full frontend 44/44 pass; lint passes with two existing warnings; build passes. Last checklist item stays open for desktop/mobile browser review, final source checks and honest native-backend limitation recording. Temporary preview was stopped on pause. Do not proceed to D before completing C's remaining gates.
+C historical pause evidence: isolated backend identity 2/2, custody 6/6, focused frontend 14/14 and full frontend 44/44 passed; lint/build passed. The user subsequently authorized backend D progress while taking frontend/C/K acceptance themselves; bounded mocked browser observations and published saved identity evidence are in VALIDATION_REPORT. Do not resume frontend work or treat deferred frontend acceptance as passed. The old C-only pause dependency is superseded by this explicit scope decision.
 
 ### Phase D — legal core and access control
 
-Current step: checkpoint seven scoped ORM tables, DB-derived role/clearance/grant policy, two metadata APIs and migrations 0019/0020. 27 targeted checks and disposable fresh/0018-to-head upgrades pass. Remaining D: audited provisioning, explicit ownership/quarantine, tenant dedupe and old content/retrieval/review/audit isolation. No legal intake/pilot acceptance yet. Frontend implementation belongs to the user; publishing existing tested identity files needs a coherent snapshot decision.
+Current step: coordinate/review remaining D gates. Seven scoped ORM tables, DB-derived policy, two metadata APIs and migrations 0019/0020 were checkpointed/published in 87cd2bd; shared base is 496f903. 27 targeted checks and fresh/0018-to-head upgrades pass. Remaining D: audited provisioning, explicit ownership/quarantine, tenant dedupe and old content/retrieval/review/audit isolation. No legal intake/pilot acceptance yet. The user approved the existing tested identity snapshot; no new frontend implementation.
 
 - [ ] Reuse UUID/version/audit conventions; add Organization/Workspace/Membership/Matter and document-level access policy.
 - [ ] Add scoped source/domain references and validated API schemas; enforce server-derived context and tenant-qualified relationships.
@@ -204,6 +204,8 @@ Append a row when an implementation discovery changes the plan. Include the reas
 
 ## Requirements traceability plan
 
+Handoff plan-change note (2026-10-06; all phases/FRs, documentation only): user requested one Claude continuation reference. CLAUDE_HANDOFF consolidates approvals/state/team/review instructions; SESSION_RESUME points to it, old notes are archived, and actual migration/CI/publication instructions are synchronized. Existing PR #4 carries the documentation; no implementation gate or approval is waived.
+
 Use the detailed PDF catalogue, not its shifted p.67 overview ranges:
 
 | IDs | Ownership / checkpoint |
@@ -235,13 +237,13 @@ Every implemented requirement must point to source page/ID, changed component, r
 
 - Backend: existing `python -m unittest discover -s backend/tests -v`, plus targeted legal/security modules, with explicitly verified disposable DB/data/model settings; no live model flags by default.
 - Frontend: `npm.cmd --prefix frontend test`, `npm.cmd --prefix frontend run lint`, `npm.cmd --prefix frontend run build` after isolated dependency availability is checked.
-- Migration: adapt/use `scripts.validate_migrations` against a dedicated disposable PostgreSQL; baseline current 0018 and fresh; `alembic check`; immutable-table/trigger survival and preserved old records.
+- Migration: approved bounded checks use `scripts.validate_legal_migrations` via legal-core-test Compose, fresh and historical 0018 to actual head 0020; Alembic parity/idempotency/source-audit-trigger preservation. Future changes append after verified head and extend immutable-record checks. Private applied schema remains unaccepted; do not run the older validator against private settings blindly.
 - Retrieval/API integration: mocked adapters first; explicit disposable Qdrant/documents/role-scoped HTTP smoke next; no production/private service probing.
 - E2E: contract source -> proposed analysis -> independent review -> accepted obligation; requirement/control/evidence -> freshness change -> finding -> remediation/retest; approved regulatory version -> diff/impact -> audit snapshot; restart timers; unauthorized-user attempts.
 - AI/security: curated public/synthetic golden set, ungrounded output refusal, citation/version integrity, prompt injection, malicious files, cross-tenant search/exports/audit, secondary-copy logging checks. Separate approved live local evaluation from ordinary suite.
 - Recovery: isolated backup/restore/reindex and configuration/key recovery rehearsal before operational-pilot readiness.
 
-At each checkpoint: inspect callers -> minimal coherent diff -> relevant tests -> document commands/results/failures -> inspect root/origin/diff/status/recent log -> stage only intended paths -> local checkpoint commit -> verify committed paths and remaining user work. Stop if custody target unsafe. Do not include unrelated user changes or push. Commit at verified phase boundaries or coherent intermediate milestones, not after every tool call. Failed commits/hooks require correction and a new commit attempt; no hook bypass, amend or history rewriting.
+At each checkpoint: inspect callers -> minimal coherent diff -> relevant tests -> document commands/results/failures -> inspect root/origin/diff/status/recent log -> stage explicit intended paths -> local checkpoint commit -> verify committed paths and remaining user work. Stop if custody target unsafe. Do not include unrelated user work or push beyond recorded authorization/protected PR rules. Commit coherent verified milestones, not every tool call. Failed commits/hooks require correction/new attempt; no hook bypass, amend or history rewriting.
 
 ## Decisions requested with discovery approval
 

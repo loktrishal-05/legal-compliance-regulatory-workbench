@@ -43,7 +43,7 @@ No validated jurisdiction/industry pack exists. All fixture sources/playbooks ca
 
 Every legal object has explicit organization/workspace ownership. Relationship rows use tenant-qualified FK/unique constraints so cross-tenant links fail at the DB boundary as well as the service policy. Clients may select an authorized workspace but cannot supply an actor, role, approval status, accepted-state flag or trusted source authority.
 
-Add forward migrations after actual source head 0018. Applied database head remains unknown until disposable testing. Preserve old rows/IDs/hashes/triggers and already-applied migration files. Do not assign legacy ownership from facility names or account role; require operator mapping or keep unassigned legacy rows quarantined from legal APIs/search.
+Add forward migrations after the verified actual source head, currently `0020_legal_policy_audit` (original Phase B baseline was 0018; initial D added 0019/0020). Fresh/0018 upgrades are verified on disposable PostgreSQL only; private applied database state remains unknown/unaccepted. Preserve old rows/IDs/hashes/triggers and applied migration files. Do not assign legacy ownership from facility names or account role; require operator mapping or keep unassigned legacy rows quarantined from legal APIs/search.
 
 Current `DocumentVersion.source_sha256` is globally unique. Tenant-scoped duplicates require an explicitly reviewed forward constraint transition/backfill; do not reuse another tenant's version or return a global duplicate error that reveals its existence. Deduplicate accepted intake only within the authorized workspace, with source-hash/version/metadata idempotency rules.
 

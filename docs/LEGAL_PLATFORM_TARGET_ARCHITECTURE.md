@@ -36,7 +36,7 @@ Keep existing directory layout; the PDF's apps/packages layout, Next.js, Tempora
 
 ## Proposed relational core
 
-Preserve existing UUIDs/timestamps, Document/DocumentVersion and immutable ActionRevision/decision/manifests. Add new tables only through new migrations after 0018, with explicit tenant backfill and integrity strategy.
+Preserve existing UUIDs/timestamps, Document/DocumentVersion and immutable ActionRevision/decision/manifests. Original baseline was 0018; initial D added 0019/0020. New changes append after the verified actual head, currently 0020_legal_policy_audit, with explicit tenant backfill/integrity strategy.
 
 | Context | Entities and invariants |
 |---|---|
@@ -98,4 +98,4 @@ Explicit user-approved development handling for item 4: public/synthetic fixture
 
 Latest D update: seven additive scope tables reuse UUIDs/auth/terms/audit envelopes; centralized grant/role/clearance policy and metadata APIs verified with 27 bounded tests and fresh/0018-to-head migrations 0019/0020. Provisioning, dedupe and legacy/retrieval/audit content isolation remain gates before intake. Development classification labels are not validated privilege/jurisdiction policies. Team ownership follows `TEAM_WORK_ALLOCATION.md`; frontend implementation is user-owned. New PR baseline CI is automatic, older full regression remains manual. Unrelated main history requires reviewed reconciliation before promotion.
 
-Source configuration now uses an isolated legal Compose project, DB and index namespace; ports 55432 (DB), 16333/16334 (Qdrant), 18000 (backend), 15173 (frontend) and dedicated local model candidate 21434. Container model access requires explicit private endpoint/host values. CI is manual-only and exact-repository gated; foreign-target Compose backups fail closed. These replace hazardous inherited defaults, not existing storage resources. Runtime and legal feature capabilities remain proposed; private config/instance ownership must be accepted before provisioning. See the current runtime guide and validation evidence.
+Source configuration uses an isolated legal Compose project, DB/index namespace; ports 55432 (DB), 16333/16334 (Qdrant), 18000 (backend), 15173 (frontend), dedicated model candidate 21434. Model access requires explicit private endpoint/host. Full regression remains manual; scoped team baseline PR/push CI is automatic and repository-gated. Foreign backups fail closed. Private config/instance ownership remains gated; disposable D checks do not accept private runtime or unimplemented legal capabilities. Read runtime/validation and consolidated CLAUDE_HANDOFF.

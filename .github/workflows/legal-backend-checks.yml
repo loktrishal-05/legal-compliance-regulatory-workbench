@@ -20,7 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - name: Fetch authorized public source without nested tooling or credentials
+        run: |
+          git init --initial-branch=ci-checkout .
+          git remote add origin https://github.com/loktrishal-05/legal-compliance-regulatory-workbench.git
+          git -c protocol.file.allow=never fetch --no-recurse-submodules --depth=1 origin "$GITHUB_SHA"
+          git -c submodule.recurse=false checkout --detach FETCH_HEAD
       - name: Validate isolated test configuration
         run: docker compose -f infra/docker-compose.legal-core-test.yml config --quiet
       - name: Build bounded backend test runtime
