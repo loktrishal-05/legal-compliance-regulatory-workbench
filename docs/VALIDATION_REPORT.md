@@ -15,7 +15,7 @@ Date: 2026-10-06. Overall: **C backend identity verified; frontend acceptance de
 | K | Owner-managed frontend; real legal journeys/usability acceptance remains required |
 | L/M | Cross-system security/legal evaluation, full runtime/recovery/restore and final FR reconciliation pending |
 | Pilot gates | Enterprise identity/MFA/re-auth, validated legal packs/terms/retention/hold, private resource ownership and recovery/SLO acceptance pending |
-| Publication | Development checkpoint requested; main has unrelated history/no merge base, promotion/reconciliation separate |
+| Publication | Base 496f903 published/protected; PR #4 handoff/CI updates await independent approval; main reconciliation separate |
 
 All 66 FRs remain tracked. Three workstreams assign all backend work; none is dropped or accepted merely by publication. This is not a completed application or compliance claim.
 
@@ -168,3 +168,7 @@ Publication evidence: checkpoint `87cd2bd` pushed normally to the authorized dev
 Final remote checks: shared base 496f903 and CI run 37492025870 SUCCESS; three team branches match the base. Main/development protection read-back confirms strict legal-core, independent approval (including last-push requirement), stale-review dismissal, conversation resolution/admin enforcement, force pushes/deletions disabled. Main remains d95dfc3. No teammate PRs at final polling; GitHub issue assignees intentionally pending actual handles. Further evidence edits go through a normal PR; no protection bypass or automatic merge.
 
 Handoff PR #4 baseline run 37492479516 passed all scope/API/migration steps, but checkout-action post-cleanup warned because the inherited claudex-loop gitlink has no .gitmodules URL; this is not a feature test failure. Nested metadata remains untouched. The new baseline workflow is being corrected to fetch the authorized public source explicitly with no credentials and no recursive submodule operations; confirming remote run required. No root Git configuration changes or nested-tool repairs.
+
+Correction confirmed at 9cd84af: push 37492888207 and PR 37492895455 SUCCESS with credential-free/non-recursive source checkout, scoped tests and both migration paths. Results also recorded in PR #4; independent approval still required. No nested/main modification.
+
+Claude handoff is documentation only. Reverified Git/remote branches/issues/protection flags/PR head/checks; consolidated reading/approval/state/team/commit-review instructions and archived old resume notes. Referenced document targets exist; focused whitespace check passed and master PDF Git blob equals HEAD. No new application/legal/model test claim or local whole-app rerun. Commit only intended documentation to the existing review branch; required GitHub baseline CI runs normally after push, with results recorded in PR #4.

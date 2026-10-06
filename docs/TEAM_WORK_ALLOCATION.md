@@ -25,7 +25,7 @@ Tickets assign work to the three owner slots; GitHub assignees remain unset unti
 git clone --branch feat/legal-regulatory-platform-migration https://github.com/loktrishal-05/legal-compliance-regulatory-workbench.git
 ```
 
-Inside each teammate's own clone, create their assigned branch:
+The assigned remote branches below already exist. Clone the assigned branch directly or fetch it and use a normal tracking checkout in the teammate's own clean clone; do not recreate or overwrite an existing remote branch. For example: `git clone --branch team/1-documents-contracts https://github.com/loktrishal-05/legal-compliance-regulatory-workbench.git`.
 
 | Slot | Branch | Primary work |
 |---|---|---|
@@ -38,6 +38,8 @@ The integrating assistant reviews incoming PRs, runs relevant checks, fixes revi
 ## Mandatory reading and common rules
 
 Read `AGENTS.md`, `SESSION_RESUME.md`, `LEGAL_DOMAIN_MIGRATION_PLAN.md`, `MIGRATION_PROGRESS.md`, `VALIDATION_REPORT.md`, `LEGAL_DOMAIN_BUILD_CONTRACTS.md`, `LEGAL_REQUIREMENT_TRACEABILITY.md` and relevant master-report pages before each phase. Inspect existing callers before changing a shared component. The living guide's dependencies and exit checks still apply.
+
+Consolidated conversation/state/approvals/commit-review prompt for Claude or another assistant: `CLAUDE_HANDOFF.md`, linked from the current `SESSION_RESUME.md`. Historical resume notes are archived separately and must not override current ownership/protection/publication state.
 
 Use public/synthetic fixtures only. No private `.env`, source documents, secrets, model weights, customer data, nested tool repositories, historical worktrees, benchmark evidence edits, or deployment artifacts in commits. Current industrial terms/consents and old immutable/audit hashes remain intact. No live inference/deployment/private-DB migration without separate permission. Frontend acceptance remains pending with the owner.
 
