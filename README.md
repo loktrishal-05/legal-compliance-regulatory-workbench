@@ -1,6 +1,11 @@
 # Sovereign On-Premise Agentic AI Workbench
 
-Current local deployment and runtime validation: [Phase 7 PowerShell guide](docs/phase7.md).
+Application repository: [legal-compliance-regulatory-workbench](https://github.com/loktrishal-05/legal-compliance-regulatory-workbench).
+Use this repository for all application changes and pushes. See [repository instructions](AGENTS.md).
+
+Current workspace setup: [isolated legal runtime guide](docs/LEGAL_RUNTIME_SETUP.md).
+Build status and required phase checks: [living migration plan](docs/LEGAL_DOMAIN_MIGRATION_PLAN.md).
+The industrial phase descriptions and commands below are historical reference, not current setup instructions or legal-platform acceptance.
 
 SIH 2026 project. Phases 0–5B provide FastAPI, a React/Vite dashboard,
 PostgreSQL/SQLAlchemy, local PDF/P&ID evidence retrieval with Docling, BGE, and

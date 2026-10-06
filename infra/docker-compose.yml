@@ -1,17 +1,18 @@
+name: legal-compliance-regulatory-workbench
 services:
   postgres:
     image: postgres:17
     environment:
-      POSTGRES_DB: sovereign_workbench
+      POSTGRES_DB: legal_compliance_workbench
       POSTGRES_USER: postgres
       # Local development only. Override for any deployment.
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:55432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d sovereign_workbench"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d legal_compliance_workbench"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -19,8 +20,8 @@ services:
   qdrant:
     image: qdrant/qdrant:v1.17.0
     ports:
-      - "127.0.0.1:6333:6333"
-      - "127.0.0.1:6334:6334"
+      - "127.0.0.1:16333:6333"
+      - "127.0.0.1:16334:6334"
     volumes:
       - qdrant_data:/qdrant/storage
 

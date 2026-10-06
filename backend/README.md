@@ -1,8 +1,8 @@
 # Backend — Phase 4A
 
-Current local startup, readiness, and sovereignty controls:
-[Phase 7 deployment guide](../docs/phase7.md). Earlier phase descriptions below
-are historical; use `/docs` for the current authenticated API contracts.
+Current local setup: [isolated legal runtime guide](../docs/LEGAL_RUNTIME_SETUP.md).
+The phase descriptions, commands and validation claims below are historical reference only;
+do not execute their old resource targets for this application. Follow the living migration plan.
 
 A local model gateway abstracts a swappable local inference runtime (Ollama in
 development) behind a policy layer with no generation endpoint yet. See the
