@@ -114,7 +114,7 @@ Each PR includes: phase/FR IDs, exact paths, requirement basis, tests and comman
 | `app/api/router.py`, `app/db/models/__init__.py`, `main.py`, central auth/policy | Integrator reviews each additive change; teams propose small separate PRs |
 | Source/span/AI proposal contracts | Part 1 authors; Parts 2/3 acknowledge before consumers land |
 | Findings/event/review binding | Part 2 proposals + Part 3 authority; Part 1 integrates contract findings |
-| Migration chain | Current head `0020_legal_policy_audit`. Part 1 proposes 0021, Part 2 0022, Part 3 0023, **only after predecessor schema is agreed/merged**. Later revisions are allocated centrally; never create competing heads or use a speculative missing predecessor |
+| Migration chain | Head `0021_legal_provisioning_audit` (D provisioning audit vocabulary). With all teams unavailable the integrator builds sequentially and allocates the next revision at merge time; never create competing heads or use a speculative missing predecessor |
 | Early parallel model/rule development | Allowed with synthetic fixtures; dependent migrations/persistent APIs wait for actual predecessor. No fake phase completion |
 | Living guide/progress/validation/FR registry | Teams update affected sections in PRs; integrator resolves overlap and preserves actual evidence |
 | Docker/runtime/dependency configuration | Dedicated disposable targets only; no private resource probing; additions bounded and pinned |

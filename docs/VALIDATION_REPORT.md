@@ -149,6 +149,19 @@ Isolated frontend preview PID 14916 used proxy `http://127.0.0.1:9` and intercep
 
 One unintended authenticated redirect reached the legacy dashboard with a generic `{}` mock and caused a rendering error; probe timeouts and this mock-shape failure are not passes. Dashboard is outside this bounded identity check and no frontend repair was made. User subsequently deferred frontend/landing/design acceptance and K to their own work; backend D may proceed. Existing frontend files remain preserved outside the backend checkpoint. No broad unchanged suites repeated; earlier results remain dated evidence.
 
+## D audited provisioning — 2026-10-06
+
+Branch `team/1-documents-contracts` (integrator; all three teammates unavailable). Disposable legal-core Compose project only; network removed after each run.
+
+| Command | Result |
+|---|---|
+| `python -B -m unittest tests.test_legal_scope_provisioning` (Windows venv, SQLite) | 7 OK, 7 PostgreSQL skipped |
+| `docker compose ... run --rm tests` (all `test_legal_scope*`) | 41/41 OK (27 prior + 7 SQLite + 7 PostgreSQL provisioning) |
+| `docker compose ... run --rm tests python -B -m scripts.validate_legal_migrations` | PASS fresh and 0018 -> 0021: parity, idempotent, reversible without history, provisioning event accepted, unknown event rejected, lossy downgrade refused |
+| CLI `--help` / invalid UUID | parses; rejects before settings/DB import |
+
+Not covered: workspace-scoped dedupe, legacy route isolation, HTTP provisioning UI (intentionally none).
+
 ## Part 2 deterministic G/H core — 2026-10-06
 
 Branch `team/2-regulatory-compliance` (owner reassigned Part 2 to the integrator). Pure stdlib modules; no DB/settings/network/model access, so no test container dependency beyond Python.
