@@ -65,7 +65,7 @@ Snapshot verified immediately before writing this handoff; re-query on resume.
 | Open PR | **[#4](https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/pull/4)**, head `team/handoff-review-evidence`, base development; OPEN / REVIEW_REQUIRED |
 | PR #4 scope | Handoff evidence + explicit credential-free/non-recursive CI checkout; no new backend feature/frontend implementation; this consolidation extends its documentation scope |
 | Team branches | `team/1-documents-contracts`, `team/2-regulatory-compliance`, `team/3-workflows-assurance`, all initially at 496f903 |
-| Issues/people | Part 1 #1, Part 2 #3, Part 3 #2; accounts intentionally unassigned because actual handles were not supplied |
+| Issues/people | Part 1 #1 @Harsha-code-per, Part 2 #3 @Sanjjith27, Part 3 #2 @Cholan-kinnera (owner delegated the mapping; invitation order). Write invitations pending; assignment comments posted; set assignees after acceptance |
 
 Important normal checkpoints (do not amend): `34dc7af` terms/auth preservation; `dfea5db` A custody/config/plan; `3f94383` B domain/FR contracts; `1968d2e` inherited frontend preservation; `770c834` identity RED checks; **`87cd2bd`** scoped backend + saved identity + three-team handoff; **`496f903`** published evidence/shared base; `30caf9c` protections evidence; `9cd84af` CI checkout custody fix. Preservation snapshots are not fresh legal acceptance.
 
@@ -138,7 +138,7 @@ Detailed ordered tasks, owned paths, required checks and shared contracts: `TEAM
 | **Member 2** — `team/2-regulatory-compliance` — [#3](https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/issues/3) | G/H, FR-026..040, regulatory connectors/taxonomy interfaces. Deliver reviewed applicability/version/change/evidence/evaluation/finding contracts and events to Part 3 |
 | **Member 3** — `team/3-workflows-assurance` — [#2](https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/issues/2) | I/J and consolidated L/M, FR-041..047 and FR-054..066 coordination. Durable legal workflows, reviews/audit/remediation, service/webhook/admin contracts, security/restart/recovery/final acceptance. Every team still owns its own security tests |
 
-Frontend/K is the user. Assistant/Claude is the integration/review coordinator unless explicitly assigned another non-overlapping implementation scope. Request all three GitHub handles; only then assign issues to real accounts. Do not guess handles, invite collaborators or alter access based on slot names.
+Frontend/K is the user. Assistant/Claude is the integration/review coordinator unless explicitly assigned another non-overlapping implementation scope. Handles are mapped above; set GitHub assignees once invitations are accepted. Do not alter access beyond the owner's invitations. Independent PR approvals come from teammates (cross-review), never the owner account that also runs the assistant.
 
 Branches already exist remotely. A teammate can clone their branch directly, for example:
 
@@ -177,7 +177,7 @@ Remote main has unrelated history. Show the actual graph/tree differences and pr
 ## 8. Exact next actions for Claude
 
 1. Read the required files and reverify all state above. This workspace is deliberately not clean; preserve user artifacts.
-2. Ask for teammates' real GitHub handles and map Members 1/2/3 to issues #1/#3/#2. Confirm any needed access action separately; do not assume contributor invitations are authorized.
+2. Check invitation acceptance; set assignees #1 Harsha-code-per, #3 Sanjjith27, #2 Cholan-kinnera. Owner wants accepted work regularly reaching `main`; that requires the owner-approved one-time unrelated-history reconciliation first (see §7), then reviewed dev→main promotion PRs.
 3. Inspect PR #4 and its latest documentation/CI checks. It is a handoff PR, not a completed legal implementation, and must get independent approval; do not self-approve/merge with admin override.
 4. Inspect new teammate PRs/commits during active review, coordinate their D/E/source/review/migration dependencies and required evidence, reproduce/fix reviewed defects, integrate accepted work on development base.
 5. Remaining D is the first implementation gate. All three backend streams are assigned; only take an explicit non-overlapping implementation task or integrator correction, never quietly duplicate a human teammate's branch.
