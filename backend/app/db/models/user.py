@@ -31,8 +31,13 @@ class User(IdentityMixin, CreatedAtMixin, Base):
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     failed_login_attempts: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    terms_version: Mapped[str | None] = mapped_column(String(40))
+    terms_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    terms_request_host: Mapped[str | None] = mapped_column(String(255))
 
     __table_args__ = (
+        CheckConstraint("(terms_version IS NULL AND terms_accepted_at IS NULL AND terms_request_host IS NULL) OR "
+                        "(terms_version IS NOT NULL AND terms_accepted_at IS NOT NULL)", name="terms_acceptance_complete"),
         Index("uq_users_email_normalized", func.lower(email), unique=True),
         CheckConstraint("email IS NULL OR email = lower(trim(email))", name="email_normalized"),
     )

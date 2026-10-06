@@ -91,7 +91,7 @@ class PostgreSQLAccountsTests(unittest.TestCase):
             self.assertEqual(user.display_name, "preserved")
             self.assertIsNone(user.email); self.assertTrue(user.is_active); self.assertFalse(user.signup_pending)
             self.assertTrue(verify_password(PASSWORD, user.password_hash))
-            self.assertEqual(db.scalar(text("SELECT version_num FROM alembic_version")), "0017_accounts_recovery")
+            self.assertEqual(db.scalar(text("SELECT version_num FROM alembic_version")), "0018_terms_acceptance")
             accounts.login(db, "preserved", PASSWORD, str(uuid4()))
         with self.assertRaises(DBAPIError), self.engine.begin() as conn:
             conn.execute(text("UPDATE users SET email='UPPER@example.com' WHERE id=:id"), {"id": self.legacy_id})

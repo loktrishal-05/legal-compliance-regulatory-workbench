@@ -84,6 +84,7 @@ class Settings(BaseSettings):
 
     # Phase 5B local authentication. No hosted identity, no client-trusted header.
     session_cookie_name: str = Field(default="workbench_session", validation_alias="SESSION_COOKIE_NAME")
+    current_terms_version: str = Field(default="1.0", min_length=1, max_length=40, pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]*$", validation_alias="CURRENT_TERMS_VERSION")
     session_ttl_seconds: float = Field(default=8 * 3600, gt=0, validation_alias="SESSION_TTL_SECONDS")
     # True requires HTTPS (browsers drop Secure cookies over plain http). Local
     # dev over http needs this False; set True behind TLS in any real deployment.

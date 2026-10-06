@@ -7,13 +7,15 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, require_role
+from app.api.deps import get_authenticated_user, require_role
 from app.core.config import settings
 from app.core.security import hash_password, hash_session_token
 from app.db.models import AuthIdentity, AuthSession, User
 from app.db.session import get_db
 from app.schemas.auth import AdminCreate, CodeRequest, EmailInput, Input, LoginRequest, ResetRequest, RoleRequest, SignupRequest, UserPublic
 from app.services import accounts, auth_delivery, auth_oidc
+from app.services import terms
+from app.schemas.auth import TermsAcceptance
 
 router = APIRouter(tags=["auth"])
 admin = require_role("admin")
@@ -64,13 +66,13 @@ def logout(request: Request, response: Response, db: Session = Depends(get_db)):
 
 
 @router.get("/auth/me")
-def me(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def me(user: User = Depends(get_authenticated_user), db: Session = Depends(get_db)):
     providers = db.scalars(select(AuthIdentity.provider).where(AuthIdentity.user_id == user.id)).all()
     return {**UserPublic.model_validate(user).model_dump(), "linked_identities": providers}
 
 
 @router.get("/auth/sessions")
-def sessions(request: Request, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def sessions(request: Request, user: User = Depends(get_authenticated_user), db: Session = Depends(get_db)):
     current = hash_session_token(request.cookies.get(settings.session_cookie_name, ""))
     rows = db.scalars(select(AuthSession).where(AuthSession.user_id == user.id, AuthSession.revoked_at.is_(None),
         AuthSession.expires_at > accounts.now()).order_by(AuthSession.created_at.desc()).limit(100)).all()
@@ -79,7 +81,7 @@ def sessions(request: Request, user: User = Depends(get_current_user), db: Sessi
 
 
 @router.post("/auth/sessions/revoke-all")
-def revoke_all(response: Response, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def revoke_all(response: Response, user: User = Depends(get_authenticated_user), db: Session = Depends(get_db)):
     db.refresh(user, with_for_update=True)
     count = accounts.revoke_sessions(db, user.id)
     accounts.event(db, "SESSIONS_REVOKED", user, count=count)
@@ -89,7 +91,7 @@ def revoke_all(response: Response, user: User = Depends(get_current_user), db: S
 
 
 @router.post("/auth/sessions/{session_id}/revoke")
-def revoke_one(session_id: UUID, request: Request, response: Response, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def revoke_one(session_id: UUID, request: Request, response: Response, user: User = Depends(get_authenticated_user), db: Session = Depends(get_db)):
     row = db.scalar(select(AuthSession).where(AuthSession.id == session_id, AuthSession.user_id == user.id).with_for_update())
     if row is None:
         raise HTTPException(404, "Session not found.")
@@ -99,6 +101,17 @@ def revoke_one(session_id: UUID, request: Request, response: Response, user: Use
     if row.token_hash == hash_session_token(request.cookies.get(settings.session_cookie_name, "")):
         response.delete_cookie(settings.session_cookie_name, path="/")
     return {"status": "revoked"}
+
+
+@router.get("/auth/terms/current")
+def current_terms(user: User = Depends(get_authenticated_user)):
+    return terms.current(user)
+
+
+@router.post("/auth/terms/accept")
+def accept_terms(payload: TermsAcceptance, request: Request, user: User = Depends(get_authenticated_user),
+                 db: Session = Depends(get_db)):
+    return terms.accept(db, user, payload, request.client.host if request.client else None)
 
 
 def dispatch_code(payload, request, background, db, purpose):

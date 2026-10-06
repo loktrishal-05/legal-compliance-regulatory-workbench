@@ -16,7 +16,7 @@ from app.db.models import AuthSession, User
 from app.db.session import get_db
 
 
-def get_optional_current_user(
+def get_session_user(
     session: Session = Depends(get_db),
     session_token: str | None = Cookie(default=None, alias=settings.session_cookie_name),
 ) -> User | None:
@@ -33,6 +33,19 @@ def get_optional_current_user(
         return None
     user = session.get(User, row.user_id)
     return user if user is not None and user.is_active and not user.signup_pending else None
+
+
+def get_authenticated_user(user: User | None = Depends(get_session_user)) -> User:
+    """Session/terms endpoints only; no Workbench authorization before acceptance."""
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication required.")
+    return user
+
+
+def get_optional_current_user(user: User | None = Depends(get_session_user)) -> User | None:
+    if user is not None and (user.terms_version != settings.current_terms_version or user.terms_accepted_at is None):
+        raise HTTPException(403, detail={"code": "terms_acceptance_required", "version": settings.current_terms_version})
+    return user
 
 
 def get_current_user(user: User | None = Depends(get_optional_current_user)) -> User:

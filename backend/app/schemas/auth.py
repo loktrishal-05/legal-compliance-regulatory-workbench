@@ -4,7 +4,7 @@ from uuid import UUID
 
 from datetime import datetime
 from typing import Literal
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, field_validator, model_validator
 from email_validator import validate_email, EmailNotValidError
 
 
@@ -17,6 +17,24 @@ def normalized_email(value: str) -> str:
 
 class Input(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+class TermsAcknowledgements(Input):
+    advisory_only: StrictBool
+    no_equipment_control: StrictBool
+    no_bypass: StrictBool
+    audit_logging: StrictBool
+
+    @model_validator(mode="after")
+    def all_required(self):
+        if not all(self.model_dump().values()):
+            raise ValueError("Every acknowledgement must be explicitly true")
+        return self
+
+
+class TermsAcceptance(Input):
+    version: str = Field(min_length=1, max_length=40)
+    acknowledgements: TermsAcknowledgements
 
 
 class EmailInput(Input):

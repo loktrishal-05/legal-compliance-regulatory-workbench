@@ -49,7 +49,7 @@ class AccountsTests(unittest.TestCase):
         self.addCleanup(app.dependency_overrides.pop, get_db)
         self.user = User(username="legacy", display_name="Alice Jones", email="alice@example.com", password_hash=HASH,
                          email_verified_at=service.now(), role="requester")
-        self.admin = User(username="administrator", display_name="Operator", password_hash=HASH, role="admin")
+        self.admin = User(terms_version="1.0", terms_accepted_at=service.now(), username="administrator", display_name="Operator", password_hash=HASH, role="admin")
         self.db.add_all([self.user, self.admin]); self.db.commit()
         self.client = TestClient(app, headers={"Origin": "http://testserver"})
         self.addCleanup(self.client.close)

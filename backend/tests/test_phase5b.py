@@ -279,8 +279,8 @@ class AuthHTTPTests(unittest.TestCase):
         self.addCleanup(self.engine.dispose)
         self.addCleanup(self.session.close)
 
-        self.requester = User(username="httprequester", role="requester", password_hash=hash_password("pass-req-1"))
-        self.reviewer = User(username="httpreviewer", role="reviewer", password_hash=hash_password("pass-rev-1"))
+        self.requester = User(username="httprequester", terms_version="1.0", terms_accepted_at=datetime.now(timezone.utc), role="requester", password_hash=hash_password("pass-req-1"))
+        self.reviewer = User(username="httpreviewer", terms_version="1.0", terms_accepted_at=datetime.now(timezone.utc), role="reviewer", password_hash=hash_password("pass-rev-1"))
         self.session.add_all([self.requester, self.reviewer])
         self.session.commit()
         self.client = TestClient(app)

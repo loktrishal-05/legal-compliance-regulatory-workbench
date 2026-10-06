@@ -563,8 +563,8 @@ class EvidenceIntegrityHTTPTests(unittest.TestCase):
         self.addCleanup(self.engine.dispose)
         self.addCleanup(self.session.close)
 
-        self.requester = User(username="httpd-requester", role="requester", password_hash=hash_password("r"))
-        self.reviewer = User(username="httpd-reviewer", role="reviewer", password_hash=hash_password("v"))
+        self.requester = User(username="httpd-requester", terms_version="1.0", terms_accepted_at=datetime.now(timezone.utc), role="requester", password_hash=hash_password("r"))
+        self.reviewer = User(username="httpd-reviewer", terms_version="1.0", terms_accepted_at=datetime.now(timezone.utc), role="reviewer", password_hash=hash_password("v"))
         self.session.add_all([self.requester, self.reviewer])
         self.session.commit()
 

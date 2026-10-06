@@ -47,7 +47,8 @@ class Phase5FSecurityTests(unittest.TestCase):
         with patch.object(settings, 'database_url', url.render_as_string(hide_password=False)):
             command.upgrade(Config(str(Path(__file__).resolve().parents[1] / 'alembic.ini')), 'head')
         with Session(cls.engine) as s:
-            users = [User(username=n, role=r, password_hash=hash_password('audit-only-password'))
+            users = [User(username=n, role=r, password_hash=hash_password('audit-only-password'),
+                          terms_version='1.0', terms_accepted_at=datetime.now(timezone.utc))
                      for n, r in [('requester', 'requester'), ('other', 'requester'), ('reviewer', 'reviewer')]]
             s.add_all(users)
             s.commit()
