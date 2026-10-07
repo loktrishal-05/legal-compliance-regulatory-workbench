@@ -27,6 +27,8 @@ Warnings: intentional duplicate-ZIP synthetic fixture warning; inherited Starlet
 
 Current full status: A/B source/design complete; C backend identity verified, frontend owner-managed; D development exit recorded with historical industrial-regression gap; E1 partial/hardened, E2/E3 pending; F pending; G/H deterministic core only, registry/domain persistence pending; I/J and L/M pending; K owner-managed. Enterprise identity/MFA/re-auth, legal packs/terms/retention/hold, model/private-resource/deployment and recovery/SLO approvals remain open. This is a verified partial backend checkpoint, not operational-pilot or all-66-FR acceptance. Publication requires the report shown to the user and explicit authorization; independent review remains a repository instruction even though GitHub's approval count is zero.
 
+Publication evidence: full status/report shown and explicit owner **Push and open PR** authorization received. Reverified exact root/origin/common metadata/no hook or URL overrides, intended all-commit diff/log and unchanged development base `b3dcf4f`; pushed `9327f9b` + `9e9e01e` normally to the authorized continuation branch and opened PR #13. `docker compose -f infra/docker-compose.legal-core-test.yml down --volumes` removed only the dedicated synthetic test container/network. No merge/main change/approval or private service operation. Remote CI is separate from these local results; verify the newest PR HEAD after this documentation-only evidence update.
+
 | Phase / area | Acceptance state |
 |---|---|
 | A/B | Source custody/configuration and approved development architecture complete; private deployment acceptance pending |

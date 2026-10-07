@@ -12,6 +12,8 @@ Delivered E1 corrections in `backend/app/services/legal_intake.py`, with reprodu
 
 Next: E2 sandboxed extraction/source spans and correction revisions, E3 scoped retrieval, F contract analysis and cited summaries, G/H persistence, I/J workflow authority/timers/audit, L/M integrated security/recovery/acceptance. Real upload extraction remains gated by an approved configured malware scanner; none is currently configured. No push performed at this checkpoint: full status/report must be shown and explicit publication authorization obtained under AGENTS.
 
+Publication follow-up: after the full status/validation report was shown, owner explicitly authorized **Push and open PR**. Commits `9327f9b` and `9e9e01e` pushed normally to the authorized continuation branch; PR #13 targets development. No merge/main promotion/self-approval. Test container/network cleanup passed; unrelated working-tree artifacts remain excluded. Latest remote CI/review must be checked on the evidence follow-up HEAD.
+
 | Checkpoint | Status |
 |---|---|
 | A custody/report/discovery | Complete: preserved branch activation, isolated defaults/CI/runbooks, offline regression/frontend checks |

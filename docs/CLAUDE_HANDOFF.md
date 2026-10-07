@@ -12,6 +12,8 @@ Updated: 2026-10-06. **One entry point for the next assistant.** This is a factu
 - A/B source/design complete; C backend identity verified; D development exit recorded with historical industrial regression gaps; E1 partial/hardened, E2/E3 and F pending; G/H deterministic core only; I/J/L/M pending. K/frontend remains owner-managed. Real uploads stay quarantined because no malware scanner is configured. No full FR/pilot/runtime/recovery acceptance.
 - Next build: E2 isolated extraction/OCR with exact source spans/corrections, then E3 authorized retrieval. No live model/private DB/deployment enablement. Local commits authorized; publication awaits the displayed full status/validation report and explicit push authorization. Root AGENTS independent-review/no-bypass rules remain binding even though GitHub currently requires zero approvals. Reverify actual commit/PR state; do not follow obsolete teammate-invitation, PR #4, migration 0022 or external-worktree commands below.
 
+Publication update: full migration/validation status shown; owner explicitly chose **Push and open PR**. RED `9327f9b` and GREEN `9e9e01e` pushed normally to the continuation branch; PR [#13](https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/pull/13) targets development. This evidence follow-up advances HEAD; reverify latest checks/review. No merge/main promotion or independent approval performed. Dedicated disposable test container/network removed.
+
 The original 2026-10-06 snapshot follows for provenance:
 
 - All three teammates are unavailable; the owner asked the integrator to build all remaining backend work and commit. Frontend/landing (K) stays with the owner.
