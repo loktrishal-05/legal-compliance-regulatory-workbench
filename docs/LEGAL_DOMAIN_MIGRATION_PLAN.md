@@ -6,6 +6,8 @@ Current continuation (2026-10-07): E1 hardening is on open PR #13; development s
 
 ## How this guide must be used
 
+Documentation/integration follow-up (2026-10-07): E2a published as `35f9e1b`; processed-upload replay corrected in the shared response contract after RED `2e033ba` and 6/6 API confirmation. README now documents actual source/runtime authority boundaries and labels future workflow diagrams explicitly. This changes presentation/evidence, not phase/FR acceptance or approved architecture. Remaining backend and owner-managed frontend/pilot gates stay open.
+
 This is the canonical execution checklist for rebuilding the **existing** codebase into the Legal & Regulatory Assurance Platform. The unchanged master PDF remains the product authority; this guide translates it into ordered implementation work, not a claim of delivered capabilities.
 
 Phase B's detailed [domain/permission/workflow/source contracts](LEGAL_DOMAIN_BUILD_CONTRACTS.md) and [66-requirement acceptance registry](LEGAL_REQUIREMENT_TRACEABILITY.md) are execution inputs for every relevant implementation phase. Update their actual component/test/demo evidence as work lands; no planning row is an implementation pass.

@@ -30,6 +30,6 @@ class IntakeResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
     document_id: UUID
     version_id: UUID
-    status: Literal["received", "quarantined"]
+    status: Literal["received", "quarantined", "ready", "needs_verification", "failed"]
     duplicate: bool
     quarantine_reasons: list[str]
