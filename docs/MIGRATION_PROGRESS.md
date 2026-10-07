@@ -4,6 +4,10 @@ Date: 2026-10-06. **Backend build resumed; user owns frontend/landing. D in prog
 
 ## Current state
 
+### Active continuation — 2026-10-07
+
+Verified current GitHub development `b3dcf4f`, main `a85494d`; PRs #4-#12 merged, no open PRs. Started `integration/backend-continuation-20261007` in the authorized root; preserved benchmark/nested/untracked user work. Merged D development exit and E1 intake are present; G/H has deterministic logic only. The local handoff branch was stale. Current work: tests-first E1 archive validation and immutable-original/duplicate integrity corrections before E2. No new frontend, private runtime, model execution or historical worktree operation.
+
 | Checkpoint | Status |
 |---|---|
 | A custody/report/discovery | Complete: preserved branch activation, isolated defaults/CI/runbooks, offline regression/frontend checks |

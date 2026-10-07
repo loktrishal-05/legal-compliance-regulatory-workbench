@@ -4,6 +4,14 @@ Date: 2026-10-06. Overall: **C backend identity verified; frontend acceptance de
 
 ## Current full migration status for team publication
 
+### 2026-10-07 E1 hardening — RED evidence
+
+Verified authorized root/origin/common metadata/sample-only hooks and Docker Desktop Linux context. Development is `b3dcf4f`, source migration head `0023_legal_intake_audit`; main is `a85494d`. Earlier status tables remain historical. PRs #4-#12 are merged; no open PRs. GitHub currently requires zero approvals but root AGENTS independent-review/no-bypass constraints are retained.
+
+`docker compose -f infra/docker-compose.legal-core-test.yml config --quiet` passed. Dedicated synthetic PostgreSQL only, internal network/no published ports/no private mounts/model and vector loopback port 9.
+
+RED command: `docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests python -B -m unittest discover -s tests -p test_legal_scope_intake.py -v`. After correcting two test subtest-context reporting errors, 28 tests ran with **17 intentional assertion failures, zero errors**: XML relationship quote/whitespace/character-reference/UTF-16 bypasses; malformed/DTD XML; duplicate/case-colliding ZIP members; unsupported compression; wrong source hash, duplicate tampering and publication overwrite race. Existing intake checks passed. This checkpoint is reproducer evidence, not E1 acceptance. Next: fix the shared service, rerun the target and broader scoped/migration checks.
+
 | Phase / area | Acceptance state |
 |---|---|
 | A/B | Source custody/configuration and approved development architecture complete; private deployment acceptance pending |
