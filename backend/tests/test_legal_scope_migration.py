@@ -53,7 +53,7 @@ class LegalScopeMigrationTests(unittest.TestCase):
                 migration_module.upgrade()
             target = MetaData(naming_convention=Base.metadata.naming_convention)
             for table in Base.metadata.tables.values():
-                if table.name.startswith("legal_") or table.name in {"users", "documents"}:
+                if (table.name.startswith("legal_") and table.name not in {"legal_extractions", "legal_source_spans"}) or table.name in {"users", "documents"}:
                     table.to_metadata(target)
             self.assertEqual(compare_metadata(context, target), [])
             self.assertEqual(conn.scalar(select(Document.checksum).where(Document.id == document_id)), "b" * 64)
@@ -64,7 +64,7 @@ class LegalScopeMigrationTests(unittest.TestCase):
         config = Config()
         config.set_main_option("script_location", str(BACKEND / "alembic"))
         script = ScriptDirectory.from_config(config)
-        self.assertEqual(script.get_heads(), ["0023_legal_intake_audit"])
+        self.assertEqual(script.get_heads(), ["0024_legal_extraction"])
         module = migration()
         self.assertEqual(module.down_revision, "0018_terms_acceptance")
         output = io.StringIO()

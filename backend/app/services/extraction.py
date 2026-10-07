@@ -4,8 +4,6 @@ from hashlib import sha256
 from pathlib import Path
 import re
 
-from app.core.config import settings
-
 
 def source_sha256(source: bytes) -> str:
     return sha256(source).hexdigest()
@@ -30,7 +28,7 @@ class Extraction:
     report: dict
 
 
-def inspect_pdf(source: bytes) -> tuple[list[Block], dict]:
+def inspect_pdf(source: bytes, *, retain_headings: bool = False) -> tuple[list[Block], dict]:
     import pymupdf
 
     blocks = []
@@ -59,7 +57,8 @@ def inspect_pdf(source: bytes) -> tuple[list[Block], dict]:
                     if any(span["size"] >= 13 or span["flags"] & 16 for span in spans):
                         depth = content.split()[0].rstrip(".").count(".") + 1
                         section = section[:depth - 1] + [content]
-                        continue
+                        if not retain_headings:
+                            continue
                 blocks.append(Block(content, section.copy(), index + 1, index + 1, [{
                     "page": index + 1, "coordinates": list(item["bbox"]), "origin": "TOPLEFT",
                 }]))
@@ -71,6 +70,7 @@ def inspect_pdf(source: bytes) -> tuple[list[Block], dict]:
 
 
 def _docling(source: bytes) -> tuple[list[Block], str, dict]:
+    from app.core.config import settings
     from io import BytesIO
     from docling.datamodel.base_models import InputFormat, DocumentStream
     from docling.datamodel.pipeline_options import PdfPipelineOptions

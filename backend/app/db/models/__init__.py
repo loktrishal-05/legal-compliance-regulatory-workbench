@@ -35,3 +35,5 @@ from app.db.models.durable_execution import DurableExecution, GraphCheckpoint, G
 from app.db.models.legal_scope import (
     Organization, Workspace, WorkspaceMembership, Matter, MatterAccess, LegalDocumentScope, DocumentAccess,
 )
+
+from app.db.models.legal_extraction import LegalExtraction, LegalSourceSpan

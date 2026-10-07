@@ -33,7 +33,7 @@ class LegalContext:
 # Legal audit is scoped (Phase J); the root industrial audit log never lists these.
 LEGAL_AUDIT_EVENT_TYPES = ("SECURITY_POLICY_DENIED", "LEGAL_WORKSPACE_BOOTSTRAPPED", "LEGAL_ACCESS_GRANTED",
                            "LEGAL_ACCESS_REVOKED", "LEGAL_LEGACY_DOCUMENT_MAPPED", "LEGAL_DOCUMENT_RECEIVED",
-                           "LEGAL_INTAKE_REJECTED")
+                           "LEGAL_INTAKE_REJECTED", "LEGAL_DOCUMENT_EXTRACTED", "LEGAL_EXTRACTION_FAILED")
 CLASSIFICATIONS = {"public": 0, "internal": 1, "confidential": 2, "restricted": 3}
 ROLE_OPERATIONS = {
     "analyst": {"read", "propose"},

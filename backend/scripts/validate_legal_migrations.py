@@ -68,8 +68,11 @@ def main():
                             assert verify_chain(db)["valid"]
                             assert db.execute(text("SELECT COUNT(*) FROM legal_document_scopes")).scalar() == 0
                         with scoped_engine.connect() as conn:
-                            assert triggers == conn.execute(text("SELECT tgname, pg_get_triggerdef(oid) FROM pg_trigger "
-                                "WHERE NOT tgisinternal ORDER BY tgname")).all()
+                            current = dict(conn.execute(text("SELECT tgname, pg_get_triggerdef(oid) FROM pg_trigger "
+                                "WHERE NOT tgisinternal ORDER BY tgname")).all())
+                            assert all(current.get(name) == definition for name, definition in triggers)
+                            assert {"immutable_legal_extractions", "immutable_legal_source_spans",
+                                    "immutable_truncate_legal_extractions", "immutable_truncate_legal_source_spans"} <= current.keys()
                     # 0021: reversible without history, accepts provisioning events, refuses lossy downgrade.
                     command.downgrade(config, "0020_legal_policy_audit")
                     command.upgrade(config, "head")
@@ -127,7 +130,40 @@ def main():
                     except Exception:
                         lossy_downgrade = False
                     assert not lossy_downgrade, "downgrade dropped provisioning audit vocabulary with history"
-                print(f"PASS: {baseline or 'fresh'} -> head, metadata parity, idempotent upgrade, 0021 audit vocabulary, 0022 scoped dedupe")
+                    # 0024: qualified FK, raw SQL/ORM-independent immutability and non-lossy downgrade.
+                    actor, version, artifact, span = uuid4(), uuid4(), uuid4(), uuid4()
+                    sha = "f" * 64
+                    with scoped_engine.begin() as conn:
+                        conn.execute(text("INSERT INTO users (id, username, role) VALUES (:a, 'synthetic-extractor', 'requester')"), {"a": actor})
+                        conn.execute(text("INSERT INTO document_versions (id, document_id, source_sha256, status, chunk_count, "
+                            "ingestion_metadata, warnings, organization_id, workspace_id) VALUES "
+                            "(:v, :d, :s, 'received', 0, '{}', '[]', :o, :w)"),
+                            {"v": version, "d": doc, "s": sha, "o": org, "w": ws})
+                        conn.execute(text("INSERT INTO legal_extractions (id, organization_id, workspace_id, document_id, "
+                            "version_id, source_sha256, policy_version, extractor, status, text, artifact_sha256, warnings, actor_id) "
+                            "VALUES (:id, :o, :w, :d, :v, :s, 'synthetic-v1', 'synthetic', 'ready', 'SYNTHETIC', :s, '[]', :a)"),
+                            {"id": artifact, "o": org, "w": ws, "d": doc, "v": version, "s": sha, "a": actor})
+                        conn.execute(text('INSERT INTO legal_source_spans (id, organization_id, workspace_id, extraction_id, start, "end", locator) '
+                            "VALUES (:id, :o, :w, :e, 0, 9, '{}')"), {"id": span, "o": org, "w": ws, "e": artifact})
+                    for table in ("legal_extractions", "legal_source_spans"):
+                        for statement in (f"DELETE FROM {table}", f"UPDATE {table} SET id=id", f"TRUNCATE {table} CASCADE"):
+                            try:
+                                with scoped_engine.begin() as conn:
+                                    conn.execute(text(statement))
+                                raise AssertionError("immutable extraction history changed")
+                            except Exception as error:
+                                if isinstance(error, AssertionError):
+                                    raise
+                                assert "Legal extractions and source spans are immutable" in str(error)
+                    try:
+                        command.downgrade(config, "0023_legal_intake_audit")
+                        extraction_downgrade = True
+                    except Exception as error:
+                        assert "Legal extraction history exists" in str(error)
+                        extraction_downgrade = False
+                    assert not extraction_downgrade, "downgrade dropped immutable extraction history"
+                print(f"PASS: {baseline or 'fresh'} -> 0024, metadata parity, idempotent upgrade, legacy preservation, "
+                      "scope/dedupe and immutable extraction/span checks")
             finally:
                 scoped_engine.dispose()
                 with engine.begin() as conn:

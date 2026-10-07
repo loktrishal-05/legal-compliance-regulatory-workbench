@@ -6,6 +6,8 @@ Detailed execution contracts: [domain/permission/workflow/source contracts](LEGA
 
 ## Source understanding
 
+E2a delta (2026-10-07, continuation branch head 0024): PostgreSQL `legal_extractions` and `legal_source_spans` are immutable; a composite FK binds artifact organization/workspace/document/version/source SHA-256. Native parser receives the exact verified byte snapshot through a secret-free, resource-bounded Linux subprocess; no settings/DB/model/network adapters imported there. Scoped extraction/source APIs enforce current propose/read grants and do not expose storage paths. DOCX/PDF layout/low native text remains needs verification. Synchronous bounds are not a durable job engine or production sandbox; OCR/corrections/queue/recovery remain E2 exit work before E3/F. Legacy native parser default behavior is retained.
+
 2026-10-07 implementation delta: current migration head is 0023, with merged D provisioning/tenant dedupe/legacy isolation and E1 intake. E1 original publication now uses atomic create-only hard links in service-owned directories; duplicate intake rechecks byte/hash/path lineage. DOCX inspection streams bounded XML, blocks DTD/entities/macro content, decodes external relationships and rejects ambiguous ZIP members/unsupported compression. These are partial FR-007/009/010 controls, verified with 93 scoped tests; no extraction, scanner, index cutover, recovery or full-domain acceptance. Historical architecture snapshots below remain provenance; current guide/validation govern the next E2/E3 work.
 
 - Users (pp. 11,21): pilot Legal Counsel/Contract Reviewer, Compliance Officer, Business Owner, Auditor; administrators operate the tenant; risk/security/executive roles expand later.

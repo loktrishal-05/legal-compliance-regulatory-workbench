@@ -4,6 +4,8 @@ Updated: 2026-10-07. **Read [CLAUDE_HANDOFF.md](CLAUDE_HANDOFF.md) next.** Rever
 
 ## Current facts
 
+E2a continuation: owner authorized ongoing verified commits/pushes and README refresh. RED `20833ab`; native extraction/source-provenance implementation locally verified (126 scoped / 32 focused, service 90% / worker 84% line coverage, fresh/0018-to-0024 migrations and immutable-history proof pass). Current source head is 0024 on the continuation branch/PR #13; development still b3dcf4f pending review. README is the next checkpoint. OCR/corrections/durable jobs/kernel sandbox and E3 remain; scanner quarantine stays intact. Reverify actual HEAD/checks; show new evidence before publishing under the owner's standing scope.
+
 - Root: `C:\Users\Lohith k\Desktop\OLD hard work\legal-compliance-regulatory-workbench`. Only repository: `https://github.com/loktrishal-05/legal-compliance-regulatory-workbench.git`.
 - Development branch `feat/legal-regulatory-platform-migration` verified at `b3dcf4f` (PRs #4-#12 merged); migration head `0023_legal_intake_audit`.
 - Active branch `integration/backend-continuation-20261007`: RED `9327f9b`, GREEN `9e9e01e` published after report/explicit approval; PR [#13](https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/pull/13) targets development. This publication-evidence update advances HEAD; reverify actual commits/checks. 93 scoped tests, 33 focused tests, 96% intake line coverage; fresh/0018-to-0023 upgrades pass. PR review/merge remains pending.

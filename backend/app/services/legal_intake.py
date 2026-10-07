@@ -211,7 +211,7 @@ def store_original(data_root: Path, organization_id: UUID, workspace_id: UUID, s
     return relative.as_posix()
 
 
-def _verify_original(path: Path, sha: str) -> None:
+def _verify_original(path: Path, sha: str) -> bytes:
     try:
         if not stat.S_ISREG(path.lstat().st_mode):
             raise IntakeIntegrityError("stored original is not a regular file")
@@ -219,6 +219,7 @@ def _verify_original(path: Path, sha: str) -> None:
             data = handle.read(MAX_BYTES + 1)
         if len(data) > MAX_BYTES or hashlib.sha256(data).hexdigest() != sha:
             raise IntakeIntegrityError("stored original does not match its hash")
+        return data  # callers parse this exact verified snapshot, never a second file read
     except OSError:
         raise IntakeIntegrityError("stored original unavailable") from None
 

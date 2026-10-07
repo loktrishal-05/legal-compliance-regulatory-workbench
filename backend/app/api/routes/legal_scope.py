@@ -12,7 +12,9 @@ from app.db.models import Document, User
 from app.db.models.legal_scope import LegalDocumentScope, Workspace
 from app.db.session import get_db
 from app.schemas.legal_scope import IntakeResponse, LegalDocumentMetadata, WorkspaceMetadata
+from app.schemas.legal_extraction import ExtractionResponse, SourceSpanResponse
 from app.services import legal_intake
+from app.services import legal_extraction
 from app.services.audit import append_event
 from app.services.legal_policy import LegalAccessDenied, authorize_document, authorize_workspace
 
@@ -91,3 +93,40 @@ async def upload_document(workspace_id: UUID, request: Request,
         return IntakeResponse(document_id=result.document_id, version_id=result.version_id, status=result.status,
                               duplicate=result.duplicate, quarantine_reasons=list(result.quarantine_reasons))
     return await run_in_threadpool(run)
+
+
+@router.post("/{workspace_id}/documents/{document_id}/versions/{version_id}/extractions",
+             response_model=ExtractionResponse, status_code=201)
+def extract_document(workspace_id: UUID, document_id: UUID, version_id: UUID,
+                     db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    try:
+        result = legal_extraction.process(db, actor_id=user.id, workspace_id=workspace_id,
+            document_id=document_id, version_id=version_id, current_terms_version=settings.current_terms_version,
+            data_root=settings.data_root)
+    except LegalAccessDenied:
+        db.rollback()
+        unavailable(db, user.id, workspace_id, document_id, operation="extract")
+    except legal_extraction.ExtractionBlocked as error:
+        raise HTTPException(409, detail={"code": str(error)})
+    except legal_extraction.ParserFailed as error:
+        db.commit()  # failure state and mandatory failure audit share the caller's transaction
+        raise HTTPException(422, detail={"code": error.code})
+    except legal_intake.IntakeIntegrityError:
+        raise HTTPException(409, detail={"code": "source_integrity_failed"})
+    db.commit()
+    return ExtractionResponse(extraction_id=result.extraction_id, status=result.status,
+                              span_ids=list(result.span_ids), warnings=list(result.warnings))
+
+
+@router.get("/{workspace_id}/documents/{document_id}/versions/{version_id}/spans/{span_id}",
+            response_model=SourceSpanResponse)
+def source_span(workspace_id: UUID, document_id: UUID, version_id: UUID, span_id: UUID,
+                db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    try:
+        return legal_extraction.resolve_span(db, actor_id=user.id, workspace_id=workspace_id,
+            document_id=document_id, version_id=version_id, span_id=span_id,
+            current_terms_version=settings.current_terms_version)
+    except LegalAccessDenied:
+        unavailable(db, user.id, workspace_id, document_id, operation="source_span")
+    except legal_intake.IntakeIntegrityError:
+        raise HTTPException(409, detail={"code": "source_integrity_failed"})

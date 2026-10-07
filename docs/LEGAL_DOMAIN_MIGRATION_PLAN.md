@@ -2,7 +2,7 @@
 
 Status: **three-team backend checkpoint published on 2026-10-06**. A/B complete; C backend identity verified; initial D slice tested, phase still in progress. User owns frontend/landing. Shared base 496f903 is published; three team branches/issues exist; main/development are protected. PR #4 holds handoff/CI corrections pending independent approval. Read `SESSION_RESUME.md` -> `CLAUDE_HANDOFF.md` and `TEAM_WORK_ALLOCATION.md`; main reconciliation is separate.
 
-Current continuation (2026-10-07): E1 hardening is on open PR #13 at `0aef554` with passing CI; development still `b3dcf4f`. Owner requests E2, ongoing verified commits/pushes and a README architecture/system-design/flowchart refresh. E2a now in progress: bounded subprocess native TXT/DOCX/PDF extraction, additive immutable extraction/span records (proposed 0024), tenant/hash-bound source resolver and scoped APIs. Reuse PyMuPDF inspection with headings retained; no live model, real scanner enablement or frontend implementation. OCR execution/correction workflow, durable async dispatch and deployment-grade parser sandbox remain later E2 gates; low-quality/partial native extraction stays needs verification. Show checkpoint evidence before authorized publication; review/merge remains gated.
+Current continuation (2026-10-07): E1 hardening is on open PR #13; development still `b3dcf4f`. Owner requests E2, ongoing verified commits/pushes and a README architecture/system-design/flowchart refresh. E2a locally verified: bounded native TXT/DOCX/PDF subprocess, immutable tenant/source-bound extraction/spans (head 0024), exact quote resolver and scoped APIs. 126 scoped checks and 32 focused checks pass; fresh/0018-to-0024 upgrades, old-trigger preservation and new immutable UPDATE/DELETE/TRUNCATE/lossy-downgrade rejection pass. Reuse PyMuPDF inspection with headings retained; no live model, real scanner enablement or frontend implementation. OCR execution/correction workflow, durable async dispatch and deployment-grade parser sandbox remain later E2 gates; DOCX/PDF native layout stays needs verification. Show checkpoint evidence before authorized publication; review/merge remains gated.
 
 ## How this guide must be used
 
@@ -30,10 +30,10 @@ Phase B's detailed [domain/permission/workflow/source contracts](LEGAL_DOMAIN_BU
 | B | Complete: approved development scope and domain/FR contracts | Operational-pilot pack/IdP/retention/recovery approvals remain release gates |
 | C | Backend identity verified; frontend acceptance deferred to user | Preserve existing frontend changes; no further frontend implementation |
 | D | Complete for development exit checks (head 0022); industrial regression suites not executable in available runtimes (recorded gap) | Start E secure intake on scoped versions |
-| E | In progress — E1 secure intake tested (head 0023) | E2 extraction to exact source spans + correction revisions; E3 scoped retrieval |
+| E | In progress — E1 hardened; E2a native spans/API verified (head 0024 on continuation PR) | Validated OCR/correction workflow, durable jobs and parser sandbox; E3 scoped retrieval |
 | F | Not started | Contract analysis and grounded summaries |
-| G | In progress — deterministic core tested (Part 2, integrator) | Registry/import/version persistence in migration 0022 after Part 1's 0021 |
-| H | In progress — deterministic core tested (Part 2, integrator) | Persist entities/mappings/assessments in 0022; review binding with Part 3 |
+| G | In progress — deterministic core tested | Registry/import/version persistence after merged source-span predecessor; allocate actual next revision centrally |
+| H | In progress — deterministic core tested | Persist entities/mappings/assessments after source contracts; review binding with J |
 | I | Not started | Durable obligations, deadlines and notifications |
 | J | Not started | Expanded legal review, remediation and audit |
 | K | Owner-managed, not accepted | User builds frontend; real-data/accessibility/end-to-end exit checks remain required |
@@ -125,6 +125,7 @@ Current step (2026-10-06, integrator for Parts 1/2): E1 `app/services/legal_inta
 - [ ] Add secure upload/import with hash-preserved originals, type/size/archive limits, quarantine/scanning and isolated processing. Upload/limits/quarantine/originals done (E1); no malware engine is configured, so every real upload stays quarantined until one is approved; isolated processing comes with E2.
 - [ ] Adapt PDF extraction and add DOCX/approved formats; reuse OCR with legal layout/quality handling and correction revisions.
 - [ ] Persist exact version/page/section/offset/box source spans and derived-artifact lineage.
+  E2a verified partial: immutable `legal_extractions`/`legal_source_spans`, composite version/hash/tenant FK, `POST .../versions/{id}/extractions`, `GET .../versions/{id}/spans/{id}`. TXT Unicode line offsets, DOCX part/paragraph coordinates (tables/headers/footnotes), PDF page/box locators with headings retained. Current grants checked before source load and after parser success/failure; read alone cannot invoke extraction. Byte snapshot/hash is reverified on idempotent retries. CPU/memory/file/output/deadline bounds are development containment, not a kernel network/filesystem sandbox; actual OCR, corrections and durable job dispatch are still pending.
 - [ ] Propagate authorization/source metadata into dense/sparse retrieval, reranking and source viewers; use a controlled legal index rebuild.
 - [ ] Verify duplicates, malformed/scanned documents, low-confidence correction, retry/failure state and scoped citations before accepting intake.
 

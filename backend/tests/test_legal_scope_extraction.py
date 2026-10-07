@@ -3,11 +3,11 @@ import io
 import os
 from pathlib import Path
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from uuid import uuid4
 import zipfile
 
-from sqlalchemy import select, update, text
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 
 from app.db.base import Base
@@ -139,6 +139,7 @@ class LegalExtractionTests(unittest.TestCase):
 
     def test_source_tampering_is_denied_before_parser(self):
         received = self.prepare()
+        self.process(received)  # idempotent retries must still verify original integrity
         path = self.root / self.db.get(Document, received.document_id).source_path
         path.chmod(0o600)
         path.write_bytes(b"SYNTHETIC tampered")
@@ -146,6 +147,18 @@ class LegalExtractionTests(unittest.TestCase):
         with patch.object(extraction, "run_parser", side_effect=AssertionError("tampered parser")):
             with self.assertRaises(IntakeIntegrityError):
                 self.process(received)
+
+    def test_revocation_during_failed_parse_blocks_failure_state_and_audit(self):
+        received = self.prepare()
+        def revoked_failure(*args):
+            self.db.execute(update(DocumentAccess).where(DocumentAccess.document_id == received.document_id)
+                            .values(is_active=False))
+            self.db.flush()
+            raise extraction.ParserFailed("parser_timeout")
+        with patch.object(extraction, "run_parser", side_effect=revoked_failure), self.assertRaises(LegalAccessDenied):
+            self.process(received)
+        self.db.rollback()
+        self.assertEqual(list(self.db.scalars(select(AuditEvent).where(AuditEvent.event_type == "LEGAL_EXTRACTION_FAILED"))), [])
 
     def test_revocation_during_parse_blocks_persistence(self):
         received = self.prepare()
@@ -203,9 +216,50 @@ class ParserBoundaryTests(unittest.TestCase):
         self.assertEqual(error.exception.code, "parser_timeout")
 
     def test_output_limits_reject_without_truncating_legal_text(self):
-        from app.services.legal_parser_worker import parse
+        from app.services import legal_parser_worker as worker
         with self.assertRaises(ValueError):
-            parse(b"SYNTHETIC", "exe")
+            worker.parse(b"SYNTHETIC", "exe")
+        with patch.object(worker, "MAX_TEXT", 4), self.assertRaises(ValueError):
+            worker.parse(b"SYNTHETIC", "txt")
+        with patch.object(worker, "MAX_SPANS", 1), self.assertRaises(ValueError):
+            worker.parse(b"SYNTHETIC\nSECOND\n", "txt")
+
+    def test_invalid_or_oversize_child_output_and_environment(self):
+        def output_run(command, **kwargs):
+            self.assertEqual(command[1:3], ["-I", "-B"])
+            self.assertNotIn("SYNTHETIC_PRIVATE_TOKEN", kwargs["env"])
+            kwargs["stdout"].write(b"not json")
+            return Mock(returncode=0)
+        with patch.dict(os.environ, {"SYNTHETIC_PRIVATE_TOKEN": "test-only"}), patch.object(extraction.subprocess, "run", side_effect=output_run):
+            with self.assertRaises(extraction.ParserFailed) as error:
+                extraction.run_parser(b"SYNTHETIC", "txt")
+            self.assertEqual(error.exception.code, "parser_output_invalid")
+            with patch.object(extraction, "MAX_OUTPUT_BYTES", 4), self.assertRaises(extraction.ParserFailed) as error:
+                extraction.run_parser(b"SYNTHETIC", "txt")
+            self.assertEqual(error.exception.code, "parser_output_limit")
+
+    def test_native_worker_parser_matrix_and_dynamic_content(self):
+        from app.services.legal_parser_worker import parse
+        import pymupdf
+        with pymupdf.open() as pdf:
+            page = pdf.new_page()
+            page.insert_text((50, 50), "SYNTHETIC Buyer pays Seller within thirty days of invoice.")
+            parsed = parse(pdf.tobytes(), "pdf")
+        self.assertEqual(parsed["status"], "needs_verification")
+        self.assertEqual(parsed["spans"][0]["locator"]["page"], 1)
+        self.assertEqual(parse(b"\n\n", "txt")["status"], "needs_verification")
+        self.assertEqual(parse(synthetic_docx(), "docx")["spans"][1]["locator"]["paragraph"], 2)
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w") as archive:
+            archive.writestr("word/document.xml", '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:instrText>SYNTHETIC FIELD</w:instrText><w:t>Visible</w:t><w:br/></w:r></w:p></w:body></w:document>')
+        self.assertEqual(parse(buffer.getvalue(), "docx")["status"], "needs_verification")
+        malicious = io.BytesIO()
+        with zipfile.ZipFile(malicious, "w") as archive:
+            archive.writestr("word/document.xml", "<!DOCTYPE r [<!ENTITY x 'SYNTHETIC'>]><r>&x;</r>")
+        with self.assertRaises(ValueError):
+            parse(malicious.getvalue(), "docx")
+        with self.assertRaises(ValueError):
+            parse(b"", "txt")
 
 
 if __name__ == "__main__":
