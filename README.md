@@ -202,7 +202,7 @@ sequenceDiagram
     Policy-->>API: Authorized context or uniform denial
     API->>Intake: Detect format and inspect archive/content
     alt Input rejected
-        Intake->>DB: Rejection code + audit; no original stored
+        Intake->>DB: Rejection code + audit (no original stored)
         Intake-->>Analyst: 422
     else Input admissible
         Intake->>Intake: Workspace duplicate? authorize and verify
