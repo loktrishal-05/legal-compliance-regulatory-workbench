@@ -4,6 +4,10 @@ Date: 2026-10-06. **Backend build resumed; user owns frontend/landing. D in prog
 
 ## Current state
 
+### E2a start — 2026-10-07
+
+Owner authorized continuing E2 with ongoing verified commits/pushes and a professional README including architecture, system design and workflow diagrams. Root/origin/status reverified; PR #13 open/passing at `0aef554`; development `b3dcf4f`, main `a85494d`, no new workstream-3 remote commits. Continue on the authorized root branch. Current scope: tests-first native extraction, immutable scoped artifact/spans and source API through additive 0024. Existing scanner quarantine stays intact. README will clearly label implemented vs planned systems. Preserved unrelated user artifacts; no external worktree or private runtime execution.
+
 ### Active continuation — 2026-10-07
 
 Verified current GitHub development `b3dcf4f`, main `a85494d`; PRs #4-#12 merged, no open PRs at entry. Started `integration/backend-continuation-20261007` in the authorized root; preserved benchmark/nested/untracked user work. Merged D development exit and E1 intake are present; G/H has deterministic logic only. The local handoff branch was stale. No new frontend, private runtime, model execution or historical worktree operation.

@@ -4,6 +4,10 @@ Date: 2026-10-06. Overall: **C backend identity verified; frontend acceptance de
 
 ## Current full migration status for team publication
 
+### E2a start / RED — 2026-10-07
+
+Owner requested continuous verified commits/pushes and an advanced README refresh. Reverified authorized root/origin/common metadata/no config overrides, active branch `integration/backend-continuation-20261007` at `0aef554`, PR #13 OPEN with passing baseline CI; development `b3dcf4f`, migration head 0023. Approved Docker context `desktop-linux`, test Compose render PASS. New synthetic E2a test target executed in the approved Linux image and failed intentionally at the missing `app.db.models.legal_extraction` module. This is a missing-feature RED checkpoint, not test acceptance. Next add scoped immutable extraction/spans, bounded parser and source APIs; only then build the lock-aligned PyMuPDF test dependency and run actual tests. No live inference, scanner release or private runtime.
+
 ### 2026-10-07 E1 hardening — RED evidence
 
 Verified authorized root/origin/common metadata/sample-only hooks and Docker Desktop Linux context. Development is `b3dcf4f`, source migration head `0023_legal_intake_audit`; main is `a85494d`. Earlier status tables remain historical. PRs #4-#12 are merged; no open PRs. GitHub currently requires zero approvals but root AGENTS independent-review/no-bypass constraints are retained.

@@ -2,6 +2,8 @@
 
 Status: **three-team backend checkpoint published on 2026-10-06**. A/B complete; C backend identity verified; initial D slice tested, phase still in progress. User owns frontend/landing. Shared base 496f903 is published; three team branches/issues exist; main/development are protected. PR #4 holds handoff/CI corrections pending independent approval. Read `SESSION_RESUME.md` -> `CLAUDE_HANDOFF.md` and `TEAM_WORK_ALLOCATION.md`; main reconciliation is separate.
 
+Current continuation (2026-10-07): E1 hardening is on open PR #13 at `0aef554` with passing CI; development still `b3dcf4f`. Owner requests E2, ongoing verified commits/pushes and a README architecture/system-design/flowchart refresh. E2a now in progress: bounded subprocess native TXT/DOCX/PDF extraction, additive immutable extraction/span records (proposed 0024), tenant/hash-bound source resolver and scoped APIs. Reuse PyMuPDF inspection with headings retained; no live model, real scanner enablement or frontend implementation. OCR execution/correction workflow, durable async dispatch and deployment-grade parser sandbox remain later E2 gates; low-quality/partial native extraction stays needs verification. Show checkpoint evidence before authorized publication; review/merge remains gated.
+
 ## How this guide must be used
 
 This is the canonical execution checklist for rebuilding the **existing** codebase into the Legal & Regulatory Assurance Platform. The unchanged master PDF remains the product authority; this guide translates it into ordered implementation work, not a claim of delivered capabilities.
