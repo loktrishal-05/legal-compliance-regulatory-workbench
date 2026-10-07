@@ -6,6 +6,8 @@ Current continuation (2026-10-07): E1 hardening is on open PR #13; development s
 
 ## How this guide must be used
 
+Owner-requested documentation promotion (2026-10-07): README-only PR #14 merged to main as 04d719f after full diff/rendering review and required CI, under explicit main visibility instruction. Main code baseline unchanged (only README differs from a85494d). Backend #13 remains open; independent feature/pilot review and all phase exit gates remain. Current root continuation/source head 0024; next implementation is unfinished E2 gates then E3. This documentation change does not approve a new architecture or legal policy.
+
 Documentation/integration follow-up (2026-10-07): E2a published as `35f9e1b`; processed-upload replay corrected in the shared response contract after RED `2e033ba` and 6/6 API confirmation. README now documents actual source/runtime authority boundaries and labels future workflow diagrams explicitly. This changes presentation/evidence, not phase/FR acceptance or approved architecture. Remaining backend and owner-managed frontend/pilot gates stay open.
 
 This is the canonical execution checklist for rebuilding the **existing** codebase into the Legal & Regulatory Assurance Platform. The unchanged master PDF remains the product authority; this guide translates it into ordered implementation work, not a claim of delivered capabilities.

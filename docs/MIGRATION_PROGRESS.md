@@ -4,6 +4,12 @@ Date: 2026-10-06. **Backend build resumed; user owns frontend/landing. D in prog
 
 ## Current state
 
+### Owner-requested README promotion to main — 2026-10-07
+
+Owner reported the advanced README was absent from main and asked for the authorized repository to be fixed. Built a README-only branch from current main a85494d in the authorized root, preserving benchmark/nested/untracked bytes. Commits e89f662/fc34ea0 provide architecture, source ER, system design, intake/extraction/target flows, API/status/verification and references with explicit main/development/#13 availability. GitHub preview exposed a semicolon parse error in the sequence diagram; corrected it and reverified five SVG diagrams/ten tables with no errors.
+
+Reviewed all commits/full diff (only README), required legal-core run 37661284977 SUCCESS, current protection has zero approvals/strict check/admin enforcement/no force/delete; used a normal merge of PR #14 after the explicit owner main-fix instruction. Main is now **04d719f**; actual diff from a85494d is README only. No self-approval, protection change or backend/main-feature acceptance. Repository homepage confirms advanced README rendering. Backend PR #13 remains OPEN (e3f677d check run 37659371892 SUCCESS), with remaining E2/E3/F/G-H persistence/I-J/L-M gates unchanged. Returned to root continuation branch. Final evidence-only update/push follows; no new runtime services/models.
+
 ### E2a start — 2026-10-07
 
 Owner authorized continuing E2 with ongoing verified commits/pushes and a professional README including architecture, system design and workflow diagrams. Root/origin/status reverified; PR #13 open/passing at `0aef554`; development `b3dcf4f`, main `a85494d`, no new workstream-3 remote commits. Continue on the authorized root branch. Current scope: tests-first native extraction, immutable scoped artifact/spans and source API through additive 0024. Existing scanner quarantine stays intact. README will clearly label implemented vs planned systems. Preserved unrelated user artifacts; no external worktree or private runtime execution.
