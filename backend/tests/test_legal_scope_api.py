@@ -170,6 +170,9 @@ class LegalScopeApiTests(unittest.TestCase):
             self.assertEqual(source.json()["quote"], "SYNTHETIC contract payment within 30 days.\n")
             self.assertEqual(source.headers["cache-control"], "no-store")
             self.assertNotIn("source_path", source.json())
+            replay = self.client.post(f"/v1/workspaces/{ws.id}/documents", content=b"SYNTHETIC contract payment within 30 days.\n",
+                params={"filename": "synthetic.txt", "document_type": "contract", "classification": "internal"})
+            self.assertEqual((replay.status_code, replay.json()["status"], replay.json()["duplicate"]), (201, "ready", True))
             self.assertEqual(self.client.get(base + "/spans/" + str(uuid4())).status_code, 404)
             self.fixture.db.execute(update(DocumentAccess).where(DocumentAccess.document_id == received.document_id)
                                     .values(is_active=False))

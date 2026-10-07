@@ -10,6 +10,8 @@ Owner requested continuous verified commits/pushes and an advanced README refres
 
 ### E2a native extraction / immutable provenance — GREEN, 2026-10-07
 
+Post-checkpoint integration review found a lifecycle response bug: repeating intake after successful extraction returned stored `ready`, but `IntakeResponse.status` still accepted only `received`/`quarantined`. Added the actual HTTP replay journey; API target ran 6 tests with 1 intended Pydantic literal-validation error. Fix the shared response contract to include current legal processing states, preserving the existing immutable result rather than resetting its lifecycle. Earlier 126-check results predate this additional journey; reconfirm affected checks before next push.
+
 | Guarantee | Actual verification |
 |---|---|
 | Native TXT Unicode/CRLF quotes, DOCX paragraphs/table cells without invented pages, actual synthetic PDF headings/page boxes, blank-page uncertainty | `docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests python -B -m unittest discover -s tests -p test_legal_scope_extraction.py -v`; final focused target **32/32 PASS** |
