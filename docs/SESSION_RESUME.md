@@ -4,7 +4,7 @@ Updated: 2026-10-07. **Read [CLAUDE_HANDOFF.md](CLAUDE_HANDOFF.md) next.** Rever
 
 ## Current facts
 
-Latest continuation: E2a GREEN `35f9e1b` pushed; replay RED `2e033ba` corrected with 6/6 API confirmation; advanced README/source architecture and flowcharts prepared in the next checkpoint. Reverify final HEAD/CI on PR #13. All existing benchmark/nested/private artifacts preserved. Next implementation: remaining E2 gates, then E3; no automatic merge/main promotion or unattended execution authorized.
+Latest continuation: E2a GREEN `35f9e1b` pushed; replay RED `2e033ba` corrected and professional README published in `54b1149` with 6/6 API confirmation. PR #13 `legal-core` passed at 54b1149 (run 37645213603). Live GitHub preview rendered all five Mermaid diagrams and 11 tables without Mermaid errors. This final documentation-evidence update advances HEAD; reverify newest CI/review. Dedicated test container/network removed. All existing benchmark/nested/private artifacts preserved. Next implementation: remaining E2 gates, then E3; no automatic merge/main promotion or unattended execution authorized.
 
 E2a continuation: owner authorized ongoing verified commits/pushes and README refresh. RED `20833ab`; native extraction/source-provenance implementation locally verified (126 scoped / 32 focused, service 90% / worker 84% line coverage, fresh/0018-to-0024 migrations and immutable-history proof pass). Current source head is 0024 on the continuation branch/PR #13; development still b3dcf4f pending review. README is the next checkpoint. OCR/corrections/durable jobs/kernel sandbox and E3 remain; scanner quarantine stays intact. Reverify actual HEAD/checks; show new evidence before publishing under the owner's standing scope.
 
