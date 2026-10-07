@@ -4,6 +4,16 @@ Updated: 2026-10-06. **One entry point for the next assistant.** This is a factu
 
 ## 0. Current state — 2026-10-06 (supersedes the §3/§4 snapshot rows below)
 
+### Current continuation — 2026-10-07 (supersedes dated snapshots and prompts below)
+
+- Verified development `b3dcf4f`, main `a85494d`; PRs #4-#12 merged, no open PRs at entry. Actual migration head `0023_legal_intake_audit`. Issues #1/#2/#3 currently assigned to the owner.
+- Authorized root-only branch `integration/backend-continuation-20261007`; RED checkpoint `9327f9b` and verified GREEN E1 corrections. Preserve existing benchmark/nested/private/untracked work and all external/historical worktrees; do not execute them.
+- Shared intake policy v2 fixes XML external-reference detection, rejects malformed/DTD/entity/macro/oversize XML and ambiguous/unsupported archives, verifies original/duplicate lineage and publishes without overwriting existing files. 33 focused checks, 93 scoped checks, 96% intake service line coverage and fresh/0018-to-0023 validation pass. See VALIDATION_REPORT for exact evidence and limitations.
+- A/B source/design complete; C backend identity verified; D development exit recorded with historical industrial regression gaps; E1 partial/hardened, E2/E3 and F pending; G/H deterministic core only; I/J/L/M pending. K/frontend remains owner-managed. Real uploads stay quarantined because no malware scanner is configured. No full FR/pilot/runtime/recovery acceptance.
+- Next build: E2 isolated extraction/OCR with exact source spans/corrections, then E3 authorized retrieval. No live model/private DB/deployment enablement. Local commits authorized; publication awaits the displayed full status/validation report and explicit push authorization. Root AGENTS independent-review/no-bypass rules remain binding even though GitHub currently requires zero approvals. Reverify actual commit/PR state; do not follow obsolete teammate-invitation, PR #4, migration 0022 or external-worktree commands below.
+
+The original 2026-10-06 snapshot follows for provenance:
+
 - All three teammates are unavailable; the owner asked the integrator to build all remaining backend work and commit. Frontend/landing (K) stays with the owner.
 - Owner set required approvals to **0** on `main` and development (kept: `legal-core` required, strict up-to-date, conversation resolution, admin enforcement, no force push/deletion). Integrator self-reviews; independent human review is an open acceptance gate.
 - Merged to development: #4 handoff/CI, #6 Part 2 deterministic G/H core, #7 D provisioning (0021), #8 D dedupe/isolation (0022). Development head `5ff7ed8`; migration head `0022_legal_version_scope`.

@@ -6,6 +6,8 @@ Detailed execution contracts: [domain/permission/workflow/source contracts](LEGA
 
 ## Source understanding
 
+2026-10-07 implementation delta: current migration head is 0023, with merged D provisioning/tenant dedupe/legacy isolation and E1 intake. E1 original publication now uses atomic create-only hard links in service-owned directories; duplicate intake rechecks byte/hash/path lineage. DOCX inspection streams bounded XML, blocks DTD/entities/macro content, decodes external relationships and rejects ambiguous ZIP members/unsupported compression. These are partial FR-007/009/010 controls, verified with 93 scoped tests; no extraction, scanner, index cutover, recovery or full-domain acceptance. Historical architecture snapshots below remain provenance; current guide/validation govern the next E2/E3 work.
+
 - Users (pp. 11,21): pilot Legal Counsel/Contract Reviewer, Compliance Officer, Business Owner, Auditor; administrators operate the tenant; risk/security/executive roles expand later.
 - Workflows (pp. 22-24,72): intake, contract review, regulatory version/change applicability, compliance assessment, evidence refresh, remediation, audit snapshot and authorized Q&A.
 - Contract output: entities/parties/terms/governing law, clause types, duties/rights/prohibitions, triggers/dates/renewals/notices, governed playbook deviations/missing clauses/conflicts, version redlines, cited summaries and reviewable obligations.

@@ -12,6 +12,21 @@ Verified authorized root/origin/common metadata/sample-only hooks and Docker Des
 
 RED command: `docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests python -B -m unittest discover -s tests -p test_legal_scope_intake.py -v`. After correcting two test subtest-context reporting errors, 28 tests ran with **17 intentional assertion failures, zero errors**: XML relationship quote/whitespace/character-reference/UTF-16 bypasses; malformed/DTD XML; duplicate/case-colliding ZIP members; unsupported compression; wrong source hash, duplicate tampering and publication overwrite race. Existing intake checks passed. This checkpoint is reproducer evidence, not E1 acceptance. Next: fix the shared service, rerun the target and broader scoped/migration checks.
 
+### 2026-10-07 E1 hardening — GREEN and scope
+
+| Check | Actual result |
+|---|---|
+| Same reproducer target after shared service fix | 28/28 PASS; all previously failing assertions now pass |
+| Additional XML size/macro, missing-original and symlink boundaries | Final focused intake target 33/33 PASS, including SQLite and PostgreSQL |
+| Line coverage | `... run --rm tests python -B -m trace --count --missing --summary --ignore-dir /usr/local/lib/python3.11 --coverdir /tmp/legal-intake-coverage --module unittest discover -s tests -p test_legal_scope_intake.py`: intake service **96%** (253 executable lines). Line coverage only; no whole-app/branch/E2E coverage claim. An earlier trace run omitted `--missing` and printed misleading 100% summaries; those percentages are discarded. |
+| Final scope/API/provisioning/isolation/migration regression | `docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests`: **93/93 PASS**, zero skipped tests |
+| Actual disposable PostgreSQL upgrades | `... run --rm tests python -B -m scripts.validate_legal_migrations`: fresh and 0018 -> actual head **0023** PASS, ORM parity and repeat upgrade, old evidence/audit/immutability preservation checks PASS |
+| Source/security review | Reviewed shared intake callers (versioned route + tests), authorization before duplicate original reads, stable rejection codes/audit without source text, no original replacement or missing-file repair, no new dependencies/migrations |
+
+Warnings: intentional duplicate-ZIP synthetic fixture warning; inherited Starlette httpx deprecation and SQLite expression-index reflection limitation. Checks run in the approved bounded Linux image, not full app startup or native Windows original-storage acceptance. Filesystem write-once assumes service-owned directories and hard-link support; protection against a malicious local administrator and filesystem crash-durability/restore remain L/M acceptance work. Simultaneous same-workspace DB duplicate insertion recovery, real malware scanner integration, real-world document corpora, sandboxed parsing/OCR, spans/corrections/retrieval and full legal journeys remain unfinished. HTTP intake still uses `scanner=None`, so real uploads remain quarantined.
+
+Current full status: A/B source/design complete; C backend identity verified, frontend owner-managed; D development exit recorded with historical industrial-regression gap; E1 partial/hardened, E2/E3 pending; F pending; G/H deterministic core only, registry/domain persistence pending; I/J and L/M pending; K owner-managed. Enterprise identity/MFA/re-auth, legal packs/terms/retention/hold, model/private-resource/deployment and recovery/SLO approvals remain open. This is a verified partial backend checkpoint, not operational-pilot or all-66-FR acceptance. Publication requires the report shown to the user and explicit authorization; independent review remains a repository instruction even though GitHub's approval count is zero.
+
 | Phase / area | Acceptance state |
 |---|---|
 | A/B | Source custody/configuration and approved development architecture complete; private deployment acceptance pending |

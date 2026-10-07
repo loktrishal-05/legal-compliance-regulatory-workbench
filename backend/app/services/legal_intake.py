@@ -15,7 +15,9 @@ import re
 import stat
 from typing import Callable
 from uuid import UUID, uuid4
+from xml.parsers import expat
 import zipfile
+import zlib
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -27,11 +29,12 @@ from app.services.legal_policy import (
     CLASSIFICATIONS, ROLE_OPERATIONS, LegalAccessDenied, authorize_document, authorize_workspace,
 )
 
-INTAKE_POLICY = "legal-intake-v1"
+INTAKE_POLICY = "legal-intake-v2"
 MAX_BYTES = 25 * 1024 * 1024  # ponytail: fixed cap; make it a setting when a deployment needs another
 DOCX_MAX_ENTRIES = 2000
 DOCX_MAX_UNCOMPRESSED = 100 * 1024 * 1024
 DOCX_MAX_RATIO = 100
+DOCX_MAX_XML_BYTES = 16 * 1024 * 1024
 EXTENSIONS = {"pdf": ".pdf", "docx": ".docx", "txt": ".txt"}
 PDF_ACTIVE = (b"/JavaScript", b"/JS", b"/Launch", b"/EmbeddedFile", b"/OpenAction", b"/AA", b"/RichMedia", b"/XFA")
 NESTED = (".zip", ".docx", ".docm", ".xlsx", ".xlsm", ".pptx", ".jar", ".7z", ".rar", ".exe", ".dll", ".bin")
@@ -82,6 +85,10 @@ def _inspect_docx(data: bytes) -> list[str]:
     except zipfile.BadZipFile:
         raise IntakeRejected("malformed_docx") from None
     infos = archive.infolist()
+    names = {i.filename for i in infos}
+    if len({i.filename.casefold() for i in infos}) != len(infos):
+        archive.close()
+        raise IntakeRejected("ambiguous_archive")
     if len(infos) > DOCX_MAX_ENTRIES or sum(i.file_size for i in infos) > DOCX_MAX_UNCOMPRESSED:
         raise IntakeRejected("archive_limits")
     reasons = []
@@ -91,6 +98,8 @@ def _inspect_docx(data: bytes) -> list[str]:
             raise IntakeRejected("unsafe_archive_path")
         if info.flag_bits & 0x1:
             raise IntakeRejected("encrypted_archive")
+        if info.compress_type not in {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED}:
+            raise IntakeRejected("unsupported_archive_compression")
         if info.file_size and (not info.compress_size or info.file_size / info.compress_size > DOCX_MAX_RATIO):
             raise IntakeRejected("archive_limits")
         lower = info.filename.lower()
@@ -98,17 +107,49 @@ def _inspect_docx(data: bytes) -> list[str]:
             raise IntakeRejected("macro_content")
         if lower.endswith(NESTED) or "/embeddings/" in lower:
             reasons.append("embedded_object")
-    names = {i.filename for i in infos}
     if not {"[Content_Types].xml", "word/document.xml"} <= names:
         raise IntakeRejected("malformed_docx")
     try:
         if archive.testzip() is not None:
             raise IntakeRejected("malformed_docx")
-        if any(b'TargetMode="External"' in archive.read(n) for n in names if n.endswith(".rels")):
-            reasons.append("external_reference")
-    except (zipfile.BadZipFile, OSError, EOFError, RuntimeError):
+        for info in infos:
+            if info.filename.lower().endswith((".xml", ".rels")):
+                _inspect_xml(archive, info, reasons)
+    except (zipfile.BadZipFile, OSError, EOFError, RuntimeError, NotImplementedError, zlib.error, expat.ExpatError):
         raise IntakeRejected("malformed_docx") from None
+    finally:
+        archive.close()
     return reasons
+
+
+def _inspect_xml(archive: zipfile.ZipFile, info: zipfile.ZipInfo, reasons: list[str]) -> None:
+    """Stream bounded XML; never resolve DTD/entities or interpret relationship text lexically."""
+    if info.file_size > DOCX_MAX_XML_BYTES:
+        raise IntakeRejected("archive_limits")
+    parser = expat.ParserCreate()
+
+    def reject_dtd(*args):
+        raise IntakeRejected("malformed_docx")
+
+    def element(name, attributes):
+        if attributes.get("TargetMode", "").casefold() == "external":
+            reasons.append("external_reference")
+        content_type = attributes.get("ContentType", "").lower()
+        if "macroenabled" in content_type or "vbaproject" in content_type:
+            raise IntakeRejected("macro_content")
+
+    parser.StartDoctypeDeclHandler = reject_dtd
+    parser.EntityDeclHandler = reject_dtd
+    parser.ExternalEntityRefHandler = reject_dtd
+    parser.StartElementHandler = element
+    with archive.open(info) as handle:
+        total = 0
+        while chunk := handle.read(64 * 1024):
+            total += len(chunk)
+            if total > DOCX_MAX_XML_BYTES:
+                raise IntakeRejected("archive_limits")
+            parser.Parse(chunk, False)
+        parser.Parse(b"", True)
 
 
 def inspect(data: bytes, filename: str) -> Inspection:
@@ -146,21 +187,40 @@ def inspect(data: bytes, filename: str) -> Inspection:
 def store_original(data_root: Path, organization_id: UUID, workspace_id: UUID, sha: str, fmt: str,
                    data: bytes) -> str:
     """Write-once content-addressed original; returns a data_root-relative POSIX path."""
+    if hashlib.sha256(data).hexdigest() != sha:
+        raise IntakeIntegrityError("original bytes do not match their hash")
     relative = PurePosixPath("legal", "originals", str(organization_id), str(workspace_id), f"{sha}{EXTENSIONS[fmt]}")
     path = Path(data_root, *relative.parts)
-    if path.exists():
-        if hashlib.sha256(path.read_bytes()).hexdigest() != sha:
-            raise IntakeIntegrityError("stored original does not match its hash")
+    if path.exists() or path.is_symlink():
+        _verify_original(path, sha)
         return relative.as_posix()
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{sha}.{uuid4().hex}.tmp")
-    with open(temporary, "xb") as handle:
-        handle.write(data)
-        handle.flush()
-        os.fsync(handle.fileno())
-    os.chmod(temporary, stat.S_IRUSR | stat.S_IRGRP)
-    os.replace(temporary, path)
+    try:
+        with open(temporary, "xb") as handle:
+            handle.write(data)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chmod(temporary, stat.S_IRUSR | stat.S_IRGRP)
+        try:
+            os.link(temporary, path)  # atomic create-only publication; never replace an original
+        except FileExistsError:
+            _verify_original(path, sha)
+    finally:
+        temporary.unlink(missing_ok=True)
     return relative.as_posix()
+
+
+def _verify_original(path: Path, sha: str) -> None:
+    try:
+        if not stat.S_ISREG(path.lstat().st_mode):
+            raise IntakeIntegrityError("stored original is not a regular file")
+        with open(path, "rb") as handle:
+            data = handle.read(MAX_BYTES + 1)
+        if len(data) > MAX_BYTES or hashlib.sha256(data).hexdigest() != sha:
+            raise IntakeIntegrityError("stored original does not match its hash")
+    except OSError:
+        raise IntakeIntegrityError("stored original unavailable") from None
 
 
 def _audit(db, event_type, ctx, **payload):
@@ -201,6 +261,12 @@ def receive(db: Session, *, actor_id: UUID, workspace_id: UUID, filename: str, d
                                current_terms_version=current_terms_version)
         except LegalAccessDenied:
             raise IntakeConflict("duplicate_in_workspace") from None
+        document = db.get(Document, existing.document_id)
+        relative = PurePosixPath("legal", "originals", str(ctx.organization_id), str(workspace_id),
+                                f"{sha}{EXTENSIONS[inspection.fmt]}")
+        if document.source_path != relative.as_posix() or document.checksum != sha:
+            raise IntakeIntegrityError("original lineage does not match its version")
+        _verify_original(Path(data_root, *relative.parts), sha)
         return IntakeResult(existing.document_id, existing.id, existing.status, True,
                             tuple(existing.ingestion_metadata.get("quarantine_reasons", ())))
     reasons = list(inspection.quarantine_reasons)

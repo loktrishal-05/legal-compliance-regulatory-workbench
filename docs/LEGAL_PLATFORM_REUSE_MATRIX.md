@@ -46,6 +46,8 @@ Status: reuse-first development baseline approved; legal feature implementation 
 
 No blanket backend rebuild, Next.js replacement, graph database, microservice split, Kubernetes or new AI provider is justified for the first slice. Required missing controls are not deferred merely for simplicity.
 
+2026-10-07 E1 reuse delta: retained the shared intake service, scoped policy and existing document/version/audit envelopes; stdlib Expat supplies streaming decoded XML validation, ZipFile member/compression guards bound archives, and `os.link` supplies create-only original publication. No new library/storage abstraction or migration. 93 scoped tests pass; actual head 0023. Scanner, parser sandbox/OCR/corrections/source spans and scoped retrieval remain E2/E3 work, not provided by these primitives.
+
 Initial D milestone: reuse Base UUID/timestamps/naming, model registry, session/terms dependencies and audit writer/hash envelopes; add scope tables/policy/metadata APIs through migrations 0019/0020. Disposable PostgreSQL policy/API/migration checks pass. Scoped dedupe, legacy-path compatibility and audited provisioning remain pending. No new frontend work; team ownership/PR/reconciliation rules are in `TEAM_WORK_ALLOCATION.md`.
 
 Phase A execution update: Docker/CI/defaults/runbooks were adapted for source-level isolation; existing password/terms/security/domain behavior remains intact. Backup Compose-target validation was extended and tested. Auxiliary tools/history remain quarantined reference material instead of being deleted or retargeted. Live resource provisioning, legal identity migration and all NEW domain capabilities remain unfinished.

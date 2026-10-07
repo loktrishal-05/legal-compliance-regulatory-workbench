@@ -173,6 +173,27 @@ class LegalIntakeTests(unittest.TestCase):
         with self.assertRaises(intake.IntakeIntegrityError):
             self.receive(TXT)
 
+    def test_missing_duplicate_original_is_not_silently_recreated(self):
+        result = self.receive(TXT)
+        path = self.root / self.db.get(Document, result.document_id).source_path
+        path.unlink()
+        with self.assertRaises(intake.IntakeIntegrityError):
+            self.receive(TXT)
+        self.assertFalse(path.exists())
+
+    def test_original_symlink_is_not_followed(self):
+        sha = hashlib.sha256(TXT).hexdigest()
+        relative = intake.store_original(self.root, self.ws.organization_id, self.ws.id, sha, "txt", TXT)
+        path = self.root / relative
+        path.unlink()
+        target = self.root / "synthetic-target.txt"
+        target.write_bytes(TXT)
+        path.symlink_to(target)
+        with self.assertRaises(intake.IntakeIntegrityError):
+            intake.store_original(self.root, self.ws.organization_id, self.ws.id, sha, "txt", TXT)
+        self.assertTrue(path.is_symlink())
+        self.assertEqual(target.read_bytes(), TXT)
+
     def test_content_address_must_match_bytes_before_storage(self):
         with self.assertRaises(intake.IntakeIntegrityError):
             intake.store_original(self.root, self.ws.organization_id, self.ws.id, "a" * 64, "txt", TXT)
@@ -252,6 +273,15 @@ class LegalArchiveInspectionTests(unittest.TestCase):
         with self.assertRaises(intake.IntakeRejected) as error:
             intake.inspect(buffer.getvalue(), "a.docx")
         self.assertEqual(error.exception.code, "unsupported_archive_compression")
+
+    def test_xml_limit_and_macro_content_type_rejected(self):
+        with patch.object(intake, "DOCX_MAX_XML_BYTES", 8), self.assertRaises(intake.IntakeRejected) as error:
+            intake.inspect(docx(), "a.docx")
+        self.assertEqual(error.exception.code, "archive_limits")
+        data = docx([("word/macro-types.xml", '<Override ContentType="application/vnd.ms-word.document.macroEnabled.main+xml"/>')])
+        with self.assertRaises(intake.IntakeRejected) as error:
+            intake.inspect(data, "a.docx")
+        self.assertEqual(error.exception.code, "macro_content")
 
 
 if __name__ == "__main__":

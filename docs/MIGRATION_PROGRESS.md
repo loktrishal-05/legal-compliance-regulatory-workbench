@@ -6,7 +6,11 @@ Date: 2026-10-06. **Backend build resumed; user owns frontend/landing. D in prog
 
 ### Active continuation — 2026-10-07
 
-Verified current GitHub development `b3dcf4f`, main `a85494d`; PRs #4-#12 merged, no open PRs. Started `integration/backend-continuation-20261007` in the authorized root; preserved benchmark/nested/untracked user work. Merged D development exit and E1 intake are present; G/H has deterministic logic only. The local handoff branch was stale. Current work: tests-first E1 archive validation and immutable-original/duplicate integrity corrections before E2. No new frontend, private runtime, model execution or historical worktree operation.
+Verified current GitHub development `b3dcf4f`, main `a85494d`; PRs #4-#12 merged, no open PRs at entry. Started `integration/backend-continuation-20261007` in the authorized root; preserved benchmark/nested/untracked user work. Merged D development exit and E1 intake are present; G/H has deterministic logic only. The local handoff branch was stale. No new frontend, private runtime, model execution or historical worktree operation.
+
+Delivered E1 corrections in `backend/app/services/legal_intake.py`, with reproducers and boundary checks in `backend/tests/test_legal_scope_intake.py`: decoded XML external-link checks, bounded XML/DTD/entity/macro guards, unambiguous ZIP member/compression checks, matching content address before storage, duplicate original integrity/lineage checks and create-only original publication with temporary-file cleanup. New records use `legal-intake-v2`; historical metadata/hashes stay untouched. RED checkpoint `9327f9b`: 17 intended assertions failed; final GREEN: 33 focused tests, 93 scoped tests, 96% intake service line coverage; fresh/0018-to-0023 validation passed. Existing warnings remain documented. Guide/validation/FR/architecture/reuse/handoff/resume synchronized; no phase/FR declared fully accepted.
+
+Next: E2 sandboxed extraction/source spans and correction revisions, E3 scoped retrieval, F contract analysis and cited summaries, G/H persistence, I/J workflow authority/timers/audit, L/M integrated security/recovery/acceptance. Real upload extraction remains gated by an approved configured malware scanner; none is currently configured. No push performed at this checkpoint: full status/report must be shown and explicit publication authorization obtained under AGENTS.
 
 | Checkpoint | Status |
 |---|---|
