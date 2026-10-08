@@ -4,6 +4,10 @@ Date: 2026-10-06. **Backend build resumed; user owns frontend/landing. D in prog
 
 ## Current state
 
+### Isolated real scanner validation start — 2026-10-08
+
+Owner requested proceeding one by one. Reverified local c5dd8b9, authorized root/remote/common metadata/no hook override, preserved unrelated work and desktop-linux context (8.16 GB Docker memory). Official latest release reports clamav-1.5.4; pulled official preloaded image and recorded digest `sha256:ebec5bc138401b36ae987caa1a3fa3c3b2a21ed3d51f0bfa5852825e663e67b0`. Image identity checks: clamav UID 100/GID 101; ClamAV 1.5.4, bundled daily signature 28136 dated 2026-09-27. Signature freshness is a current blocker; build the isolated updater/engine/test profile and update before acceptance. No private configuration/application services or frontend enabled.
+
 ### Phase E scanner integration start — 2026-10-08
 
 Owner requested building the remaining work. Root/origin/common metadata/sample-only hooks and user artifacts verified; continuation HEAD 9763a81 matches open PR #13, legal-core SUCCESS (run 37662308360). Docker context desktop-linux; disposable test targets inspected. First increment is configured local scanning through the existing intake callback, fail-closed outages/protocol handling and post-scan authorization recheck. Tests first; no real engine/private runtime/frontend/main integration enabled. Next: validate scanner adapter and HTTP intake, then remaining E2 gates.
