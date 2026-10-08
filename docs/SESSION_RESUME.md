@@ -1,8 +1,10 @@
 # Resume entry point — Claude / any incoming assistant
 
-Updated: 2026-10-07. **Read [CLAUDE_HANDOFF.md](CLAUDE_HANDOFF.md) next.** Reverify current state; dated historical notes are not current execution instructions.
+Updated: 2026-10-08. **Read [CLAUDE_HANDOFF.md](CLAUDE_HANDOFF.md) next.** Reverify current state; dated historical notes are not current execution instructions.
 
 ## Current facts
+
+Latest local build (2026-10-08): optional local ClamAV INSTREAM adapter + settings/upload wiring and intake v3 outage/protocol quarantine/redacted scan provenance/post-scan policy recheck. RED `991437c`; GREEN locally verified with 139 scoped tests, 98% adapter line coverage and fresh/0018-to-0024 upgrades. Default remains unconfigured; real HTTP uploads still quarantine, actual engine/signature/limit acceptance and rescan/release remain open (runtime guide §8). No push/main integration. PR #13 verified OPEN at remote 9763a81, CI SUCCESS run 37662308360. Next remaining E2 OCR/corrections/durable jobs/sandbox, then E3. Reverify local GREEN HEAD; older publication snapshots below are historical.
 
 Main README visibility fixed at the owner's explicit request: README-only PR [#14](https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/pull/14) merged normally after content/rendering review and required CI. `main` now `04d719f`; diff from prior `a85494d` is **README.md only**. Main homepage displays all five diagrams without errors. Backend PR #13 remains OPEN; e3f677d CI passed (run 37659371892). Returned to root continuation branch; this evidence update advances its HEAD. Reverify latest checks. No backend feature/main-pilot acceptance or independent-human feature approval is implied by the documentation promotion.
 

@@ -83,3 +83,17 @@ Never execute old seed/restore/staging scripts as setup. Keep credentials/model 
 ## 7. Backup compatibility
 
 The `--compose` backup path now accepts only this project's native loopback database on `55432`, DB `legal_compliance_workbench`, and isolated Qdrant on `16333`. It pins the Compose project name. Foreign/historical targets are rejected before command execution. It still requires operator-quiesced writers and verified protected storage; no backup/restore was executed in Phase A. Native/site-specific backup remains an independently reviewed operation.
+
+## 8. Optional legal upload malware scanner — adapter delivered, engine unconfigured
+
+The continuation backend supports ClamAV `clamd` via a **local Unix-domain socket** using INSTREAM. Set `WORKBENCH_LEGAL_CLAMD_SOCKET` to the approved absolute socket path as visible inside the backend runtime (at most 107 UTF-8 bytes), and `WORKBENCH_LEGAL_SCAN_TIMEOUT_SECONDS` to a positive value at most 30 seconds. Blank socket is the default. No TCP/public scanner address, shell command, source filename or storage path is sent; only the already-authorized, bounded upload bytes stream to the local engine. Native Windows engine integration is not delivered; use an approved Linux runtime for this adapter.
+
+Only the exact complete `stream: OK` NUL-terminated reply permits a new upload to become `received`. Detection, malformed/oversized/truncated responses, socket failure and total-deadline timeout keep it `quarantined`. Structural quarantine reasons still apply even after a clean scan. Ingestion metadata and the transactional intake audit record scan policy/outcome; signatures, socket paths and raw scanner errors are omitted. Duplicate upload never releases an existing quarantine or rewrites history. A rescan/release workflow remains to be built.
+
+Before enabling on real uploads, the operator must provision a dedicated least-privilege engine, verify socket ownership/permissions and backend mount, approve pinned engine/signature update policy and freshness monitoring, and configure ClamAV stream/scan/archive limits to cover the 25 MiB input / 100 MiB permitted DOCX expansion. Enable/verify limit-exceeded alerts so partial scans cannot report a clean result (`AlertExceedsMax` and applicable encrypted-content alerts). Verify clean synthetic text, the standard harmless EICAR test string, representative PDF/DOCX including archive-limit/encryption cases, engine outage and signature-update failures in the approved isolated scanner environment; preserve engine/config/signature-version evidence before approval. No engine was installed or probed by this checkpoint, and protocol peers are not detection-accuracy proof. Existing application Compose files do not provision or mount ClamAV; that is a deployment-specific approved step.
+
+Runnable adapter check (synthetic Unix-socket protocol peers, no live scanner):
+
+```powershell
+docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests python -B -m unittest discover -s tests -p test_legal_scope_scanner.py -v
+```

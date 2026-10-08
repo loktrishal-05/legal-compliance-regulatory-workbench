@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import AliasChoices, Field, model_validator
+from pydantic import AliasChoices, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     chunk_max_tokens: int = Field(default=500, validation_alias="CHUNK_MAX_TOKENS")
     chunk_overlap_tokens: int = Field(default=60, validation_alias="CHUNK_OVERLAP_TOKENS")
     data_root: Path = Path(__file__).resolve().parents[3] / "data"
+    legal_clamd_socket: str = ""  # WORKBENCH_LEGAL_CLAMD_SOCKET; off until operator-approved
+    legal_scan_timeout_seconds: float = Field(default=30, gt=0, le=30)
     model_root: Path = Path(__file__).resolve().parents[3] / "models"
     pid_vision_enabled: bool = Field(default=False, validation_alias="PID_VISION_ENABLED")
     pid_vision_model: str = Field(default="qwen3.5:9b", validation_alias="PID_VISION_MODEL")
@@ -126,6 +128,12 @@ class Settings(BaseSettings):
     @property
     def model_allowed_hosts_set(self) -> set[str]:
         return {host.strip().lower() for host in self.model_allowed_hosts.split(",") if host.strip()}
+
+    @field_validator("legal_clamd_socket")
+    @classmethod
+    def validate_legal_scanner(cls, value: str) -> str:
+        from app.services.legal_malware import validate_socket_path
+        return validate_socket_path(value)
 
     @model_validator(mode="after")
     def validate_pipeline(self):

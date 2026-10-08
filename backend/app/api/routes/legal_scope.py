@@ -15,6 +15,7 @@ from app.schemas.legal_scope import IntakeResponse, LegalDocumentMetadata, Works
 from app.schemas.legal_extraction import ExtractionResponse, SourceSpanResponse
 from app.services import legal_intake
 from app.services import legal_extraction
+from app.services.legal_malware import configured_scanner
 from app.services.audit import append_event
 from app.services.legal_policy import LegalAccessDenied, authorize_document, authorize_workspace
 
@@ -81,7 +82,7 @@ async def upload_document(workspace_id: UUID, request: Request,
                 db, actor_id=user.id, workspace_id=workspace_id, filename=filename, document_type=document_type,
                 classification=classification, data=bytes(body), matter_id=matter_id,
                 current_terms_version=settings.current_terms_version, data_root=settings.data_root,
-                scanner=None)  # no malware scanner is configured: uploads stay quarantined
+                scanner=configured_scanner(settings))
         except LegalAccessDenied:
             unavailable(db, user.id, workspace_id, operation="intake")
         except legal_intake.IntakeRejected as rejected:

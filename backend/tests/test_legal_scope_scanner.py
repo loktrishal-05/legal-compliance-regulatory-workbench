@@ -91,6 +91,13 @@ class ClamdScannerTests(unittest.TestCase):
                 Settings(_env_file=None, model_name="qwen3.5:9b", legal_clamd_socket=path)
         settings = Settings(_env_file=None, model_name="qwen3.5:9b", legal_clamd_socket="/tmp/synthetic.sock")
         self.assertIsNotNone(configured_scanner(settings))
+        for timeout in (0, -1, 31, float("nan"), float("inf")):
+            with self.subTest(timeout=timeout), self.assertRaises(ValueError):
+                Settings(_env_file=None, model_name="qwen3.5:9b", legal_scan_timeout_seconds=timeout)
+        from app.services.legal_malware import ClamdScanner
+        for path in ("", "/" + "s" * 107):
+            with self.subTest(path=path), self.assertRaises(ValueError):
+                ClamdScanner(path)
 
 
 if __name__ == "__main__":

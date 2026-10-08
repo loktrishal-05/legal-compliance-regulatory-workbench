@@ -87,6 +87,8 @@ Part 2 deterministic core evidence (2026-10-06, partial, not acceptance): `app/s
 
 ## NFR and innovation acceptance
 
+2026-10-08 partial FR-007 (supporting FR-002/003/010/054): optional local ClamAV INSTREAM adapter in `legal_malware.py`, Settings/HTTP intake wiring and intake v3 scan outcome/policy provenance. RED `991437c`; 139 scoped tests pass, adapter 98% line coverage, fresh/0018-to-0024 migrations pass. Synthetic protocol peers and stubbed scanner HTTP journeys verify fail-closed clean/detected/outage, bounded replies/deadline, no quarantine replay release and separate-session revocation before publication. Actual engine/signature/scan-limit acceptance, rescan/release, async work and production sandbox remain unbuilt/unconfigured; no full FR acceptance. Commands/limits: VALIDATION_REPORT and runtime guide §8.
+
 - **Isolation/security/privacy:** authorization before all retrieval/export/model context, malicious upload/parser isolation, least privilege, encrypted storage/transport, redacted telemetry, governed secondary copies. Verified by D/E/L/M; actual encryption/IdP/retention deployment remains unconfigured.
 - **Integrity/audit/explainability:** exact source lineage, immutable decisions and old hash compatibility, sufficient citations, visible uncertainty/status reasons, point-in-time replay. Verified by E-J/L.
 - **Reliability/recovery:** durable processing/receipts/timers, retry/restart/dead letters, model-outage deterministic workflow, dedicated backup/restore/reindex. Verified by E/I/J/M; no SLO or RPO/RTO attainment assumed.

@@ -78,7 +78,7 @@ class LegalIntakeTests(unittest.TestCase):
 
     def test_quarantine_reasons(self):
         cases = [(TXT, "a.txt", None, "malware_scanner_not_configured"),
-                 (TXT + b"x", "b.txt", lambda d: (False, "SYNTHETIC-SIGNATURE"), "malware_scan:SYNTHETIC-SIGNATURE"),
+                 (TXT + b"x", "b.txt", lambda d: (False, "SYNTHETIC-SIGNATURE"), "malware_scan:detected"),
                  (PDF.replace(b"<<>>endobj", b"<</JavaScript 1>>endobj"), "c.pdf", CLEAN, "pdf_active_content:JavaScript"),
                  (PDF.replace(b"trailer", b"PK\x03\x04 trailer"), "d.pdf", CLEAN, "embedded_archive"),
                  (docx(rels=b'<Relationship TargetMode="External" Target="http://x.invalid"/>'), "e.docx", CLEAN,
@@ -96,11 +96,14 @@ class LegalIntakeTests(unittest.TestCase):
 
     def test_scan_revocation_blocks_original_publication(self):
         from sqlalchemy import update
+        from sqlalchemy.orm import Session
         from app.db.models.legal_scope import WorkspaceMembership
+        actor_id = self.alice.id
         def revoke(data):
-            self.db.execute(update(WorkspaceMembership).where(WorkspaceMembership.user_id == self.alice.id)
-                            .values(is_active=False))
-            self.db.commit()
+            with Session(self.engine) as other:
+                other.execute(update(WorkspaceMembership).where(WorkspaceMembership.user_id == actor_id)
+                              .values(is_active=False))
+                other.commit()
             return True, "clean"
         with self.assertRaises(LegalAccessDenied):
             self.receive(TXT, scanner=revoke)
@@ -114,6 +117,13 @@ class LegalIntakeTests(unittest.TestCase):
         self.assertEqual((result.status, result.quarantine_reasons),
                          ("quarantined", ("malware_scan:unavailable",)))
         self.assertNotIn("private scanner", str(self.events("LEGAL_DOCUMENT_RECEIVED")[-1].payload))
+
+    def test_malformed_scanner_result_never_accepts_truthy_non_boolean(self):
+        for index, outcome in enumerate((("clean", "clean"), (1, "clean"), (True, None), None)):
+            with self.subTest(outcome=outcome):
+                result = self.receive(TXT + str(index).encode(), scanner=lambda data: outcome)
+                self.assertEqual((result.status, result.quarantine_reasons),
+                                 ("quarantined", ("malware_scan:unavailable",)))
 
     def test_rejections_are_audited_and_store_nothing(self):
         bomb = docx([("word/media/zeros.xml", b"\0" * (20 * 1024 * 1024))])

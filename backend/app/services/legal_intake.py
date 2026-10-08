@@ -29,7 +29,7 @@ from app.services.legal_policy import (
     CLASSIFICATIONS, ROLE_OPERATIONS, LegalAccessDenied, authorize_document, authorize_workspace,
 )
 
-INTAKE_POLICY = "legal-intake-v2"
+INTAKE_POLICY = "legal-intake-v3"
 MAX_BYTES = 25 * 1024 * 1024  # ponytail: fixed cap; make it a setting when a deployment needs another
 DOCX_MAX_ENTRIES = 2000
 DOCX_MAX_UNCOMPRESSED = 100 * 1024 * 1024
@@ -231,22 +231,27 @@ def _audit(db, event_type, ctx, **payload):
                           **{k: str(v) if isinstance(v, UUID) else v for k, v in payload.items()}})
 
 
-def receive(db: Session, *, actor_id: UUID, workspace_id: UUID, filename: str, document_type: str,
-            classification: str, data: bytes, current_terms_version: str, data_root: Path,
-            matter_id: UUID | None = None, scanner: Scanner | None = None) -> IntakeResult:
+def _authorize_intake(db, actor_id, workspace_id, classification, matter_id, current_terms_version):
     ctx = authorize_workspace(db, actor_id, workspace_id, current_terms_version=current_terms_version)
     if "propose" not in ROLE_OPERATIONS[ctx.role]:
         raise LegalAccessDenied()
     if classification not in CLASSIFICATIONS or CLASSIFICATIONS[classification] > CLASSIFICATIONS[ctx.clearance]:
         raise LegalAccessDenied()
-    if not DOCUMENT_TYPE.match(document_type):
-        raise IntakeRejected("invalid_document_type")
     if matter_id is not None:
         matter = db.get(Matter, matter_id)
         grant = db.get(MatterAccess, (matter_id, actor_id))
         if (matter is None or matter.workspace_id != workspace_id or not matter.is_active
                 or grant is None or not grant.is_active):
             raise LegalAccessDenied()
+    return ctx
+
+
+def receive(db: Session, *, actor_id: UUID, workspace_id: UUID, filename: str, document_type: str,
+            classification: str, data: bytes, current_terms_version: str, data_root: Path,
+            matter_id: UUID | None = None, scanner: Scanner | None = None) -> IntakeResult:
+    ctx = _authorize_intake(db, actor_id, workspace_id, classification, matter_id, current_terms_version)
+    if not DOCUMENT_TYPE.match(document_type):
+        raise IntakeRejected("invalid_document_type")
     sha = hashlib.sha256(data).hexdigest()
     try:
         inspection = inspect(data, filename)
@@ -273,10 +278,19 @@ def receive(db: Session, *, actor_id: UUID, workspace_id: UUID, filename: str, d
     reasons = list(inspection.quarantine_reasons)
     if scanner is None:
         reasons.append("malware_scanner_not_configured")
+        scan_outcome = "not_configured"
     else:
-        clean, finding = scanner(data)
+        try:
+            clean, finding = scanner(data)
+            if type(clean) is not bool or not isinstance(finding, str):
+                clean, finding = False, "unavailable"
+        except Exception:  # scanner boundary: preserve bytes in quarantine, never log raw errors
+            clean, finding = False, "unavailable"
+        scan_outcome = "clean" if clean else "unavailable" if finding == "unavailable" else "detected"
         if not clean:
-            reasons.append(f"malware_scan:{finding}")
+            reasons.append(f"malware_scan:{scan_outcome}")
+        db.expire_all()
+        ctx = _authorize_intake(db, actor_id, workspace_id, classification, matter_id, current_terms_version)
     status = "quarantined" if reasons else "received"
     source_path = store_original(data_root, ctx.organization_id, workspace_id, sha, inspection.fmt, data)
     document = Document(id=uuid4(), filename=safe_filename(filename), document_type=document_type,
@@ -290,13 +304,17 @@ def receive(db: Session, *, actor_id: UUID, workspace_id: UUID, filename: str, d
     version = DocumentVersion(id=uuid4(), document_id=document.id, source_sha256=sha, status=status, chunk_count=0,
                               organization_id=ctx.organization_id, workspace_id=workspace_id, warnings=reasons,
                               ingestion_metadata={"intake_policy": INTAKE_POLICY, "format": inspection.fmt,
-                                                  "size_bytes": len(data), "quarantine_reasons": reasons,
-                                                  "received_by": str(actor_id)})
+                                                   "size_bytes": len(data), "quarantine_reasons": reasons,
+                                                   "malware_scan": {"outcome": scan_outcome,
+                                                       "policy": getattr(scanner, "policy_version", "injected-scanner")
+                                                           if scanner else "not_configured"},
+                                                   "received_by": str(actor_id)})
     db.add(version)
     db.add(DocumentAccess(organization_id=ctx.organization_id, workspace_id=workspace_id,
                           document_id=document.id, user_id=actor_id, operation="read"))  # uploader read only
     db.flush()
     _audit(db, "LEGAL_DOCUMENT_RECEIVED", ctx, document_id=document.id, version_id=version.id, source_sha256=sha,
            size_bytes=len(data), format=inspection.fmt, status=status, quarantine_reasons=reasons,
+           malware_scan=version.ingestion_metadata["malware_scan"],
            matter_id=matter_id, uploader_grant="read")
     return IntakeResult(document.id, version.id, status, False, tuple(reasons))
