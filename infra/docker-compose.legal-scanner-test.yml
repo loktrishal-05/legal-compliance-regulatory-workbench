@@ -19,6 +19,8 @@ services:
   scanner:
     image: clamav/clamav@sha256:ebec5bc138401b36ae987caa1a3fa3c3b2a21ed3d51f0bfa5852825e663e67b0 # 1.5.4
     user: '100:101'
+    environment:
+      TZ: UTC
     entrypoint: [clamd, --config-file=/etc/clamav/clamd.conf]
     network_mode: none
     read_only: true

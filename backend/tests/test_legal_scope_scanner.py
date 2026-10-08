@@ -48,7 +48,7 @@ class ClamdScannerTests(unittest.TestCase):
 
                 worker = threading.Thread(target=peer)
                 worker.start()
-                result = ClamdScanner(path, timeout_seconds=0.1 if delay else 2)(data)
+                result = ClamdScanner(path, timeout_seconds=0.1 if delay else 2, max_signature_age_hours=None)(data)
                 worker.join(3)
                 self.assertFalse(worker.is_alive())
                 self.assertEqual(errors, [])
@@ -80,7 +80,8 @@ class ClamdScannerTests(unittest.TestCase):
         with patch("app.services.legal_malware.time.monotonic", side_effect=[0, 0, 0, 0, 31]):
             with patch("app.services.legal_malware.socket.socket") as factory:
                 factory.return_value.__enter__.return_value.recv.return_value = b"s"
-                self.assertEqual(ClamdScanner("/tmp/synthetic.sock")(b"SYNTHETIC"), (False, "unavailable"))
+                self.assertEqual(ClamdScanner("/tmp/synthetic.sock", max_signature_age_hours=None)(b"SYNTHETIC"),
+                                 (False, "unavailable"))
 
     def test_configuration_is_optional_local_absolute_and_bounded(self):
         from app.core.config import Settings
@@ -91,7 +92,7 @@ class ClamdScannerTests(unittest.TestCase):
             with self.subTest(path=path), self.assertRaises(ValueError):
                 Settings(_env_file=None, model_name="qwen3.5:9b", legal_clamd_socket=path)
         settings = Settings(_env_file=None, model_name="qwen3.5:9b", legal_clamd_socket="/tmp/synthetic.sock")
-        self.assertIsNotNone(configured_scanner(settings))
+        self.assertEqual(configured_scanner(settings).max_signature_age_hours, 72)
         for timeout in (0, -1, 31, float("nan"), float("inf")):
             with self.subTest(timeout=timeout), self.assertRaises(ValueError):
                 Settings(_env_file=None, model_name="qwen3.5:9b", legal_scan_timeout_seconds=timeout)
@@ -99,6 +100,11 @@ class ClamdScannerTests(unittest.TestCase):
         for path in ("", "/" + "s" * 107):
             with self.subTest(path=path), self.assertRaises(ValueError):
                 ClamdScanner(path)
+        for age in (0, 169, float("nan"), float("inf")):
+            with self.subTest(age=age), self.assertRaises(ValueError):
+                ClamdScanner("/tmp/synthetic.sock", max_signature_age_hours=age)
+            with self.subTest(setting_age=age), self.assertRaises(ValueError):
+                Settings(_env_file=None, model_name="qwen3.5:9b", legal_signature_max_age_hours=age)
 
     def test_configured_scanner_refuses_stale_or_invalid_signature_version_before_bytes(self):
         from app.core.config import Settings
@@ -121,7 +127,8 @@ class ClamdScannerTests(unittest.TestCase):
     def test_configured_scanner_checks_fresh_signatures_then_streams(self):
         from app.core.config import Settings
         from app.services.legal_malware import configured_scanner
-        version = datetime.now(timezone.utc).strftime("ClamAV 1.5.4/28147/%a %b %d %H:%M:%S %Y\0").encode()
+        timestamp = datetime.now(timezone.utc).strftime("%a %b %d %H:%M:%S %Y")
+        version = f"ClamAV 1.5.4/28147/{timestamp}\0".encode()
         with patch("app.services.legal_malware.socket.socket") as factory:
             connection = factory.return_value.__enter__.return_value
             connection.recv.side_effect = [version, b"", b"stream: OK\0", b""]
@@ -130,6 +137,20 @@ class ClamdScannerTests(unittest.TestCase):
             self.assertEqual(result, (True, "clean"))
             self.assertEqual(connection.sendall.call_args_list[0].args, (b"zVERSION\0",))
             self.assertEqual(factory.call_count, 2)
+
+    def test_signature_preflight_and_scan_share_one_deadline(self):
+        from app.core.config import Settings
+        from app.services.legal_malware import configured_scanner
+        timestamp = datetime.now(timezone.utc).strftime("%a %b %d %H:%M:%S %Y")
+        with patch("app.services.legal_malware.socket.socket") as factory:
+            connection = factory.return_value.__enter__.return_value
+            connection.recv.side_effect = [f"ClamAV 1.5.4/28147/{timestamp}\0".encode(), b""]
+            with patch("app.services.legal_malware.time.monotonic", side_effect=[0, 0, 0, 0, 0, 31]):
+                result = configured_scanner(Settings(_env_file=None, model_name="qwen3.5:9b",
+                    legal_clamd_socket="/tmp/synthetic.sock"))(b"SYNTHETIC timeout must not stream")
+            self.assertEqual(result, (False, "unavailable"))
+            self.assertEqual(connection.sendall.call_args_list[0].args, (b"zVERSION\0",))
+            self.assertEqual(connection.sendall.call_count, 1)
 
 
 if __name__ == "__main__":
