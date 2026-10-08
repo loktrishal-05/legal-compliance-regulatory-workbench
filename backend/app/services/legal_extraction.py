@@ -1,4 +1,4 @@
-"""E2a: scoped native extraction and exact immutable source resolver; caller commits."""
+"""Scoped native/opt-in OCR extraction and exact immutable source resolver; caller commits."""
 from dataclasses import dataclass
 import hashlib
 import json
@@ -40,17 +40,19 @@ class ExtractionResult:
     warnings: tuple[str, ...]
 
 
-def run_parser(data: bytes, fmt: str) -> dict:
+def run_parser(data: bytes, fmt: str, *, ocr: bool = False) -> dict:
     if sys.platform != "linux":
         raise ParserFailed("parser_runtime_unsupported")
     worker = Path(__file__).with_name("legal_parser_worker.py")
     # No inherited secrets/private .env, read-only input snapshot, fixed executable and format allowlist.
     if fmt not in EXTENSIONS:
         raise ParserFailed("unsupported_parser_format")
+    if ocr and fmt != "pdf":
+        raise ParserFailed("ocr_requires_pdf")
     with tempfile.TemporaryDirectory(prefix="legal-parser-") as cwd, tempfile.TemporaryFile() as output:
         try:
-            completed = subprocess.run([sys.executable, "-I", "-B", str(worker), fmt], input=data,
-                stdout=output, stderr=subprocess.DEVNULL, timeout=10, cwd=cwd,
+            completed = subprocess.run([sys.executable, "-I", "-B", str(worker), fmt] + (["--ocr"] if ocr else []), input=data,
+                stdout=output, stderr=subprocess.DEVNULL, timeout=30 if ocr else 10, cwd=cwd,
                 env={"LANG": "C.UTF-8", "PYTHONIOENCODING": "utf-8", "PYTHONDONTWRITEBYTECODE": "1"})
         except subprocess.TimeoutExpired:
             raise ParserFailed("parser_timeout") from None
@@ -92,7 +94,7 @@ def _audit(db, ctx, version, event_type, **payload):
 
 
 def process(db: Session, *, actor_id: UUID, workspace_id: UUID, document_id: UUID, version_id: UUID,
-            current_terms_version: str, data_root: Path) -> ExtractionResult:
+            current_terms_version: str, data_root: Path, ocr: bool = False) -> ExtractionResult:
     ctx = authorize_document(db, actor_id, workspace_id, document_id,
                              current_terms_version=current_terms_version, operation="propose")
     version = db.scalar(select(DocumentVersion).where(DocumentVersion.id == version_id,
@@ -103,14 +105,18 @@ def process(db: Session, *, actor_id: UUID, workspace_id: UUID, document_id: UUI
         raise LegalAccessDenied()
     if version.status == "quarantined" or version.ingestion_metadata.get("quarantine_reasons"):
         raise ExtractionBlocked("document_quarantined")
+    policy = "legal-ocr-v1" if ocr else PARSER_POLICY
     existing = db.scalar(select(LegalExtraction).where(LegalExtraction.version_id == version_id,
-                                                     LegalExtraction.policy_version == PARSER_POLICY))
-    if (existing is None and version.status not in {"received", "failed"}) or not version.ingestion_metadata.get("intake_policy"):
+                                                     LegalExtraction.policy_version == policy))
+    eligible = {"received", "failed", "needs_verification", "ready"} if ocr else {"received", "failed"}
+    if (existing is None and version.status not in eligible) or not version.ingestion_metadata.get("intake_policy"):
         raise ExtractionBlocked("document_not_received")
     document = db.get(Document, document_id)
     fmt = version.ingestion_metadata.get("format")
     if fmt not in EXTENSIONS:
         raise IntakeIntegrityError("unknown original format")
+    if ocr and fmt != "pdf":
+        raise ExtractionBlocked("ocr_requires_pdf")
     relative = PurePosixPath("legal", "originals", str(ctx.organization_id), str(workspace_id),
                             f"{version.source_sha256}{EXTENSIONS[fmt]}")
     if document.source_path != relative.as_posix() or document.checksum != version.source_sha256:
@@ -122,12 +128,12 @@ def process(db: Session, *, actor_id: UUID, workspace_id: UUID, document_id: UUI
     if existing is not None:
         return _result(db, existing)
     try:
-        parsed = run_parser(data, fmt)
+        parsed = run_parser(data, fmt, ocr=True) if ocr else run_parser(data, fmt)
     except ParserFailed as error:
         authorize_document(db, actor_id, workspace_id, document_id,
                            current_terms_version=current_terms_version, operation="propose")
         version.status = document.ingestion_status = "failed"
-        _audit(db, ctx, version, "LEGAL_EXTRACTION_FAILED", code=error.code)
+        _audit(db, ctx, version, "LEGAL_EXTRACTION_FAILED", code=error.code, policy_version=policy)
         raise
     # Re-read current grants after expensive work; a revoked actor never persists or receives its text.
     authorize_document(db, actor_id, workspace_id, document_id,
@@ -136,7 +142,7 @@ def process(db: Session, *, actor_id: UUID, workspace_id: UUID, document_id: UUI
     digest = hashlib.sha256(json.dumps(parsed, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     artifact = LegalExtraction(id=artifact_id, organization_id=ctx.organization_id, workspace_id=workspace_id,
         document_id=document_id, version_id=version_id, source_sha256=version.source_sha256,
-        policy_version=PARSER_POLICY, extractor=parsed["extractor"], status=parsed["status"], text=parsed["text"],
+        policy_version=policy, extractor=parsed["extractor"], status=parsed["status"], text=parsed["text"],
         artifact_sha256=digest, warnings=parsed["warnings"], actor_id=actor_id)
     db.add(artifact)
     db.flush()
@@ -145,6 +151,7 @@ def process(db: Session, *, actor_id: UUID, workspace_id: UUID, document_id: UUI
                               extraction_id=artifact_id, **item))
     version.status = document.ingestion_status = parsed["status"]
     _audit(db, ctx, version, "LEGAL_DOCUMENT_EXTRACTED", extraction_id=str(artifact_id),
+           policy_version=policy,
            artifact_sha256=digest, extractor=parsed["extractor"], status=parsed["status"],
            span_count=len(parsed["spans"]), warnings=parsed["warnings"])
     db.flush()

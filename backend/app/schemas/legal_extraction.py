@@ -27,6 +27,7 @@ class PageLocator(BaseModel):
     bbox: list[float] = Field(min_length=4, max_length=4)
     origin: Literal["TOPLEFT"]
     offset_unit: Literal["unicode_codepoint"]
+    extraction_method: Literal["native", "ocr"] = "native"
 
 
 Locator = Annotated[LineLocator | ParagraphLocator | PageLocator, Field(discriminator="kind")]

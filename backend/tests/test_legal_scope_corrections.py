@@ -102,6 +102,18 @@ class LegalCorrectionTests(unittest.TestCase):
         with self.assertRaises(corrections.CorrectionConflict):
             self.propose(self.request.model_copy(update={"corrected_text": "SYNTHETIC different"}))
 
+    def test_rejection_remains_visible_and_request_does_not_control_authority(self):
+        from pydantic import ValidationError
+        proposal = self.propose()
+        self.assertEqual(self.decide(proposal, outcome="rejected")["outcome"], "rejected")
+        self.assertEqual(self.propose()["outcome"], "rejected")
+        for field in ("actor_id", "outcome", "approved"):
+            with self.subTest(field=field), self.assertRaises(ValidationError):
+                CorrectionRequest.model_validate({**self.request.model_dump(), field: "approved"})
+        for value in (" ", "\0"):
+            with self.subTest(value=value), self.assertRaises(ValidationError):
+                CorrectionRequest.model_validate({**self.request.model_dump(), "corrected_text": value})
+
     def test_cross_workspace_and_revoked_access_are_uniformly_denied(self):
         with self.assertRaises(LegalAccessDenied):
             self.propose(workspace=self.fixture.other)
@@ -140,6 +152,31 @@ class LegalCorrectionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "immutable"):
             self.db.flush()
         self.db.rollback()
+
+    def test_quarantine_blocks_new_corrections_and_decisions(self):
+        from app.services.legal_extraction import ExtractionBlocked
+        proposal = self.propose()
+        version = self.db.get(DocumentVersion, self.received.version_id)
+        version.status = "quarantined"
+        self.db.commit()
+        with self.assertRaises(ExtractionBlocked):
+            self.propose(self.request.model_copy(update={"idempotency_key": uuid4()}))
+        with self.assertRaises(ExtractionBlocked):
+            self.decide(proposal)
+
+    def test_review_revocation_before_response_rolls_back_pending_decision(self):
+        from app.db.models.legal_scope import WorkspaceMembership
+        proposal = self.propose()
+        real_audit = corrections.append_event
+        def revoke(*args, **kwargs):
+            result = real_audit(*args, **kwargs)
+            self.db.execute(update(WorkspaceMembership).where(WorkspaceMembership.workspace_id == self.fixture.ws.id,
+                WorkspaceMembership.user_id == self.fixture.bob.id).values(role="analyst"))
+            return result
+        with patch.object(corrections, "append_event", side_effect=revoke), self.assertRaises(LegalAccessDenied):
+            self.decide(proposal)
+        self.db.rollback()
+        self.assertEqual(list(self.db.scalars(select(LegalCorrectionDecision))), [])
 
 
 @unittest.skipUnless(os.environ.get("LEGAL_TEST_DATABASE_URL"), "Disposable PostgreSQL not selected")

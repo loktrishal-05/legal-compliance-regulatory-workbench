@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     legal_clamd_socket: str = ""  # WORKBENCH_LEGAL_CLAMD_SOCKET; off until operator-approved
     legal_scan_timeout_seconds: float = Field(default=30, gt=0, le=30)
     legal_signature_max_age_hours: float = Field(default=72, ge=1, le=168)
+    legal_ocr_enabled: bool = False
     model_root: Path = Path(__file__).resolve().parents[3] / "models"
     pid_vision_enabled: bool = Field(default=False, validation_alias="PID_VISION_ENABLED")
     pid_vision_model: str = Field(default="qwen3.5:9b", validation_alias="PID_VISION_MODEL")

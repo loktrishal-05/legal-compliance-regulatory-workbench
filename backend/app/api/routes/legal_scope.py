@@ -16,6 +16,8 @@ from app.schemas.legal_extraction import ExtractionResponse, SourceSpanResponse
 from app.services import legal_intake
 from app.services import legal_extraction
 from app.services.legal_malware import configured_scanner
+from app.services import legal_correction
+from app.schemas.legal_correction import CorrectionRequest, CorrectionDecisionRequest, CorrectionResponse
 from app.services.audit import append_event
 from app.services.legal_policy import LegalAccessDenied, authorize_document, authorize_workspace
 
@@ -99,11 +101,16 @@ async def upload_document(workspace_id: UUID, request: Request,
 @router.post("/{workspace_id}/documents/{document_id}/versions/{version_id}/extractions",
              response_model=ExtractionResponse, status_code=201)
 def extract_document(workspace_id: UUID, document_id: UUID, version_id: UUID,
+                     ocr: bool = False,
                      db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     try:
+        if ocr and not settings.legal_ocr_enabled:
+            authorize_document(db, user.id, workspace_id, document_id,
+                               current_terms_version=settings.current_terms_version, operation="propose")
+            raise legal_extraction.ExtractionBlocked("ocr_not_configured")
         result = legal_extraction.process(db, actor_id=user.id, workspace_id=workspace_id,
             document_id=document_id, version_id=version_id, current_terms_version=settings.current_terms_version,
-            data_root=settings.data_root)
+            data_root=settings.data_root, ocr=ocr)
     except LegalAccessDenied:
         db.rollback()
         unavailable(db, user.id, workspace_id, document_id, operation="extract")
@@ -131,3 +138,46 @@ def source_span(workspace_id: UUID, document_id: UUID, version_id: UUID, span_id
         unavailable(db, user.id, workspace_id, document_id, operation="source_span")
     except legal_intake.IntakeIntegrityError:
         raise HTTPException(409, detail={"code": "source_integrity_failed"})
+
+
+def correction_command(db, user, workspace_id, document_id, call):
+    try:
+        result = call()
+    except LegalAccessDenied:
+        db.rollback()
+        unavailable(db, user.id, workspace_id, document_id, operation="correction")
+    except (legal_correction.CorrectionConflict, legal_extraction.ExtractionBlocked) as error:
+        db.rollback()
+        raise HTTPException(409, detail={"code": str(error)})
+    except legal_intake.IntakeIntegrityError:
+        db.rollback()
+        raise HTTPException(409, detail={"code": "source_integrity_failed"})
+    db.commit()
+    return result
+
+
+@router.post("/{workspace_id}/documents/{document_id}/versions/{version_id}/spans/{span_id}/corrections",
+             response_model=CorrectionResponse, status_code=201)
+def propose_correction(workspace_id: UUID, document_id: UUID, version_id: UUID, span_id: UUID,
+                       request: CorrectionRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return correction_command(db, user, workspace_id, document_id, lambda: legal_correction.propose(db,
+        actor_id=user.id, workspace_id=workspace_id, document_id=document_id, version_id=version_id, span_id=span_id,
+        request=request, current_terms_version=settings.current_terms_version))
+
+
+@router.post("/{workspace_id}/documents/{document_id}/versions/{version_id}/corrections/{correction_id}/decisions",
+             response_model=CorrectionResponse, status_code=201)
+def decide_correction(workspace_id: UUID, document_id: UUID, version_id: UUID, correction_id: UUID,
+                      request: CorrectionDecisionRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return correction_command(db, user, workspace_id, document_id, lambda: legal_correction.decide(db,
+        actor_id=user.id, workspace_id=workspace_id, document_id=document_id, version_id=version_id,
+        correction_id=correction_id, request=request, current_terms_version=settings.current_terms_version))
+
+
+@router.get("/{workspace_id}/documents/{document_id}/versions/{version_id}/corrections/{correction_id}",
+            response_model=CorrectionResponse)
+def read_correction(workspace_id: UUID, document_id: UUID, version_id: UUID, correction_id: UUID,
+                    db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return correction_command(db, user, workspace_id, document_id, lambda: legal_correction.get(db,
+        actor_id=user.id, workspace_id=workspace_id, document_id=document_id, version_id=version_id,
+        correction_id=correction_id, current_terms_version=settings.current_terms_version))

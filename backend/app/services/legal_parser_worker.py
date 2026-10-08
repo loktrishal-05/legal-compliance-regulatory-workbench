@@ -1,4 +1,4 @@
-"""Native text parser subprocess: bounded input/output; no DB, settings, models or network adapters.
+"""Native/opt-in English OCR subprocess: bounded input/output; no DB, settings or private/network adapters.
 
 Resource limits are a development containment boundary, not a deployment-grade OS sandbox.
 """
@@ -14,12 +14,17 @@ import zipfile
 MAX_INPUT = 25 * 1024 * 1024
 MAX_TEXT = 2 * 1024 * 1024
 MAX_SPANS = 2000
+OCR_MAX_PAGES = 5
+OCR_MAX_PIXELS = 8_000_000
+OCR_TESSDATA = "/usr/share/tesseract-ocr/5/tessdata"
 WORD = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 
 
-def parse(data: bytes, fmt: str) -> dict:
+def parse(data: bytes, fmt: str, *, ocr: bool = False) -> dict:
     if not data or len(data) > MAX_INPUT:
         raise ValueError("parser_input_limit")
+    if ocr and fmt != "pdf":
+        raise ValueError("ocr_requires_pdf")
     blocks, warnings = [], []
     extractor = "stdlib_native"
     if fmt == "txt":
@@ -69,6 +74,43 @@ def parse(data: bytes, fmt: str) -> dict:
         for block in native:
             blocks.append((block.text, {"kind": "page_region", "page": block.page_start,
                 "bbox": block.bounding_boxes[0]["coordinates"], "origin": "TOPLEFT"}))
+        if ocr:
+            image_pages = {page["page"] for page in report["pages"] if page["images"]}
+            if len(image_pages) > OCR_MAX_PAGES:
+                raise ValueError("ocr_page_limit")
+            if image_pages:
+                warnings.append("ocr_text_requires_human_verification")
+                with open(Path(OCR_TESSDATA) / "eng.traineddata", "rb") as language:
+                    model_data = language.read(16 * 1024 * 1024 + 1)
+                if len(model_data) > 16 * 1024 * 1024:
+                    raise ValueError("ocr_language_limit")
+                extractor = "pymupdf_ocr_" + pymupdf.VersionBind + "_eng200_" + hashlib.sha256(model_data).hexdigest()
+            else:
+                extractor = "pymupdf_ocr_no_images_" + pymupdf.VersionBind
+            blocks = []
+            with pymupdf.open(stream=data, filetype="pdf") as pdf:
+                for number, page in enumerate(pdf, 1):
+                    if number not in image_pages:
+                        for block in native:
+                            if block.page_start == number:
+                                blocks.append((block.text, {"kind": "page_region", "page": number,
+                                    "bbox": block.bounding_boxes[0]["coordinates"], "origin": "TOPLEFT",
+                                    "extraction_method": "native"}))
+                        continue
+                    if page.rect.width * page.rect.height * (200 / 72) ** 2 > OCR_MAX_PIXELS:
+                        raise ValueError("ocr_render_limit")
+                    if sum(image["width"] * image["height"] for image in page.get_image_info()) > OCR_MAX_PIXELS:
+                        raise ValueError("ocr_image_limit")
+                    textpage = page.get_textpage_ocr(language="eng", dpi=200, full=False, tessdata=OCR_TESSDATA)
+                    for item in page.get_text("dict", textpage=textpage, sort=True)["blocks"]:
+                        if item["type"] != 0:
+                            continue
+                        content = "\n".join("".join(s["text"] for s in line["spans"]) for line in item["lines"]).strip()
+                        if content:
+                            derived = any(s["font"] == "GlyphLessFont" for line in item["lines"] for s in line["spans"])
+                            blocks.append((content, {"kind": "page_region", "page": number,
+                                "bbox": list(item["bbox"]), "origin": "TOPLEFT",
+                                "extraction_method": "ocr" if derived else "native"}))
     else:
         raise ValueError("unsupported_parser_format")
     pieces, spans, offset = [], [], 0
@@ -95,14 +137,17 @@ def parse(data: bytes, fmt: str) -> dict:
 
 def main():
     import resource  # fail closed outside the supported Linux test/runtime profile
-    resource.setrlimit(resource.RLIMIT_CPU, (5, 5))
-    resource.setrlimit(resource.RLIMIT_AS, (512 * 1024 * 1024, 512 * 1024 * 1024))
+    ocr = sys.argv[2:] == ["--ocr"]
+    cpu = 20 if ocr else 5
+    memory = (768 if ocr else 512) * 1024 * 1024
+    resource.setrlimit(resource.RLIMIT_CPU, (cpu, cpu))
+    resource.setrlimit(resource.RLIMIT_AS, (memory, memory))
     resource.setrlimit(resource.RLIMIT_FSIZE, (8 * 1024 * 1024, 8 * 1024 * 1024))
     resource.setrlimit(resource.RLIMIT_NOFILE, (32, 32))
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
     try:
-        result = parse(sys.stdin.buffer.read(MAX_INPUT + 1), sys.argv[1])
+        result = parse(sys.stdin.buffer.read(MAX_INPUT + 1), sys.argv[1], ocr=ocr)
         sys.stdout.write(json.dumps(result, ensure_ascii=True, separators=(",", ":")))
     except Exception:
         return 1  # no source text, file paths or parser internals on stderr

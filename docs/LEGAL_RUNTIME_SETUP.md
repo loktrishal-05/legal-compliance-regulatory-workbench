@@ -116,3 +116,17 @@ docker compose -f infra/docker-compose.legal-core-test.yml -f infra/docker-compo
 ```
 
 Stop on update failure; never mark detection acceptance green on a stale signature database. `down` removes only the dedicated containers/networks and retains the owned public-signature cache (no `--volumes`). Scans/tests create synthetic and harmless EICAR content only in container memory/temporary storage. Current evidence: 7 engine checks + 1 stopped-engine HTTP check passed, daily 28147 dated 2026-10-08, 142 scoped regressions. Engine tests are opt-in; baseline CI alone does not execute this external-image/signature acceptance profile.
+
+## 10. Bounded English OCR and transcription correction APIs
+
+OCR is **off by default** (`WORKBENCH_LEGAL_OCR_ENABLED=false`). In an approved Linux runtime with public `tesseract-ocr-eng=1:4.1.0-2` data at `/usr/share/tesseract-ocr/5/tessdata`, enable the setting and POST the existing version extraction route with `?ocr=true`. The dedicated test image packages this data; private application images/settings were not enabled. Existing scanner/quarantine/propose-grant and original-hash checks still precede parsing. OCR uses separate `legal-ocr-v1`, preserves native text in mixed PDFs, binds English data hash in extractor provenance, and always returns needs_verification. Limits: 5 image-bearing pages, 8M raster/source-image pixels, 200dpi, 20 CPU/30 wall seconds/768MiB child memory; native limits unchanged. This is not a kernel parser sandbox or durable async worker. Exceeding limits/missing data fails without partial release; blank scans never receive invented text.
+
+New source-version scoped routes (prefix `/v1/workspaces/{workspace_id}/documents/{document_id}/versions/{version_id}`):
+
+- POST `/spans/{span_id}/corrections`: idempotency_key UUID, expected_quote_sha256 (exact UTF-8 source quote), corrected_text, rationale, optional parent_correction_id. Client actor/outcome/approval fields are forbidden.
+- POST `/corrections/{correction_id}/decisions`: outcome approved/rejected and rationale. Requires independent current scoped legal/compliance reviewer, original platform reviewer eligibility, read + relevant review grant.
+- GET `/corrections/{correction_id}`: authorized original/corrected quotes, locator, immutable revision hash and transcription decision. It does not replace source text or clear document uncertainty.
+
+Correction history is append-only; same-key changed content/conflicting decision retries return conflict. Unknown/denied resources share 404, origin/session/terms/no-store controls remain. Decisions are transcription-only, not findings/obligations/legal acceptance. Source spans must already contain text; manual authoring for unrecognized empty regions and owner-managed frontend correction journeys remain unfinished.
+
+Verified synthetic checks: `... legal-core-test.yml run --rm tests` (168), `... python -B -m scripts.validate_legal_migrations` (fresh/0018 -> 0025), and focused `test_legal_scope_ocr.py`/`test_legal_scope_corrections.py`. Do not migrate a private DB or download private OCR/AI models to reproduce them. Owner has paused implementation; resume only on request.

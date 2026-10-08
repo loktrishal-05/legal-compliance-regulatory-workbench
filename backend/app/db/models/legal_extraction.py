@@ -46,6 +46,7 @@ class LegalSourceSpan(IdentityMixin, CreatedAtMixin, Base):
             ["legal_extractions.id", "legal_extractions.organization_id", "legal_extractions.workspace_id"],
             name="fk_legal_source_spans_extraction_scope"),
         UniqueConstraint("extraction_id", "start", name="uq_legal_source_spans_start"),
+        UniqueConstraint("id", "extraction_id", "organization_id", "workspace_id", name="uq_legal_source_spans_lineage"),
         CheckConstraint('start >= 0 AND "end" > start', name="offsets"),
     )
 

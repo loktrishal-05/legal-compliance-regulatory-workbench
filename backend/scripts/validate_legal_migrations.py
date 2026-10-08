@@ -72,7 +72,8 @@ def main():
                                 "WHERE NOT tgisinternal ORDER BY tgname")).all())
                             assert all(current.get(name) == definition for name, definition in triggers)
                             assert {"immutable_legal_extractions", "immutable_legal_source_spans",
-                                    "immutable_truncate_legal_extractions", "immutable_truncate_legal_source_spans"} <= current.keys()
+                                    "immutable_truncate_legal_extractions", "immutable_truncate_legal_source_spans",
+                                    "immutable_legal_corrections", "immutable_legal_correction_decisions"} <= current.keys()
                     # 0021: reversible without history, accepts provisioning events, refuses lossy downgrade.
                     command.downgrade(config, "0020_legal_policy_audit")
                     command.upgrade(config, "head")
@@ -145,6 +146,9 @@ def main():
                             {"id": artifact, "o": org, "w": ws, "d": doc, "v": version, "s": sha, "a": actor})
                         conn.execute(text('INSERT INTO legal_source_spans (id, organization_id, workspace_id, extraction_id, start, "end", locator) '
                             "VALUES (:id, :o, :w, :e, 0, 9, '{}')"), {"id": span, "o": org, "w": ws, "e": artifact})
+                    # New empty dependent tables would fire their own CASCADE guard first.
+                    # Verify the original 0024 trigger message at its own revision, then reupgrade.
+                    command.downgrade(config, "0024_legal_extraction")
                     for table in ("legal_extractions", "legal_source_spans"):
                         for statement in (f"DELETE FROM {table}", f"UPDATE {table} SET id=id", f"TRUNCATE {table} CASCADE"):
                             try:
@@ -162,8 +166,46 @@ def main():
                         assert "Legal extraction history exists" in str(error)
                         extraction_downgrade = False
                     assert not extraction_downgrade, "downgrade dropped immutable extraction history"
-                print(f"PASS: {baseline or 'fresh'} -> 0024, metadata parity, idempotent upgrade, legacy preservation, "
-                      "scope/dedupe and immutable extraction/span checks")
+                    command.upgrade(config, "head")
+                    correction, reviewer = uuid4(), uuid4()
+                    with scoped_engine.begin() as conn:
+                        conn.execute(text("INSERT INTO users (id, username, role) VALUES (:a, 'synthetic-correction-reviewer', 'reviewer')"), {"a": reviewer})
+                        conn.execute(text("INSERT INTO legal_corrections (id, organization_id, workspace_id, span_id, extraction_id, "
+                            "actor_id, idempotency_key, original_quote_sha256, correction_sha256, corrected_text, rationale) "
+                            "VALUES (:c, :o, :w, :s, :e, :a, :k, :h, :h, 'SYNTHETIC correction', 'Synthetic review')"),
+                            {"c": correction, "o": org, "w": ws, "s": span, "e": artifact, "a": actor, "k": uuid4(), "h": sha})
+                    decision_sql = text("INSERT INTO legal_correction_decisions (id, organization_id, workspace_id, correction_id, "
+                        "correction_sha256, requester_id, reviewer_id, outcome, rationale) "
+                        "VALUES (:id, :o, :w, :c, :h, :a, :r, 'approved', 'Synthetic independent review')")
+                    try:
+                        with scoped_engine.begin() as conn:
+                            conn.execute(decision_sql, {"id": uuid4(), "o": org, "w": ws, "c": correction, "h": sha, "a": actor, "r": actor})
+                        raise AssertionError("database accepted self-review")
+                    except Exception as error:
+                        if isinstance(error, AssertionError):
+                            raise
+                        assert "independent_reviewer" in str(error)
+                    with scoped_engine.begin() as conn:
+                        conn.execute(decision_sql, {"id": uuid4(), "o": org, "w": ws, "c": correction, "h": sha, "a": actor, "r": reviewer})
+                    for table in ("legal_corrections", "legal_correction_decisions"):
+                        for statement in (f"DELETE FROM {table}", f"UPDATE {table} SET id=id", f"TRUNCATE {table} CASCADE"):
+                            try:
+                                with scoped_engine.begin() as conn:
+                                    conn.execute(text(statement))
+                                raise AssertionError("immutable correction history changed")
+                            except Exception as error:
+                                if isinstance(error, AssertionError):
+                                    raise
+                                assert "Legal correction records are immutable" in str(error)
+                    try:
+                        command.downgrade(config, "0024_legal_extraction")
+                        raise AssertionError("downgrade dropped correction history")
+                    except Exception as error:
+                        if isinstance(error, AssertionError):
+                            raise
+                        assert "Legal correction history exists" in str(error)
+                print(f"PASS: {baseline or 'fresh'} -> 0025, metadata parity, idempotent upgrade, legacy preservation, "
+                      "scope/dedupe, immutable extraction/correction and independent review checks")
             finally:
                 scoped_engine.dispose()
                 with engine.begin() as conn:
