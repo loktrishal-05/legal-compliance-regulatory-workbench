@@ -6,6 +6,10 @@ Date: 2026-10-06. Overall: **C backend identity verified; frontend acceptance de
 
 ### E2 OCR — RED, 2026-10-08
 
+OCR implementation verification: dedicated image build installed pinned public `tesseract-ocr-eng=1:4.1.0-2` (4.1 MB installed), no private artifacts. Same OCR target **4/4 PASS** with actual bounded child OCR: scanned/mixed text, native preservation, page regions, blank refusal and pixel/missing-language guards. Expected direct missing-language test emits native Tesseract diagnostics in the synthetic test only; child API stderr is suppressed. Full integration checks pending.
+
+Correction RED target: `... run --rm tests python -B -m unittest discover -s tests -p test_legal_scope_corrections.py -v` fails at intentionally missing `app.db.models.legal_correction`. Synthetic tests specify immutable span-bound proposals, retries/conflicts, independent review/self-denial, successors, tenant FK/revocation and audit rollback. Next add model/schema/service/APIs through 0025; no phase acceptance inferred from OCR target alone.
+
 Authorized root/origin/common metadata, local 89c45fe, user artifacts and desktop-linux verified. Existing OCR reuse inspection found Paddle bound to industrial/private model records; opted for PyMuPDF local OCR with packaged public English data in the bounded worker (no private model use). Core Compose config --quiet PASS. `docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests python -B -m unittest discover -s tests -p test_legal_scope_ocr.py -v`: **4 intended missing-feature errors** (OCR argument/limits absent). Synthetic rasterized/mixed/blank PDF fixtures executed; this RED is not OCR acceptance. Next implement bounded opt-in OCR and verify actual engine output before corrections.
 
 ### Real scanner / freshness — GREEN, 2026-10-08
