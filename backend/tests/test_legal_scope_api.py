@@ -145,6 +145,29 @@ class LegalScopeApiTests(unittest.TestCase):
         self.fixture.db.commit()
         self.assertEqual(self.client.get(self.path).status_code, 401)
 
+    def test_configured_scanner_controls_http_intake_without_releasing_duplicates(self):
+        import tempfile
+        from app.core.config import settings
+        from app.services.legal_malware import ClamdScanner
+        upload = f"/v1/workspaces/{self.fixture.workspace.id}/documents"
+        params = {"filename": "synthetic.txt", "document_type": "contract", "classification": "internal"}
+        with tempfile.TemporaryDirectory(prefix="legal-api-scan-") as directory:
+            with patch.object(settings, "data_root", Path(directory)), \
+                 patch.object(settings, "legal_clamd_socket", "/tmp/synthetic.sock"), \
+                 patch.object(ClamdScanner, "__call__", return_value=(True, "clean")) as scan:
+                clean = self.client.post(upload, params=params, content=b"SYNTHETIC clean")
+                self.assertEqual((clean.status_code, clean.json()["status"]), (201, "received"))
+                scan.assert_called_once_with(b"SYNTHETIC clean")
+                scan.return_value = (False, "detected")
+                infected = self.client.post(upload, params=params, content=b"SYNTHETIC infected")
+                self.assertEqual(infected.json()["quarantine_reasons"], ["malware_scan:detected"])
+                scan.return_value = (True, "clean")
+                replay = self.client.post(upload, params=params, content=b"SYNTHETIC infected")
+                self.assertEqual((replay.json()["status"], replay.json()["duplicate"]), ("quarantined", True))
+                scan.return_value = (False, "unavailable")
+                unavailable = self.client.post(upload, params=params, content=b"SYNTHETIC outage")
+                self.assertEqual(unavailable.json()["quarantine_reasons"], ["malware_scan:unavailable"])
+
     def test_extraction_and_source_api_scope_origin_and_quarantine(self):
         import tempfile
         from sqlalchemy import update

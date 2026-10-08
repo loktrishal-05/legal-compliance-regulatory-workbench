@@ -1,0 +1,97 @@
+"""Synthetic ClamAV protocol peers only; not real-engine malware acceptance."""
+from pathlib import Path
+import socket
+import struct
+import tempfile
+import threading
+import time
+import unittest
+from unittest.mock import patch
+
+
+class ClamdScannerTests(unittest.TestCase):
+    def scan_with_peer(self, data, responses, delay=0):
+        from app.services.legal_malware import ClamdScanner
+        with tempfile.TemporaryDirectory(prefix="legal-scanner-") as directory:
+            path = str(Path(directory) / "clamd.sock")
+            received = bytearray()
+            errors = []
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as server:
+                server.bind(path)
+                server.listen(1)
+                server.settimeout(2)
+
+                def peer():
+                    try:
+                        with server.accept()[0] as connection:
+                            connection.settimeout(2)
+                            def exact(size):
+                                result = bytearray()
+                                while len(result) < size:
+                                    chunk = connection.recv(size - len(result))
+                                    if not chunk:
+                                        raise EOFError("incomplete synthetic stream")
+                                    result.extend(chunk)
+                                return bytes(result)
+                            self.assertEqual(exact(10), b"zINSTREAM\0")
+                            while size := struct.unpack("!I", exact(4))[0]:
+                                self.assertLessEqual(size, 65536)
+                                received.extend(exact(size))
+                            time.sleep(delay)
+                            for response in responses:
+                                connection.sendall(response)
+                    except (BrokenPipeError, ConnectionResetError):
+                        pass  # expected when the bounded client rejects/ times out
+                    except Exception as error:
+                        errors.append(error)
+
+                worker = threading.Thread(target=peer)
+                worker.start()
+                result = ClamdScanner(path, timeout_seconds=0.1 if delay else 2)(data)
+                worker.join(3)
+                self.assertFalse(worker.is_alive())
+                self.assertEqual(errors, [])
+                self.assertEqual(bytes(received), data)
+                return result
+
+    def test_exact_clean_response_and_chunked_bytes(self):
+        self.assertEqual(self.scan_with_peer(b"SYNTHETIC\n" * 10000, [b"stream: ", b"OK\0"]), (True, "clean"))
+
+    def test_detection_is_generic_and_does_not_leak_signature(self):
+        self.assertEqual(self.scan_with_peer(b"SYNTHETIC", [b"stream: private-signature FOUND\0"]),
+                         (False, "detected"))
+
+    def test_non_clean_incomplete_oversize_or_ambiguous_reply_fails_closed(self):
+        for reply in (b"", b"stream: OK", b"OK\0", b"stream: OK\0extra", b"stream: OK\n",
+                      b"stream: scan limit ERROR\0", b"x" * 4097, b"stream: OK\0stream: bad FOUND\0"):
+            with self.subTest(reply=reply[:40]):
+                self.assertEqual(self.scan_with_peer(b"SYNTHETIC", [reply]), (False, "unavailable"))
+
+    def test_timeout_and_missing_socket_fail_closed(self):
+        from app.services.legal_malware import ClamdScanner
+        self.assertEqual(self.scan_with_peer(b"SYNTHETIC", [b"stream: OK\0"], delay=0.2),
+                         (False, "unavailable"))
+        self.assertEqual(ClamdScanner("/tmp/legal-synthetic-missing-clamd.sock")(b"SYNTHETIC"),
+                         (False, "unavailable"))
+
+    def test_deadline_is_total_not_reset_per_read(self):
+        from app.services.legal_malware import ClamdScanner
+        with patch("app.services.legal_malware.time.monotonic", side_effect=[0, 0, 0, 0, 31]):
+            with patch("app.services.legal_malware.socket.socket") as factory:
+                factory.return_value.__enter__.return_value.recv.return_value = b"s"
+                self.assertEqual(ClamdScanner("/tmp/synthetic.sock")(b"SYNTHETIC"), (False, "unavailable"))
+
+    def test_configuration_is_optional_local_absolute_and_bounded(self):
+        from app.core.config import Settings
+        from app.services.legal_malware import configured_scanner
+        settings = Settings(_env_file=None, model_name="qwen3.5:9b")
+        self.assertIsNone(configured_scanner(settings))
+        for path in ("relative.sock", "http://remote.invalid", "/tmp/a\0b", "//remote/share.sock"):
+            with self.subTest(path=path), self.assertRaises(ValueError):
+                Settings(_env_file=None, model_name="qwen3.5:9b", legal_clamd_socket=path)
+        settings = Settings(_env_file=None, model_name="qwen3.5:9b", legal_clamd_socket="/tmp/synthetic.sock")
+        self.assertIsNotNone(configured_scanner(settings))
+
+
+if __name__ == "__main__":
+    unittest.main()

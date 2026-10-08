@@ -94,6 +94,27 @@ class LegalIntakeTests(unittest.TestCase):
         self.assertEqual(self.receive(PDF, "contract.pdf").status, "received")
         self.assertEqual(self.receive(docx(), "contract.docx").status, "received")
 
+    def test_scan_revocation_blocks_original_publication(self):
+        from sqlalchemy import update
+        from app.db.models.legal_scope import WorkspaceMembership
+        def revoke(data):
+            self.db.execute(update(WorkspaceMembership).where(WorkspaceMembership.user_id == self.alice.id)
+                            .values(is_active=False))
+            self.db.commit()
+            return True, "clean"
+        with self.assertRaises(LegalAccessDenied):
+            self.receive(TXT, scanner=revoke)
+        self.assertEqual(list(self.root.rglob("*.txt")), [])
+        self.assertEqual(self.events("LEGAL_DOCUMENT_RECEIVED"), [])
+
+    def test_scanner_outage_preserves_quarantine_and_redacts_error(self):
+        def unavailable(data):
+            raise OSError("private scanner path and source text")
+        result = self.receive(TXT, scanner=unavailable)
+        self.assertEqual((result.status, result.quarantine_reasons),
+                         ("quarantined", ("malware_scan:unavailable",)))
+        self.assertNotIn("private scanner", str(self.events("LEGAL_DOCUMENT_RECEIVED")[-1].payload))
+
     def test_rejections_are_audited_and_store_nothing(self):
         bomb = docx([("word/media/zeros.xml", b"\0" * (20 * 1024 * 1024))])
         cases = {"empty": (b"", "a.txt"), "macro_content": (docx([("word/vbaProject.bin", b"x")]), "a.docx"),

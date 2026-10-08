@@ -4,6 +4,10 @@ Date: 2026-10-06. Overall: **C backend identity verified; frontend acceptance de
 
 ## Current full migration status for team publication
 
+### Phase E scanner integration — RED, 2026-10-08
+
+Authorized root/remote/common metadata/hooks and open PR #13 verified at 9763a81 (legal-core SUCCESS run 37662308360). Read master FR-007/security/WF-01 and existing intake callers. Compose config --quiet PASS; Docker daemon initially unavailable, started Docker Desktop, then only the approved synthetic legal-core project. `docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests python -B -m unittest discover -s tests -p test_legal_scope_scanner.py -v`: 6 tests, intended missing `legal_malware` module (13 errors including subtests). Same intake target (`test_legal_scope_intake.py`): 37 tests, 2 intended revocation assertion failures and 2 scanner-outage errors, all earlier checks pass. RED is missing-feature/defect evidence, not acceptance. New HTTP journey is written; GREEN execution pending. No real scanner/model/private target or main change.
+
 ### README main-branch visibility fix — 2026-10-07
 
 Owner explicitly requested the README on main. Reverified authorized root/origin/common metadata/user-work boundaries and main protection; fetched named main refs only. From main a85494d, root branch docs/main-readme-20261007 changed README.md only (e89f662/fc34ea0). All commits/full diff and whitespace reviewed. First GitHub preview exposed the sequence-arrow semicolon parser error; fixed before integration. Final live preview rendered all five Mermaid SVGs/ten tables with no syntax/error display. Required legal-core run [37661284977](https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/actions/runs/37661284977) SUCCESS at fc34ea0. This checks the earlier main code baseline, not the 126-test continuation code.

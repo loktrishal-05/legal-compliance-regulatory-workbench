@@ -4,6 +4,10 @@ Date: 2026-10-06. **Backend build resumed; user owns frontend/landing. D in prog
 
 ## Current state
 
+### Phase E scanner integration start — 2026-10-08
+
+Owner requested building the remaining work. Root/origin/common metadata/sample-only hooks and user artifacts verified; continuation HEAD 9763a81 matches open PR #13, legal-core SUCCESS (run 37662308360). Docker context desktop-linux; disposable test targets inspected. First increment is configured local scanning through the existing intake callback, fail-closed outages/protocol handling and post-scan authorization recheck. Tests first; no real engine/private runtime/frontend/main integration enabled. Next: validate scanner adapter and HTTP intake, then remaining E2 gates.
+
 ### Owner-requested README promotion to main — 2026-10-07
 
 Owner reported the advanced README was absent from main and asked for the authorized repository to be fixed. Built a README-only branch from current main a85494d in the authorized root, preserving benchmark/nested/untracked bytes. Commits e89f662/fc34ea0 provide architecture, source ER, system design, intake/extraction/target flows, API/status/verification and references with explicit main/development/#13 availability. GitHub preview exposed a semicolon parse error in the sequence diagram; corrected it and reverified five SVG diagrams/ten tables with no errors.
