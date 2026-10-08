@@ -4,6 +4,10 @@ Date: 2026-10-06. Overall: **C backend identity verified; frontend acceptance de
 
 ## Current full migration status for team publication
 
+### E2 OCR — RED, 2026-10-08
+
+Authorized root/origin/common metadata, local 89c45fe, user artifacts and desktop-linux verified. Existing OCR reuse inspection found Paddle bound to industrial/private model records; opted for PyMuPDF local OCR with packaged public English data in the bounded worker (no private model use). Core Compose config --quiet PASS. `docker compose -f infra/docker-compose.legal-core-test.yml run --rm tests python -B -m unittest discover -s tests -p test_legal_scope_ocr.py -v`: **4 intended missing-feature errors** (OCR argument/limits absent). Synthetic rasterized/mixed/blank PDF fixtures executed; this RED is not OCR acceptance. Next implement bounded opt-in OCR and verify actual engine output before corrections.
+
 ### Real scanner / freshness — GREEN, 2026-10-08
 
 Owner requested sequential implementation; this completes isolated real-engine provisioning/validation, not production scanner deployment or all of E. RED `99eea33` rejected stale bundled daily 28136; dedicated `freshclam` verified and updated to **28147, 2026-10-08T06:24:12Z** (main 63/bytecode 339 unchanged). FreshClam network mounts only public signature databases/config; the content-scanning container has network none. Official image pinned to 1.5.4 digest `sha256:ebec5bc138401b36ae987caa1a3fa3c3b2a21ed3d51f0bfa5852825e663e67b0`.

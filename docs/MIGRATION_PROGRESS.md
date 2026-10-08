@@ -4,6 +4,10 @@ Date: 2026-10-06. **Backend build resumed; user owns frontend/landing. D in prog
 
 ## Current state
 
+### E2 OCR / corrections start — 2026-10-08
+
+Owner requested the next milestone. Verified root/origin/common metadata, local 89c45fe and preserved unrelated work. Traced native worker/service/schema/model/API, PDF inspection and existing Paddle service. Reuse PyMuPDF and bounded subprocess; avoid private model paths/industrial OCR normalization. Tests first for actual synthetic scanned/mixed PDFs and source coordinates, then immutable correction/independent decision/FK/audit/API tests. Planned migration 0025 follows actual 0024; no private DB/model/frontend/push execution. Next add opt-in English OCR and correction review, run dedicated synthetic validation and record actual limits.
+
 ### Isolated real scanner validation start — 2026-10-08
 
 Owner requested proceeding one by one. Reverified local c5dd8b9, authorized root/remote/common metadata/no hook override, preserved unrelated work and desktop-linux context (8.16 GB Docker memory). Official latest release reports clamav-1.5.4; pulled official preloaded image and recorded digest `sha256:ebec5bc138401b36ae987caa1a3fa3c3b2a21ed3d51f0bfa5852825e663e67b0`. Image identity checks: clamav UID 100/GID 101; ClamAV 1.5.4, bundled daily signature 28136 dated 2026-09-27. Signature freshness is a current blocker; build the isolated updater/engine/test profile and update before acceptance. No private configuration/application services or frontend enabled.
