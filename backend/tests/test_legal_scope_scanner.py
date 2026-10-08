@@ -1,5 +1,6 @@
 """Synthetic ClamAV protocol peers only; not real-engine malware acceptance."""
 from pathlib import Path
+from datetime import datetime, timedelta, timezone
 import socket
 import struct
 import tempfile
@@ -98,6 +99,37 @@ class ClamdScannerTests(unittest.TestCase):
         for path in ("", "/" + "s" * 107):
             with self.subTest(path=path), self.assertRaises(ValueError):
                 ClamdScanner(path)
+
+    def test_configured_scanner_refuses_stale_or_invalid_signature_version_before_bytes(self):
+        from app.core.config import Settings
+        from app.services.legal_malware import configured_scanner
+        now = datetime.now(timezone.utc)
+        stale = (now - timedelta(days=4)).strftime("%a %b %d %H:%M:%S %Y")
+        future = (now + timedelta(days=1)).strftime("%a %b %d %H:%M:%S %Y")
+        for reply in (b"", b"ClamAV invalid\0", f"ClamAV 1.5.4/28147/{stale}\0".encode(),
+                      f"ClamAV 1.5.4/28147/{future}\0".encode(), b"x" * 4097):
+            with self.subTest(reply=reply[:40]):
+                with patch("app.services.legal_malware.socket.socket") as factory:
+                    connection = factory.return_value.__enter__.return_value
+                    connection.recv.side_effect = [reply, b""]
+                    result = configured_scanner(Settings(_env_file=None, model_name="qwen3.5:9b",
+                        legal_clamd_socket="/tmp/synthetic.sock"))(b"SYNTHETIC must not be streamed")
+                    self.assertEqual(result, (False, "unavailable"))
+                    self.assertEqual(connection.sendall.call_args_list[0].args, (b"zVERSION\0",))
+                    self.assertEqual(connection.sendall.call_count, 1)
+
+    def test_configured_scanner_checks_fresh_signatures_then_streams(self):
+        from app.core.config import Settings
+        from app.services.legal_malware import configured_scanner
+        version = datetime.now(timezone.utc).strftime("ClamAV 1.5.4/28147/%a %b %d %H:%M:%S %Y\0").encode()
+        with patch("app.services.legal_malware.socket.socket") as factory:
+            connection = factory.return_value.__enter__.return_value
+            connection.recv.side_effect = [version, b"", b"stream: OK\0", b""]
+            result = configured_scanner(Settings(_env_file=None, model_name="qwen3.5:9b",
+                legal_clamd_socket="/tmp/synthetic.sock"))(b"SYNTHETIC current signatures")
+            self.assertEqual(result, (True, "clean"))
+            self.assertEqual(connection.sendall.call_args_list[0].args, (b"zVERSION\0",))
+            self.assertEqual(factory.call_count, 2)
 
 
 if __name__ == "__main__":
