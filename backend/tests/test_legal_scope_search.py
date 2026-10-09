@@ -22,7 +22,7 @@ TERMS = "1.0"
 OTHER_TXT = b"SYNTHETIC lease: Tenant shall maintain insurance coverage annually.\n"
 
 
-class LegalSearchTests(unittest.TestCase):
+class SearchFixture(unittest.TestCase):
     make_engine = extraction_fixture.LegalExtractionTests.make_engine
 
     def setUp(self):
@@ -56,6 +56,8 @@ class LegalSearchTests(unittest.TestCase):
     def search(self, q="Party A", user=None, ws=None):
         return legal_search.search_spans(self.db, self.ctx(user, ws), q, 20, current_terms_version=TERMS)
 
+
+class LegalSearchTests(SearchFixture):
     def test_identical_content_in_two_tenants_never_crosses(self):
         mine = self.search()
         theirs = self.search(user=self.dave, ws=self.f.other)
