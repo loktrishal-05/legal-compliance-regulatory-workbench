@@ -102,3 +102,28 @@ Part 2 deterministic core evidence (2026-10-06, partial, not acceptance): `app/s
 ## Definition of implementation acceptance
 
 For each requirement, append actual component/file, test command/result, fixture version, demonstration evidence and blockers as its owning phase runs. Change status only after those checks pass. SSO/MFA, legal-pack validation, retention/legal privilege, authoritative source ownership and deployment SLO/RPO/RTO need named approval before operational-pilot claims. The approved development baseline authorizes building/testing, not silently treating those gates as complete.
+
+## Parallel build evidence — agent A (2026-10-09; status "MVP implemented + tested", never "accepted")
+
+Source: `docs/parallel/EVIDENCE_A.md` (agent B and C evidence: `EVIDENCE_B.md`, `EVIDENCE_C.md`). Synthetic fixtures, deterministic profiles, disposable PostgreSQL. External gates below remain open; no FR is accepted.
+
+| FR | Agent A slice | Evidence |
+|---|---|---|
+| FR-002/003/004 | Workspace/matter/clearance/grant filtering before ranking/paging; uniform 404; every legal route x 7 roles matrix | `legal_search.py`, `test_legal_scope_search.py`, `test_legal_scope_authz_matrix.py` |
+| FR-006/007/008 | Durable extraction/OCR jobs with lease/retry/dead letter, workspace backpressure, parser sandbox profile (no network, read-only, non-root) | `legal_jobs.py`, 0026, `test_legal_scope_jobs.py`, compose `parser-sandbox` (container-per-parse wiring open) |
+| FR-010 | Hash-verified original download; worker re-verifies stored hash; tamper fails closed | `legal_jobs.original`, `test_legal_scope_search.py`, `test_legal_scope_security.py` |
+| FR-011 | Blank-region manual transcription anchored to page/bbox + independent review; labelled corrected-text projection | 0026, `test_legal_scope_jobs.py` |
+| FR-019 | Accepted obligations only from independently approved proposals; human-confirmed tz/date; owner/trigger/conditions/notice/recurrence | 0031, `legal_obligations.py`, `test_legal_scope_obligations.py`, J1 |
+| FR-022/048..051 | Authorized PostgreSQL full-text span search (`search_spans`, used by B assistant); document/version/span lists; exact source open | `legal_search.py`, J4 (dense/hybrid retrieval open) |
+| FR-041 | Exact-revision independent review ledger (approve/reject/request_changes/escalate) for all pillars | 0027, `legal_review.py`, `test_legal_scope_reviews.py` |
+| FR-042 | Durable deadlines, exactly-once reminders/escalations, in-app notifications with read state | 0031, `test_legal_scope_obligations.py` (external delivery adapters open) |
+| FR-043 | Remediation from accepted findings; closure evidence + independent review; failed retest reopens | 0031, J2 |
+| FR-044 | Tasks: owner, due, dependencies with cycle denial, evidence requests, overdue, reassignment with current-grant check; comments/mentions | 0031, `test_legal_scope_obligations.py` |
+| FR-045 | Timer scan catch-up after downtime; restart-safe receipts | `scan_deadlines`, J5 |
+| FR-046 | Exception/risk acceptance with mandatory bounded expiry, independent review, expiry scan | 0031 |
+| FR-047 | Bulk triage with per-object authorization and uniform `unavailable` | `bulk_triage` |
+| FR-054/055 | Workspace-filtered legal audit (document-bound events need current grant); outbox and activity audit in the same transaction | `legal_audit_export.py`, `legal_events.py` |
+| FR-056/057 | As-of snapshot separating recorded and effective time | `snapshot`, J3/J6 |
+| FR-058/059 | Frozen evidence packs and JSON findings exports with integrity hash; denied objects excluded | `legal_evidence_packs`, J1/J6 |
+
+Open gates: FR-001/005 enterprise IdP/MFA/step-up; FR-060 archive; FR-061..063 connectors/webhooks/service credentials; legal-pack/pilot approvals; live private-model evaluation; independent human review; penetration test; real-infrastructure backup/restore/SLO.

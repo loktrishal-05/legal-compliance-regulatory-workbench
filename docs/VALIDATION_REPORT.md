@@ -337,3 +337,16 @@ Handoff PR #4 baseline run 37492479516 passed all scope/API/migration steps, but
 Correction confirmed at 9cd84af: push 37492888207 and PR 37492895455 SUCCESS with credential-free/non-recursive source checkout, scoped tests and both migration paths. Results also recorded in PR #4; independent approval still required. No nested/main modification.
 
 Claude handoff is documentation only. Reverified Git/remote branches/issues/protection flags/PR head/checks; consolidated reading/approval/state/team/commit-review instructions and archived old resume notes. Referenced document targets exist; focused whitespace check passed and master PDF Git blob equals HEAD. No new application/legal/model test claim or local whole-app rerun. Commit only intended documentation to the existing review branch; required GitHub baseline CI runs normally after push, with results recorded in PR #4.
+
+## Parallel build freeze — agent A (2026-10-09)
+
+Commands and results at local HEAD 67a64ff (branch integration/backend-continuation-20261007, includes agents B and C commits present at freeze):
+
+- docker compose -p lrw-a -f infra/docker-compose.legal-core-test.yml run --rm tests python -B -m unittest discover -s tests -p "test_legal_scope*.py": **Ran 363 tests, OK** (baseline before the build: 168 at b3b6a71).
+- python -B -m scripts.validate_legal_migrations (same image): **PASS** fresh -> 0031 and 0018 -> 0031; alembic check parity, idempotent repeat upgrade, legacy preservation, downgrade guards, immutability triggers (now including agent A tables).
+- frontend: npm test **44/44 pass**; npm run lint **0 errors, 2 pre-existing warnings** (src/app/session.jsx fast-refresh); npm run build **success**. No legal frontend feature directory existed at freeze.
+- Parser sandbox profile (compose parser-sandbox): parse OK as uid 65534, read-only filesystem, no network, no secret env, no data root.
+
+Finding fixed during Step 9: workspace audit exposed document IDs to an auditor/admin without a document grant; now filtered (ec428db).
+
+Status: MVP implemented + tested on synthetic fixtures with deterministic profiles. Not accepted. Open gates: enterprise IdP/MFA/step-up, legal-pack and pilot approvals, live private-model evaluation, independent human review, penetration test, real-infrastructure backup/restore/SLO, connectors/webhooks/service credentials FR-061..063, archive FR-060, container-per-parse sandbox wiring, dense/hybrid retrieval, external notification adapters, legal frontend. Details: docs/parallel/EVIDENCE_A.md.
