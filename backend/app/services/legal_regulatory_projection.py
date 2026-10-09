@@ -1,5 +1,4 @@
 """Persisted-row projections using the existing deterministic regulatory core."""
-from dataclasses import asdict
 from datetime import timedelta
 
 from app.services.regulatory_versions import RegulatoryVersion, exact_diff, source_freshness, version_as_of
@@ -23,4 +22,5 @@ def monitoring_status(now, max_age_days, last_success_at, last_failure_at):
 
 
 def structural_changes(old_sections, new_sections):
-    return [asdict(change) for change in exact_diff(old_sections, new_sections)]
+    return [{"section_ref": change.section_ref, "kind": change.kind, "text_diff": list(change.text_diff)}
+            for change in exact_diff(old_sections, new_sections)]
