@@ -39,5 +39,7 @@ from app.db.models.legal_scope import (
 from app.db.models.legal_extraction import LegalExtraction, LegalSourceSpan
 from app.db.models.legal_correction import LegalCorrection, LegalCorrectionDecision
 from app.db.models.legal_review import LegalReview, LegalReviewDecision, LegalEvent, LegalSchedulerScan
+from app.db.models import legal_contract
+from app.db.models import legal_regulatory  # noqa: F401
 from app.db.models.legal_jobs import LegalJob, LegalRegionTranscription
 from app.db.models import legal_obligations  # noqa: F401  (0031, agent A)
