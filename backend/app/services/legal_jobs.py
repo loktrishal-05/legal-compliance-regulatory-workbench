@@ -273,3 +273,32 @@ def projection(db: Session, *, actor_id: UUID, workspace_id: UUID, document_id: 
             "original_text_sha256": hashlib.sha256(artifact.text.encode()).hexdigest(),
             "segments": segments, "manual_regions": regions,
             "text": "".join(segment["text"] for segment in segments)}
+
+
+def original(db: Session, *, actor_id: UUID, workspace_id: UUID, document_id: UUID, version_id: UUID,
+             current_terms_version: str, data_root: Path) -> tuple[bytes, str, str, str]:
+    """Hash-verified original bytes (data, format, safe filename, sha). Quarantined bytes are never released."""
+    from pathlib import PurePosixPath
+    from app.db.models import Document
+    from app.services import legal_intake
+    ctx = authorize_document(db, actor_id, workspace_id, document_id, current_terms_version=current_terms_version)
+    version = db.scalar(select(DocumentVersion).where(DocumentVersion.id == version_id,
+        DocumentVersion.document_id == document_id, DocumentVersion.workspace_id == workspace_id,
+        DocumentVersion.organization_id == ctx.organization_id))
+    if version is None:
+        raise LegalAccessDenied()
+    if version.status == "quarantined" or version.ingestion_metadata.get("quarantine_reasons"):
+        raise legal_extraction.ExtractionBlocked("document_quarantined")
+    fmt = version.ingestion_metadata.get("format")
+    if fmt not in legal_intake.EXTENSIONS:
+        raise IntakeIntegrityError("unknown original format")
+    relative = PurePosixPath("legal", "originals", str(ctx.organization_id), str(workspace_id),
+                             f"{version.source_sha256}{legal_intake.EXTENSIONS[fmt]}")
+    document = db.get(Document, document_id)
+    if document.source_path != relative.as_posix() or document.checksum != version.source_sha256:
+        raise IntakeIntegrityError("original lineage mismatch")
+    data = legal_intake._verify_original(Path(data_root, *relative.parts), version.source_sha256)
+    legal_events.audit_activity(db, ctx, "original_downloaded", document_id=str(document_id),
+                                version_id=str(version_id), source_sha256=version.source_sha256)
+    name = legal_intake.safe_filename(document.filename).encode("ascii", "replace").decode().replace('"', "_")
+    return data, fmt, name, version.source_sha256

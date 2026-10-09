@@ -20,7 +20,10 @@ from app.services import legal_correction
 from app.schemas.legal_correction import CorrectionRequest, CorrectionDecisionRequest, CorrectionResponse
 from app.services.audit import append_event
 from app.services.legal_policy import LegalAccessDenied, authorize_document, authorize_workspace
-from app.services import legal_jobs
+from app.services import legal_events, legal_jobs, legal_search
+from app.db.models import DocumentVersion
+from app.db.models.legal_extraction import LegalSourceSpan
+from fastapi import Response
 from app.schemas.legal_jobs import JobRequest, JobResponse, RegionTranscriptionRequest, RegionTranscriptionResponse
 
 router = APIRouter(prefix="/v1/workspaces", tags=["legal scope"])
@@ -250,3 +253,92 @@ def corrected_projection(workspace_id: UUID, document_id: UUID, version_id: UUID
     return job_command(db, user, workspace_id, document_id, lambda: legal_jobs.projection(db, actor_id=user.id,
         workspace_id=workspace_id, document_id=document_id, version_id=version_id,
         current_terms_version=settings.current_terms_version, extraction_id=extraction_id), "projection")
+
+def read_command(db, user, workspace_id, document_id, call, operation):
+    try:
+        return call()
+    except LegalAccessDenied:
+        db.rollback()
+        unavailable(db, user.id, workspace_id, document_id, operation=operation)
+    except legal_intake.IntakeIntegrityError:
+        raise HTTPException(409, detail={"code": "source_integrity_failed"})
+    except legal_extraction.ExtractionBlocked as error:
+        raise HTTPException(409, detail={"code": str(error)})
+
+
+def _context(db, user, workspace_id):
+    return authorize_workspace(db, user.id, workspace_id, current_terms_version=settings.current_terms_version)
+
+
+@router.get("/{workspace_id}/documents")
+def list_documents(workspace_id: UUID, limit: int = Query(50, ge=1, le=200), offset: int = Query(0, ge=0, le=100000),
+                   matter_id: UUID | None = None, classification: str | None = Query(None, max_length=20),
+                   status: str | None = Query(None, max_length=30), filename: str | None = Query(None, max_length=255),
+                   db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    """Only currently readable documents; no totals (has_more is a page hint, not a count)."""
+    def call():
+        items = legal_search.list_documents(db, _context(db, user, workspace_id), limit=limit + 1, offset=offset,
+            matter_id=matter_id, classification=classification, status=status, filename=filename,
+            current_terms_version=settings.current_terms_version)
+        return {"items": items[:limit], "has_more": len(items) > limit, "limit": limit, "offset": offset}
+    return read_command(db, user, workspace_id, None, call, "document_list")
+
+
+@router.get("/{workspace_id}/documents/{document_id}/versions")
+def list_versions(workspace_id: UUID, document_id: UUID, db: Session = Depends(get_db),
+                  user: User = Depends(get_current_user)):
+    def call():
+        ctx = authorize_document(db, user.id, workspace_id, document_id,
+                                 current_terms_version=settings.current_terms_version)
+        rows = db.scalars(select(DocumentVersion).where(DocumentVersion.document_id == document_id,
+            DocumentVersion.workspace_id == workspace_id, DocumentVersion.organization_id == ctx.organization_id)
+            .order_by(DocumentVersion.created_at, DocumentVersion.id))
+        return {"items": [{"version_id": v.id, "status": v.status, "source_sha256": v.source_sha256,
+                           "format": v.ingestion_metadata.get("format"), "created_at": v.created_at,
+                           "quarantine_reasons": v.ingestion_metadata.get("quarantine_reasons") or []} for v in rows]}
+    return read_command(db, user, workspace_id, document_id, call, "version_list")
+
+
+@router.get("/{workspace_id}/documents/{document_id}/versions/{version_id}/spans")
+def list_spans(workspace_id: UUID, document_id: UUID, version_id: UUID, extraction_id: UUID | None = None,
+               limit: int = Query(200, ge=1, le=2000), offset: int = Query(0, ge=0),
+               db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    def call():
+        ctx = authorize_document(db, user.id, workspace_id, document_id,
+                                 current_terms_version=settings.current_terms_version)
+        artifact = legal_jobs._extraction(db, ctx, document_id, version_id, extraction_id)
+        spans = db.scalars(select(LegalSourceSpan).where(LegalSourceSpan.extraction_id == artifact.id)
+                           .order_by(LegalSourceSpan.start).limit(limit + 1).offset(offset)).all()
+        return {"extraction_id": artifact.id, "status": artifact.status, "source_sha256": artifact.source_sha256,
+                "artifact_sha256": artifact.artifact_sha256, "warnings": artifact.warnings,
+                "items": [{"span_id": sp.id, "start": sp.start, "end": sp.end, "locator": sp.locator,
+                           "quote": artifact.text[sp.start:sp.end]} for sp in spans[:limit]],
+                "has_more": len(spans) > limit}
+    return read_command(db, user, workspace_id, document_id, call, "span_list")
+
+
+MEDIA_TYPES = {"pdf": "application/pdf", "txt": "text/plain; charset=utf-8",
+               "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
+
+
+@router.get("/{workspace_id}/documents/{document_id}/versions/{version_id}/original")
+def download_original(workspace_id: UUID, document_id: UUID, version_id: UUID, db: Session = Depends(get_db),
+                      user: User = Depends(get_current_user)):
+    """Hash-verified original bytes as an attachment; quarantined bytes are never released here."""
+    def call():
+        return legal_jobs.original(db, actor_id=user.id, workspace_id=workspace_id, document_id=document_id,
+            version_id=version_id, current_terms_version=settings.current_terms_version, data_root=settings.data_root)
+    data, fmt, name, sha = read_command(db, user, workspace_id, document_id, call, "original_download")
+    db.commit()
+    return Response(content=data, media_type=MEDIA_TYPES[fmt], headers={
+        "Content-Disposition": f"attachment; filename=\"{name}\"", "X-Content-Type-Options": "nosniff",
+        "X-Source-SHA256": sha, "Cache-Control": "no-store"})
+
+
+@router.get("/{workspace_id}/search")
+def search(workspace_id: UUID, q: str = Query(..., min_length=1, max_length=200), limit: int = Query(20, ge=1, le=50),
+           db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    """Authorized full-text span search; results only (no totals). Quote = exact stored span text."""
+    return read_command(db, user, workspace_id, None, lambda: {"items": legal_search.search_spans(
+        db, _context(db, user, workspace_id), q, limit, current_terms_version=settings.current_terms_version),
+        "mode": "postgres_fulltext" if db.get_bind().dialect.name == "postgresql" else "substring"}, "search")
