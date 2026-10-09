@@ -20,6 +20,8 @@ from app.services import legal_correction
 from app.schemas.legal_correction import CorrectionRequest, CorrectionDecisionRequest, CorrectionResponse
 from app.services.audit import append_event
 from app.services.legal_policy import LegalAccessDenied, authorize_document, authorize_workspace
+from app.services import legal_jobs
+from app.schemas.legal_jobs import JobRequest, JobResponse, RegionTranscriptionRequest, RegionTranscriptionResponse
 
 router = APIRouter(prefix="/v1/workspaces", tags=["legal scope"])
 
@@ -181,3 +183,70 @@ def read_correction(workspace_id: UUID, document_id: UUID, version_id: UUID, cor
     return correction_command(db, user, workspace_id, document_id, lambda: legal_correction.get(db,
         actor_id=user.id, workspace_id=workspace_id, document_id=document_id, version_id=version_id,
         correction_id=correction_id, current_terms_version=settings.current_terms_version))
+
+
+def job_response(job) -> JobResponse:
+    return JobResponse(job_id=job.id, document_id=job.document_id, version_id=job.version_id, operation=job.operation,
+        profile=job.profile, state=job.state, attempts=job.attempts, max_attempts=job.max_attempts,
+        failure_code=job.failure_code, extraction_id=job.extraction_id, next_retry_at=job.next_retry_at,
+        created_at=job.created_at, finished_at=job.finished_at)
+
+
+def job_command(db, user, workspace_id, document_id, call, operation):
+    try:
+        result = call()
+    except LegalAccessDenied:
+        db.rollback()
+        unavailable(db, user.id, workspace_id, document_id, operation=operation)
+    except (legal_jobs.JobConflict, legal_extraction.ExtractionBlocked) as error:
+        db.rollback()
+        raise HTTPException(409, detail={"code": str(error)})
+    except legal_jobs.JobQuotaExceeded as error:
+        db.rollback()
+        raise HTTPException(429, detail={"code": str(error)})
+    db.commit()
+    return result
+
+
+@router.post("/{workspace_id}/documents/{document_id}/versions/{version_id}/jobs", response_model=JobResponse,
+             status_code=202)
+def submit_job(workspace_id: UUID, document_id: UUID, version_id: UUID, request: JobRequest,
+               db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    def call():
+        if request.operation == "ocr" and not settings.legal_ocr_enabled:
+            authorize_document(db, user.id, workspace_id, document_id,
+                               current_terms_version=settings.current_terms_version, operation="propose")
+            raise legal_extraction.ExtractionBlocked("ocr_not_configured")
+        return job_response(legal_jobs.submit(db, actor_id=user.id, workspace_id=workspace_id, document_id=document_id,
+            version_id=version_id, operation=request.operation, idempotency_key=request.idempotency_key,
+            current_terms_version=settings.current_terms_version))
+    return job_command(db, user, workspace_id, document_id, call, "job_submit")
+
+
+@router.get("/{workspace_id}/jobs/{job_id}", response_model=JobResponse)
+def read_job(workspace_id: UUID, job_id: UUID, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return job_command(db, user, workspace_id, None, lambda: job_response(legal_jobs.get(db, actor_id=user.id,
+        workspace_id=workspace_id, job_id=job_id, current_terms_version=settings.current_terms_version)), "job_read")
+
+
+@router.post("/{workspace_id}/documents/{document_id}/versions/{version_id}/region-transcriptions",
+             response_model=RegionTranscriptionResponse, status_code=201)
+def transcribe_region(workspace_id: UUID, document_id: UUID, version_id: UUID, request: RegionTranscriptionRequest,
+                      db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    def call():
+        row = legal_jobs.transcribe_region(db, actor_id=user.id, workspace_id=workspace_id, document_id=document_id,
+            version_id=version_id, extraction_id=request.extraction_id, page=request.page, bbox=request.bbox,
+            text=request.text, rationale=request.rationale, idempotency_key=request.idempotency_key,
+            current_terms_version=settings.current_terms_version)
+        return RegionTranscriptionResponse(transcription_id=row.id, extraction_id=row.extraction_id, page=row.page,
+            bbox=row.bbox, text=row.text, transcription_sha256=row.transcription_sha256)
+    return job_command(db, user, workspace_id, document_id, call, "region_transcription")
+
+
+@router.get("/{workspace_id}/documents/{document_id}/versions/{version_id}/projection")
+def corrected_projection(workspace_id: UUID, document_id: UUID, version_id: UUID, extraction_id: UUID | None = None,
+                         db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    """Labelled corrected-text projection; never the original artifact and never replaces it."""
+    return job_command(db, user, workspace_id, document_id, lambda: legal_jobs.projection(db, actor_id=user.id,
+        workspace_id=workspace_id, document_id=document_id, version_id=version_id,
+        current_terms_version=settings.current_terms_version, extraction_id=extraction_id), "projection")

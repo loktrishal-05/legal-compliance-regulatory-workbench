@@ -40,6 +40,27 @@ services:
       postgres:
         condition: service_healthy
     command: [python, -B, -m, unittest, discover, -s, tests, -p, 'test_legal_scope*.py', -v]
+  # Parser containment profile (agent A): same parser executable, no network, read-only root, non-root,
+  # all capabilities dropped, bounded memory/pids. stdin = original bytes, stdout = bounded JSON artifact.
+  parser-sandbox:
+    image: legal-compliance-workbench-legal-core-test:py311
+    profiles: [parser-sandbox]
+    network_mode: none
+    read_only: true
+    user: "65534:65534"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 512m
+    pids_limit: 64
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    environment:
+      LANG: C.UTF-8
+      PYTHONDONTWRITEBYTECODE: '1'
+    volumes:
+      - ../backend/app:/sandbox/backend/app:ro  # code only: no .env, data root, DB or model mounts
+    working_dir: /tmp
+    entrypoint: [python, -I, -B, /sandbox/backend/app/services/legal_parser_worker.py]
 networks:
   default:
     internal: true
