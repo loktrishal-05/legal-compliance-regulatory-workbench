@@ -71,6 +71,12 @@ class ContractDeterministicTests(unittest.TestCase):
         self.assertEqual(result["coverage"]["covered_spans"], 2)
         self.assertIn("unclassified_clause", result["uncertainties"])
 
+    def test_passive_notice_duty_never_invents_notices_as_a_legal_actor(self):
+        result = self.analyze("saas")
+        self.assertIn("passive_duty_actor_requires_manual_extraction", result["uncertainties"])
+        self.assertFalse(any(o["actor"] == "Notices" for o in result["obligations"]))
+        self.assertTrue(any("Notices must be sent" in c["text"] for c in result["clauses"]))
+
     def test_empty_duplicate_and_oversize_source_inputs_fail_closed(self):
         from app.services.legal_contract_analysis import analyze_sources
         with self.assertRaises(ValueError):

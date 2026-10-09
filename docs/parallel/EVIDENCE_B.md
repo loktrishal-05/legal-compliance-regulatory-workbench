@@ -167,6 +167,23 @@ A's checkpoint confirms worker imports every legal service, so B handlers/target
 
 Hardening target RED **two actual assertion failures**: approving after originating analyst's propose grant was revoked still emitted accepted obligation. Fixed in shared B approval callback: recompute proposal hash against immutable analysis/collision inputs, verify exact requested revision/requester, and reauthorize every cited document for originating propose permission before release. Same hardening target GREEN **12/12 PASS**, SQLite/PostgreSQL; failed approval rolls back both decision and outbox event.
 
+### Milestone B10 — authored golden evaluation GREEN
+
+Command: `docker compose -p lrw-b -f infra/docker-compose.legal-core-test.yml run --rm tests python -B -m unittest discover -s tests -p "test_legal_scope_contracts_golden.py" -v`.
+
+Initial RED: TXT obligation precision **11/12 = 0.916667**, recall **11/11 = 1.0**; extractor incorrectly proposed `Notices` as an actor for passive `Notices must be sent`. Fixed the heuristic to retain passive/copular duties in cited clauses and explicitly flag manual actor extraction, not invent an actor. Authored expected labels/thresholds were unchanged. Added a dedicated passive-source-preservation check.
+
+GREEN golden test **1/1 PASS**, actual TXT, in-test generated DOCX, and in-test generated PDF all parsed through the real worker. Per format:
+
+| Metric label | TP | FP | FN | Precision | Recall |
+|---|---:|---:|---:|---:|---:|
+| Ordered clause-type labels | 24 | 0 | 0 | 1.0 | 1.0 |
+| Party names | 8 | 0 | 0 | 1.0 | 1.0 |
+| Field presence/type/name (dates include exact value) | 12 | 0 | 0 | 1.0 | 1.0 |
+| Active-voice actor/type obligation labels | 11 | 0 | 0 | 1.0 | 1.0 |
+
+These metrics cover four short synthetic authored fixtures and specified labels, **not legal-corpus accuracy, complete obligation recall, deadline/condition normalization, semantic field correctness or counsel acceptance**. Passive/copy-like duties are explicitly deferred to manual extraction; no production threshold invented. Expected labels/provenance at `fixtures/legal_contracts/expected.json`; generation never truncates a fixture to fit PDF.
+
 ## Files / FR scope
 
 Owned files only, as in binding plan. Intended FRs: FR-012..025, FR-048..053, FR-064/065, supporting source/auth/review/audit invariants.

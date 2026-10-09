@@ -68,6 +68,10 @@ def analyze_sources(sources, *, playbook_rules=(), quality="ready"):
                 facts.append({"kind": kind, "name": kind, "value": line, "citations": [citation]})
             for modal in MODAL.finditer(line):
                 actor, verb, action = modal.groups()
+                # ponytail: active-voice duties only; passive/copular duties stay in cited clauses and require manual actor extraction.
+                if action.casefold().startswith("be "):
+                    uncertainties.append("passive_duty_actor_requires_manual_extraction")
+                    continue
                 deadline = DEADLINE.search(action)
                 conditions = re.findall(r"\b(?:provided|subject to|if|unless|while|except with)\b[^.;]+", action, re.I)
                 trigger = re.search(r"\b(?:upon|after)\s+[^,.;]+", action, re.I)
