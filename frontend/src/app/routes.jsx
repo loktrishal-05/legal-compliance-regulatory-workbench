@@ -47,7 +47,7 @@ export const routes = [{
             legalPage('dashboard', placeholders, 'LegalDashboardPlaceholder', 'Legal dashboard'),
             legalPage('documents', () => import('../features/legal/documents/DocumentsPage.jsx'), 'DocumentsPage', 'Documents'),
             legalPage('source', () => import('../features/legal/source/SourcePage.jsx'), 'SourcePage', 'Source viewer'),
-            legalPage('contracts', placeholders, 'ContractsPlaceholder', 'Contracts'),
+            legalPage('contracts', () => import('../features/legal/contracts/ContractsPage.jsx'), 'ContractsPage', 'Contracts'),
             legalPage('reviews', placeholders, 'ReviewsPlaceholder', 'Review queue'),
             legalPage('compliance', placeholders, 'CompliancePlaceholder', 'Compliance'),
             legalPage('regulatory', placeholders, 'RegulatoryPlaceholder', 'Regulatory intelligence'),
