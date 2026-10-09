@@ -60,3 +60,9 @@ test('upload sends raw bytes with metadata in the query and surfaces refusal cod
   await assert.rejects(uploadDocument(WS, file, { documentType: 'contract', classification: 'internal' }, refused),
     error => error.status === 422 && /unsupported_format/.test(error.message))
 })
+
+test('quote digest matches the server sha256 of the exact UTF-8 quote', async () => {
+  const { sha256Hex } = await import('./legalApi.js')
+  assert.equal(await sha256Hex('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad')
+  assert.equal((await sha256Hex('Zahlung ü\n')).length, 64)
+})

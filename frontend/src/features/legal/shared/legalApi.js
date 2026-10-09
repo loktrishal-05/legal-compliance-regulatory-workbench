@@ -132,3 +132,9 @@ export async function uploadDocument(workspaceId, file, { documentType, classifi
   }
   return data
 }
+
+// Correction proposals bind the exact stored quote: the server compares this digest before accepting.
+export async function sha256Hex(text) {
+  const bytes = new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))
+  return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('')
+}
