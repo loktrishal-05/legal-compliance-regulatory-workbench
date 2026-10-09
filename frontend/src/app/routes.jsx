@@ -10,6 +10,10 @@ const pages = () => import('./AppPages.jsx')
 const authPages = () => import('../features/auth/AuthPages.jsx')
 const page = (path, name, title) => ({ path, lazy: lazyNamed(pages, name), handle: { title } })
 const indexPage = (name, title) => ({ index: true, lazy: lazyNamed(pages, name), handle: { title } })
+// Legal area: one route line per page so each owner swaps only its own line (placeholder -> real page).
+const legalShared = () => import('../features/legal/shared/LegalShared.jsx')
+const placeholders = () => import('../features/legal/shared/Placeholders.jsx')
+const legalPage = (path, loader, name, title) => ({ path, lazy: lazyNamed(loader, name), handle: { title } })
 const authPage = (path, name, title, media) => ({ path, lazy: lazyNamed(authPages, name), handle: { title, authMedia: media } })
 
 export const routes = [{
@@ -38,6 +42,20 @@ export const routes = [{
         lazy: lazyNamed(() => import('./AppShell.jsx'), 'default'),
         children: [
           { index: true, element: <Navigate to="dashboard" replace /> },
+          { path: 'legal', lazy: lazyNamed(legalShared, 'LegalLayout'), children: [
+            { index: true, element: <Navigate to="documents" replace /> },
+            legalPage('dashboard', placeholders, 'LegalDashboardPlaceholder', 'Legal dashboard'),
+            legalPage('documents', placeholders, 'DocumentsPlaceholder', 'Documents'),
+            legalPage('source', placeholders, 'SourcePlaceholder', 'Source viewer'),
+            legalPage('contracts', placeholders, 'ContractsPlaceholder', 'Contracts'),
+            legalPage('reviews', placeholders, 'ReviewsPlaceholder', 'Review queue'),
+            legalPage('compliance', placeholders, 'CompliancePlaceholder', 'Compliance'),
+            legalPage('regulatory', placeholders, 'RegulatoryPlaceholder', 'Regulatory intelligence'),
+            legalPage('summaries', placeholders, 'SummariesPlaceholder', 'Summaries'),
+            legalPage('assistant', placeholders, 'AssistantPlaceholder', 'Legal assistant'),
+            legalPage('obligations', placeholders, 'ObligationsPlaceholder', 'Obligations and tasks'),
+            legalPage('audit', placeholders, 'LegalAuditPlaceholder', 'Legal audit and exports'),
+          ] },
           page('dashboard', 'DashboardPage', 'Dashboard'),
           page('workspace', 'WorkspacePage', 'AI Workspace'),
           page('workspace/voice', 'VoiceWorkspacePage', 'Voice query'),

@@ -4,6 +4,18 @@ export const REVIEWERS = ['reviewer', 'admin']
 export const ADMINS = ['admin']
 
 export const APP_SECTIONS = [
+  { group: 'Legal', items: [
+    { path: 'legal/dashboard', label: 'Legal dashboard', icon: 'grid' },
+    { path: 'legal/documents', label: 'Documents', icon: 'book' },
+    { path: 'legal/contracts', label: 'Contracts', icon: 'drawing' },
+    { path: 'legal/reviews', label: 'Review queue', icon: 'check' },
+    { path: 'legal/compliance', label: 'Compliance', icon: 'shield' },
+    { path: 'legal/regulatory', label: 'Regulatory', icon: 'globe' },
+    { path: 'legal/summaries', label: 'Summaries', icon: 'list' },
+    { path: 'legal/assistant', label: 'Legal assistant', icon: 'agent' },
+    { path: 'legal/obligations', label: 'Obligations & tasks', icon: 'timeline' },
+    { path: 'legal/audit', label: 'Legal audit', icon: 'lock' },
+  ] },
   { group: 'Operate', items: [
     { path: 'dashboard', label: 'Dashboard', icon: 'grid' },
     { path: 'workspace', label: 'AI Workspace', icon: 'terminal' },
