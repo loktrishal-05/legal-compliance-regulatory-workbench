@@ -73,7 +73,12 @@ def main():
                             assert all(current.get(name) == definition for name, definition in triggers)
                             assert {"immutable_legal_extractions", "immutable_legal_source_spans",
                                     "immutable_truncate_legal_extractions", "immutable_truncate_legal_source_spans",
-                                    "immutable_legal_corrections", "immutable_legal_correction_decisions"} <= current.keys()
+                                    "immutable_legal_corrections", "immutable_legal_correction_decisions",
+                                    # agent A 0026/0027/0031 immutable or append-only workflow history
+                                    "immutable_legal_region_transcriptions", "immutable_legal_reviews",
+                                    "immutable_legal_review_decisions", "immutable_legal_events",
+                                    "immutable_legal_comments", "immutable_legal_evidence_packs",
+                                    "immutable_legal_dispatch_receipts"} <= current.keys()
                     # 0021: reversible without history, accepts provisioning events, refuses lossy downgrade.
                     command.downgrade(config, "0020_legal_policy_audit")
                     command.upgrade(config, "head")
