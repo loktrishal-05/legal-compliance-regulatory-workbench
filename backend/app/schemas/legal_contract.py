@@ -22,6 +22,11 @@ class ContractRequest(Command):
     title: str = Field(min_length=1, max_length=200)
 
 
+class ContractVersionRequest(Command):
+    document_id: UUID
+    version_id: UUID
+
+
 class AnalysisRequest(Command):
     playbook_id: UUID | None = None
 

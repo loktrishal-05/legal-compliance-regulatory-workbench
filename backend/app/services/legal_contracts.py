@@ -73,7 +73,8 @@ def load_version(db, *, actor_id, workspace_id, contract_id, version_id, current
     ctx = authorize_workspace(db, actor_id, workspace_id, current_terms_version=current_terms_version)
     row = db.execute(select(Contract, ContractVersion).join(ContractVersion, ContractVersion.contract_id == Contract.id)
         .where(Contract.id == contract_id, ContractVersion.id == version_id, Contract.workspace_id == workspace_id,
-            Contract.organization_id == ctx.organization_id, ContractVersion.document_id == Contract.document_id)).one_or_none()
+            Contract.organization_id == ctx.organization_id, ContractVersion.workspace_id == workspace_id,
+            ContractVersion.organization_id == ctx.organization_id)).one_or_none()
     if row is None:
         raise LegalAccessDenied()
     contract, version = row
@@ -105,14 +106,21 @@ def stored_sources(db, *, actor_id, workspace_id, document_id, version_id, curre
     return artifact, [{**s, "span_id": str(s["span_id"])} for s in sources]
 
 
-def analysis_response(db, row):
+def analysis_response(db, row, *, actor_id, workspace_id, current_terms_version):
     result = dict(row.result)
     result.update(analysis_id=row.id, revision_sha256=row.revision_sha256, contract_version_id=row.contract_version_id)
     result["clauses"] = [{"clause_id": c.id, **c.payload} for c in db.scalars(select(ContractClause)
         .where(ContractClause.analysis_id == row.id).order_by(ContractClause.ordinal))]
     for key, model, identifier in (("findings", ContractFinding, "finding_id"), ("obligations", ObligationProposal, "proposal_id")):
-        result[key] = [{identifier: r.id, "revision_sha256": r.revision_sha256, "outcome": proposal_outcome(db, r, "contract_finding" if key == "findings" else "contract_obligation"), **r.payload}
-            for r in db.scalars(select(model).where(model.analysis_id == row.id).order_by(model.created_at, model.id))]
+        result[key] = []
+        for r in db.scalars(select(model).where(model.analysis_id == row.id).order_by(model.created_at, model.id)):
+            try:
+                validate_citations(db, actor_id=actor_id, workspace_id=workspace_id,
+                    citations=r.payload["citations"], current_terms_version=current_terms_version)
+            except LegalAccessDenied:
+                continue
+            result[key].append({identifier: r.id, "revision_sha256": r.revision_sha256,
+                "outcome": proposal_outcome(db, r, "contract_finding" if key == "findings" else "contract_obligation"), **r.payload})
     return result
 
 
@@ -132,7 +140,7 @@ def analyze(db, *, actor_id, workspace_id, contract_id, version_id, current_term
     existing = db.scalar(select(ContractAnalysis).where(ContractAnalysis.contract_version_id == version.id,
         ContractAnalysis.workspace_id == workspace_id, ContractAnalysis.revision_sha256 == digest))
     if existing:
-        return analysis_response(db, existing)
+        return analysis_response(db, existing, actor_id=actor_id, workspace_id=workspace_id, current_terms_version=current_terms_version)
     row = ContractAnalysis(id=uuid4(), **scope(ctx), contract_version_id=version.id, extraction_id=artifact.id,
         requester_id=actor_id, profile_version=parsed["profile_version"], schema_version=parsed["schema_version"],
         prompt_version=parsed["prompt_version"], rule_version=parsed["rule_version"], revision_sha256=digest, result=parsed)
@@ -155,9 +163,9 @@ def analyze(db, *, actor_id, workspace_id, contract_id, version_id, current_term
             db.add(model(id=uuid4(), **scope(ctx), analysis_id=row.id, requester_id=actor_id,
                 revision_sha256=canonical_hash({"analysis": digest, "proposal": item}), payload=item))
     db.flush()
-    authorize_document(db, actor_id, workspace_id, contract.document_id, current_terms_version=current_terms_version, operation="propose")
+    authorize_document(db, actor_id, workspace_id, version.document_id, current_terms_version=current_terms_version, operation="propose")
     audit(db, ctx, "contract_analysis_proposed", row.id)
-    return analysis_response(db, row)
+    return analysis_response(db, row, actor_id=actor_id, workspace_id=workspace_id, current_terms_version=current_terms_version)
 
 
 def list_contracts(db, *, actor_id, workspace_id, current_terms_version):
@@ -169,9 +177,15 @@ def list_contracts(db, *, actor_id, workspace_id, current_terms_version):
             authorize_document(db, actor_id, workspace_id, contract.document_id, current_terms_version=current_terms_version)
         except LegalAccessDenied:
             continue
-        items.append({"contract_id": contract.id, "document_id": contract.document_id, "title": contract.title,
-            "versions": [{"contract_version_id": v.id, "version_id": v.version_id, "source_sha256": v.source_sha256}
-                for v in db.scalars(select(ContractVersion).where(ContractVersion.contract_id == contract.id))]})
+        versions = []
+        for v in db.scalars(select(ContractVersion).where(ContractVersion.contract_id == contract.id)):
+            try:
+                authorize_document(db, actor_id, workspace_id, v.document_id, current_terms_version=current_terms_version)
+            except LegalAccessDenied:
+                continue
+            versions.append({"contract_version_id": v.id, "document_id": v.document_id,
+                "version_id": v.version_id, "source_sha256": v.source_sha256})
+        items.append({"contract_id": contract.id, "document_id": contract.document_id, "title": contract.title, "versions": versions})
     return {"items": items}
 
 
@@ -258,7 +272,7 @@ def get_analysis(db, *, actor_id, workspace_id, contract_id, version_id, current
         ContractAnalysis.workspace_id == workspace_id).order_by(ContractAnalysis.created_at.desc(), ContractAnalysis.id.desc()))
     if row is None:
         raise ExtractionBlocked("contract_analysis_required")
-    result = analysis_response(db, row)
+    result = analysis_response(db, row, actor_id=actor_id, workspace_id=workspace_id, current_terms_version=current_terms_version)
     validate_citations(db, actor_id=actor_id, workspace_id=workspace_id,
         citations=[c for clause in result["clauses"] for c in clause["citations"]], current_terms_version=current_terms_version)
     return result
@@ -336,8 +350,9 @@ def handle_document_extracted(db, event):
     if document is None or document.document_type != "contract":
         return
     actor_id = UUID(data["actor_id"])
+    existing = db.scalar(select(Contract).where(Contract.document_id == document.id, Contract.workspace_id == event.workspace_id))
     result = create_contract(db, actor_id=actor_id, workspace_id=event.workspace_id,
-        document_id=document.id, version_id=UUID(data["version_id"]), title=document.filename,
+        document_id=document.id, version_id=UUID(data["version_id"]), title=existing.title if existing else document.filename,
         current_terms_version=settings.current_terms_version)
     legal_events.emit(db, workspace_id=event.workspace_id, event_type="legal.contract.analysis_requested",
         idempotency_key="analysis:" + data["extraction_id"], payload={"actor_id": str(actor_id),
@@ -356,3 +371,24 @@ def handle_analysis_requested(db, event):
 from app.services import legal_events
 legal_events.register_handler("legal.document.extracted", handle_document_extracted)
 legal_events.register_handler("legal.contract.analysis_requested", handle_analysis_requested)
+
+
+def add_version(db, *, contract_id, document_id, version_id, actor_id, workspace_id, current_terms_version):
+    ctx = authorize_workspace(db, actor_id, workspace_id, current_terms_version=current_terms_version)
+    contract = db.scalar(select(Contract).where(Contract.id == contract_id, Contract.workspace_id == workspace_id,
+        Contract.organization_id == ctx.organization_id).with_for_update())
+    if contract is None:
+        raise LegalAccessDenied()
+    authorize_document(db, actor_id, workspace_id, contract.document_id, current_terms_version=current_terms_version, operation="propose")
+    ctx, source = version_source(db, actor_id=actor_id, workspace_id=workspace_id, document_id=document_id,
+        version_id=version_id, current_terms_version=current_terms_version, operation="propose")
+    row = db.scalar(select(ContractVersion).where(ContractVersion.contract_id == contract_id,
+        ContractVersion.version_id == version_id, ContractVersion.workspace_id == workspace_id))
+    if row is None:
+        row = ContractVersion(id=uuid4(), **scope(ctx), contract_id=contract_id, document_id=document_id,
+            version_id=version_id, source_sha256=source.source_sha256)
+        db.add(row)
+        db.flush()
+        audit(db, ctx, "contract_version_attached", row.id)
+    return {"contract_id": contract_id, "contract_version_id": row.id, "document_id": document_id,
+        "version_id": version_id, "source_sha256": row.source_sha256}

@@ -8,7 +8,7 @@ from app.core.config import settings
 from app.db.models import User
 from app.db.session import get_db
 from app.schemas.legal_contract import (ContractRequest, AnalysisRequest, PlaybookRequest, SummaryRequest,
-    QuestionRequest, ConversationRequest, CollisionRequest)
+    QuestionRequest, ConversationRequest, CollisionRequest, ContractVersionRequest)
 from app.services import legal_contracts, legal_playbooks, legal_summaries, legal_assistant, legal_review
 from app.services.legal_policy import LegalAccessDenied
 from app.services.legal_extraction import ExtractionBlocked
@@ -46,6 +46,13 @@ def create_contract(workspace_id: UUID, request: ContractRequest, db: Session = 
 @router.get("/contracts")
 def contracts(workspace_id: UUID, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     return execute(db, user, workspace_id, lambda: legal_contracts.list_contracts(db, **args(user, workspace_id)))
+
+
+@router.post("/contracts/{contract_id}/versions", status_code=201)
+def contract_version(workspace_id: UUID, contract_id: UUID, request: ContractVersionRequest,
+                     db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return execute(db, user, workspace_id, lambda: legal_contracts.add_version(db, contract_id=contract_id,
+        **request.model_dump(), **args(user, workspace_id)))
 
 
 @router.post("/contracts/{contract_id}/versions/{version_id}/analysis", status_code=201)

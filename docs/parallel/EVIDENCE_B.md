@@ -153,6 +153,16 @@ Contracts HTTP target RED: three missing-router errors; GREEN **3/3 PASS** on mi
 
 Persistence event RED: two missing-handler errors; GREEN **16/16 PASS** in persistence target. `legal.document.extracted` recognizes document type contract, registers source contract and enqueues one `legal.contract.analysis_requested` durable outbox row per extraction. B's analysis handler binds exact extraction and reauthorizes the original actor, including after replay/revocation. Worker import integration remains A-owned.
 
+### Milestone B8 — review/matter/version hardening GREEN
+
+Hardening RED: four intended errors exposed absent new-source version attachment and automatic event title conflicting with an existing user-created contract. Shared service fixes preserve user title, allow independently authorized immutable document versions under one contract, validate each version before list exposure, and recheck all multi-source finding citations before returning analysis.
+
+Full contracts discovery target **38/38 PASS**, including SQLite/PostgreSQL business-owner/auditor denial, true self-review with platform/scoped reviewer eligibility, forged review hash rollback (no decision/event), missing document-review grant, restricted matter, source/version ACL revocation and event title replay. No source lineage/role/audit test weakened.
+
+New endpoint **POST `/contracts/{contract_id}/versions`**, body `{"document_id":"<UUID>","version_id":"<document-version UUID>"}`, 201 `{"contract_id":"<UUID>","contract_version_id":"<UUID>","document_id":"<UUID>","version_id":"<document-version UUID>","source_sha256":"<hex>"}`. Both base-contract and new-source propose grants required. GET contracts version items now additionally include `document_id`; inaccessible versions omitted. Contract-version IDs can then be used for redline/analysis.
+
+A's checkpoint confirms worker imports every legal service, so B handlers/targets registration integration request is resolved. B still awaits A's final actual accepted-obligation consumer/combined E2E evidence; emits confirmed agreed payload without guessing due dates.
+
 ## Files / FR scope
 
 Owned files only, as in binding plan. Intended FRs: FR-012..025, FR-048..053, FR-064/065, supporting source/auth/review/audit invariants.
