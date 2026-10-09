@@ -100,3 +100,38 @@ No POST campaign endpoint: independent approved change persists it and emits `le
 ## Open gates
 
 Independent human/legal approval, enterprise identity, operational source packs, deployment/recovery and live-model quality remain unaccepted. No routes or persistence delivered yet.
+
+## Step 5 (completed by A) — compliance persistence, migration 0030 and API
+
+Commit a47447f. C models/schemas/service kept as written; A filled migration 0030 from the models (12 tables, workspace-qualified FKs, append-only triggers on requirements, interpretations, policy versions, evidence versions, mappings, rules, assessments, findings, reevaluations; downgrade refuses with data). Validator PASS fresh and 0018 -> 0031. Evidence-expiry scan `compliance_evidence_expiry` (C) is registered with `legal_scheduler`. Full legal-core 376/376 OK; `test_legal_scope_compliance_api.py` 3/3 (PG HTTP).
+
+Prefix `/v1/workspaces/{workspace_id}/compliance`; cookie + current terms + scoped policy; deny/unknown → 404 `{"detail":{"code":"legal_resource_unavailable"}}`; extra fields (e.g. client `status`) → 422; conflicts → 409 `{"detail":{"code":"..."}}`. Approval only through `POST /reviews` (targets `requirement_interpretation`, `compliance_rule`, `evidence_acceptance`, `assessment`, `compliance_finding`).
+
+POST bodies (201 returns the stored row with all columns; reviewable resources add `"review_state":"approved|not_approved"`):
+
+```json
+POST /requirements      {"regulatory_version_id":"<uuid>","title":"Synthetic retention duty"}
+POST /interpretations   {"requirement_id":"<uuid>","text":"Approved reading","span_ids":["<stored span uuid>"]}
+POST /policies          {"title":"Records policy"}
+POST /policy-versions   {"policy_id":"<uuid>","document_id":"<uuid>","version_id":"<uuid>"}
+POST /controls          {"title":"Retention control","description":"Retain records","owner_id":"<member uuid>"}
+POST /evidence          {"title":"Synthetic proof"}
+POST /evidence-versions {"evidence_id":"<uuid>","document_id":"<uuid>","version_id":"<uuid>","observed_at":"2026-10-09T10:00:00Z","valid_from":"2026-10-09T10:00:00Z","expires_at":"2027-10-09T10:00:00Z","replaces_id":null,"facts":{"retention_years":7},"span_ids":["<uuid>"]}
+POST /mappings          {"requirement_id":"<uuid>","control_id":"<uuid>","policy_version_id":null,"evidence_version_id":"<uuid>"}
+POST /rules             {"control_id":"<uuid>","interpretation_id":"<uuid>","checks":[{"fact":"retention_years","op":"ge","value":7}]}
+POST /assessments       {"requirement_id":"<uuid>","applicability_id":"<uuid>"}
+POST /findings          {"assessment_id":"<uuid>","text":"Synthetic gap"}
+```
+
+Assessment response (stored immutable snapshot):
+```json
+{"id":"<uuid>","organization_id":"<uuid>","workspace_id":"<uuid>","requirement_id":"<uuid>","applicability_id":"<uuid>","actor_id":"<uuid>","evaluated_at":"<ts>","inputs":{"components":[...]},"result":{"status":"satisfied","reasons":[],"components":[...]},"status":"satisfied|partially_satisfied|unsatisfied|insufficient_evidence|not_applicable|needs_review","revision_sha256":"<hex>","created_at":"<ts>","review_state":"not_approved"}
+```
+
+`GET /{resource}?offset=0&limit=50` for requirements|interpretations|policies|policy-versions|controls|evidence|evidence-versions|mappings|rules|assessments|findings|reevaluations → `{"items":[row...],"has_more":false,"next_offset":null}` (denied rows never counted).
+
+`GET /assessments/{id}/current` → `{"assessment":{stored row},"current":{"status":"...","reasons":["..."],"freshness":"stale|...","review_state":"approved|not_approved", ...}}` — evidence expiry/replacement or accepted change marks `freshness:"stale"` with reasons; the stored snapshot is never rewritten.
+
+`GET /impact?changed_id=<requirement|control|policy|evidence uuid>` → `{"changed_id":"<uuid>","paths":[{"id":"<uuid>","kind":"requirement|control|policy|evidence|regulatory_version","path":["<uuid>", "..."]}]}`.
+
+Over HTTP the tests show insufficient_evidence → satisfied → stale after real expiry, unsatisfied for failing facts, cross-tenant/unknown 404, forged client status 422. All six evaluator states are covered in `test_legal_scope_compliance_snapshot.py`.
