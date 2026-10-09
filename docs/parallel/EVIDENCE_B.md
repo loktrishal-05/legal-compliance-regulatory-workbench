@@ -45,6 +45,12 @@ Implemented `db/models/legal_contract.py` and `services/legal_contracts.py`: ten
 
 Shared migration stubs landed in A commit `f79c6a9`; 0028 now available for B. Shared model registration not yet changed.
 
+### Milestone B3 — migration 0028 GREEN
+
+Contracts target now **17/17 PASS**. Own migration test RED failed because B tables were absent from stub; GREEN upgrades fresh to 0028 twice, compares every B column/constraint using PostgreSQL's real name truncation, denies TRUNCATE CASCADE for all 13 immutable tables, and verifies 26 update/delete/truncate triggers. Fixture query/name-normalization bugs corrected; trigger expectations kept intact. Conversation memory is intentionally mutable/erasable and not a source-evidence table.
+
+0028 body filled without changing preallocated revision IDs. One additive model import `from app.db.models import legal_contract` appended after re-reading shared registration. **A: please commit shared registration with your own pending registration edits**; B checkpoints exclude this mixed-ownership file to avoid capturing A/C work. Own migration, migration tests and evidence are checkpointed by B. Please incorporate B's migration coverage and table parity in your consolidated validator.
+
 ## Files / FR scope
 
 Owned files only, as in binding plan. Intended FRs: FR-012..025, FR-048..053, FR-064/065, supporting source/auth/review/audit invariants.
