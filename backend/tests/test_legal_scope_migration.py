@@ -64,7 +64,7 @@ class LegalScopeMigrationTests(unittest.TestCase):
         config = Config()
         config.set_main_option("script_location", str(BACKEND / "alembic"))
         script = ScriptDirectory.from_config(config)
-        self.assertEqual(script.get_heads(), ["0025_legal_corrections"])
+        self.assertEqual(script.get_heads(), ["0031_legal_obligations"])
         module = migration()
         self.assertEqual(module.down_revision, "0018_terms_acceptance")
         output = io.StringIO()

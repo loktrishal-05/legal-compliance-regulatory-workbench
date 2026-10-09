@@ -204,7 +204,7 @@ def main():
                         if isinstance(error, AssertionError):
                             raise
                         assert "Legal correction history exists" in str(error)
-                print(f"PASS: {baseline or 'fresh'} -> 0025, metadata parity, idempotent upgrade, legacy preservation, "
+                print(f"PASS: {baseline or 'fresh'} -> head, metadata parity, idempotent upgrade, legacy preservation, "
                       "scope/dedupe, immutable extraction/correction and independent review checks")
             finally:
                 scoped_engine.dispose()
