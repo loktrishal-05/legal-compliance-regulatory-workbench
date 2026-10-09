@@ -45,7 +45,7 @@ export const routes = [{
           { path: 'legal', lazy: lazyNamed(legalShared, 'LegalLayout'), children: [
             { index: true, element: <Navigate to="documents" replace /> },
             legalPage('dashboard', placeholders, 'LegalDashboardPlaceholder', 'Legal dashboard'),
-            legalPage('documents', placeholders, 'DocumentsPlaceholder', 'Documents'),
+            legalPage('documents', () => import('../features/legal/documents/DocumentsPage.jsx'), 'DocumentsPage', 'Documents'),
             legalPage('source', placeholders, 'SourcePlaceholder', 'Source viewer'),
             legalPage('contracts', placeholders, 'ContractsPlaceholder', 'Contracts'),
             legalPage('reviews', placeholders, 'ReviewsPlaceholder', 'Review queue'),
