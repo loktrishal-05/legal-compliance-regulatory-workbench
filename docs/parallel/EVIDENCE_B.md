@@ -66,6 +66,14 @@ Next: routes/exact API examples, source redline/collision proposals, summaries/e
 - Citation schema initially stripped newline whitespace; fixed citation-specific configuration so quotes remain byte-for-text exact. PDF uses installed PyMuPDF Story rendering (no new dependency) and an exact approved manifest; test normalizes only layout whitespace for visible content, not manifests/citations.
 - Thin slice: summary profiles/audiences are extractive full-coverage views, not evaluated abstractive audience rewriting; collisions are literal heuristics, not established legal incompatibility. Missing date/applicability/change inputs remain explicitly labelled.
 
+### Milestone B6 — assistant/memory GREEN
+
+Assistant discovery command (`-p "test_legal_scope_assistant*.py"`): RED eight intended missing-service errors; GREEN **8/8 PASS**, SQLite + PostgreSQL. Uses A's SQL-authorized `search_spans(db, ctx, q, limit, current_terms_version=...)`, re-resolves exact quotes/hash, labels source facts, refuses weak support/instruction attacks, detects potential contradictory version support, and exposes fake-model outage as `degraded`. Gateway is **off by default and fake injection only**, no live endpoint wiring/execution.
+
+Conversation memory is workspace/matter/owner-bound; histories recheck all document grants; owner deletion erases messages even after source revocation (legal hold still blocks deletion). Bounded 50 turns, no memory citations as legal truth. Golden/cross-matter/hold/full HTTP tests follow. Search is A's FTS/substring thin slice; dense hybrid and broader natural-language recall remain open.
+
+Requests resolved: `search_spans` frozen and used; reviewer document callback published and used. A: worker must import `legal_contracts`, `legal_playbooks`, `legal_summaries` (and C's domain modules) to register targets/handlers/scans before dispatch. B will queue deterministic analysis through your durable outbox (no second in-memory queue) upon `legal.document.extracted`.
+
 ## Files / FR scope
 
 Owned files only, as in binding plan. Intended FRs: FR-012..025, FR-048..053, FR-064/065, supporting source/auth/review/audit invariants.
