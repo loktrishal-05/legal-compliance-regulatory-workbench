@@ -53,7 +53,10 @@ class LegalScopeMigrationTests(unittest.TestCase):
                 migration_module.upgrade()
             target = MetaData(naming_convention=Base.metadata.naming_convention)
             for table in Base.metadata.tables.values():
-                if (table.name.startswith("legal_") and table.name not in {"legal_extractions", "legal_source_spans", "legal_corrections", "legal_correction_decisions"}) or table.name in {"users", "documents"}:
+                # 0019's own tables only; later migrations' parity is `alembic check` in validate_legal_migrations.
+                if table.name in {"legal_organizations", "legal_workspaces", "legal_workspace_memberships",
+                                  "legal_matters", "legal_matter_access", "legal_document_scopes",
+                                  "legal_document_access", "users", "documents"}:
                     table.to_metadata(target)
             self.assertEqual(compare_metadata(context, target), [])
             self.assertEqual(conn.scalar(select(Document.checksum).where(Document.id == document_id)), "b" * 64)

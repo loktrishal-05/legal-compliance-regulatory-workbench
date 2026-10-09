@@ -38,3 +38,4 @@ from app.db.models.legal_scope import (
 
 from app.db.models.legal_extraction import LegalExtraction, LegalSourceSpan
 from app.db.models.legal_correction import LegalCorrection, LegalCorrectionDecision
+from app.db.models.legal_review import LegalReview, LegalReviewDecision, LegalEvent, LegalSchedulerScan
