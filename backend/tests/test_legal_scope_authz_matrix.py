@@ -202,6 +202,11 @@ class LegalAuthorizationMatrixTests(unittest.TestCase):
         self.assertEqual(projection["label"], "corrected_projection_not_original")
         reviews = self.call("analyst", "GET", f"{base}/reviews")
         self.assertEqual((reviews.status_code, reviews.json()), (200, []))
+        mine = self.call("analyst", "GET", "/v1/workspaces").json()["items"]
+        self.assertEqual([w["workspace_id"] for w in mine], [str(self.ws)])
+        theirs = self.call("other_tenant", "GET", "/v1/workspaces").json()["items"]
+        self.assertEqual([w["workspace_id"] for w in theirs], [str(self.f.other.id)])
+        self.assertEqual(self.call("terms_missing", "GET", "/v1/workspaces").status_code, 403)
 
 
 if __name__ == "__main__":

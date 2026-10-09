@@ -39,6 +39,23 @@ def unavailable(db: Session, actor_id: UUID, workspace_id: UUID, document_id: UU
     raise HTTPException(404, detail={"code": "legal_resource_unavailable"})
 
 
+@router.get("")
+def my_workspaces(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    """The caller's own currently authorized workspaces (picker). Never lists other members or tenants."""
+    from app.db.models.legal_scope import WorkspaceMembership
+    items = []
+    for workspace_id in db.scalars(select(WorkspaceMembership.workspace_id).where(
+            WorkspaceMembership.user_id == user.id, WorkspaceMembership.is_active.is_(True))):
+        try:
+            context = authorize_workspace(db, user.id, workspace_id, current_terms_version=settings.current_terms_version)
+        except LegalAccessDenied:
+            continue
+        name = db.scalar(select(Workspace.name).where(Workspace.id == workspace_id))
+        items.append({"workspace_id": workspace_id, "organization_id": context.organization_id, "name": name,
+                      "role": context.role})
+    return {"items": sorted(items, key=lambda item: (item["name"] or "", str(item["workspace_id"])))}
+
+
 @router.get("/{workspace_id}", response_model=WorkspaceMetadata)
 def workspace_metadata(workspace_id: UUID, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     try:
