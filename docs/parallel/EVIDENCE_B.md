@@ -51,6 +51,14 @@ Contracts target now **17/17 PASS**. Own migration test RED failed because B tab
 
 0028 body filled without changing preallocated revision IDs. One additive model import `from app.db.models import legal_contract` appended after re-reading shared registration. **A: please commit shared registration with your own pending registration edits**; B checkpoints exclude this mixed-ownership file to avoid capturing A/C work. Own migration, migration tests and evidence are checkpointed by B. Please incorporate B's migration coverage and table parity in your consolidated validator.
 
+### Milestone B4 — approved playbooks and obligation review handoff GREEN
+
+Contracts target RED: four expected missing playbook/submit errors; GREEN **21/21 PASS**. New schemas forbid authority extras, bound rules/strings and require aware valid playbook intervals. Stored playbooks have owner/basis/jurisdiction/version; unapproved playbooks cannot drive analysis. A's `authorize` callback checks each source document and exact stored quotes/hash. `contract_finding`, `contract_obligation`, and `playbook` registered with exact-revision/requester checks on approval.
+
+Independent obligation approval emits one `legal.contract.obligation_accepted` event in the decision transaction; repeat decisions do not emit duplicates; unreviewed proposals have no event. Payload includes `normalized_deadline: null` plus original phrase/conditions/uncertainties; no legal calendar guessed. Self-review denied. SQLite and PostgreSQL journey checks exercise the real shared ledger/outbox.
+
+Next: routes/exact API examples, source redline/collision proposals, summaries/exports and assistant. Additional forged-hash/matter/role/revocation tests remain integration hardening work, not implied by this 21-test milestone.
+
 ## Files / FR scope
 
 Owned files only, as in binding plan. Intended FRs: FR-012..025, FR-048..053, FR-064/065, supporting source/auth/review/audit invariants.

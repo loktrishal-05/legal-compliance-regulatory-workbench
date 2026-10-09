@@ -111,7 +111,7 @@ def analysis_response(db, row):
     result["clauses"] = [{"clause_id": c.id, **c.payload} for c in db.scalars(select(ContractClause)
         .where(ContractClause.analysis_id == row.id).order_by(ContractClause.ordinal))]
     for key, model, identifier in (("findings", ContractFinding, "finding_id"), ("obligations", ObligationProposal, "proposal_id")):
-        result[key] = [{identifier: r.id, "revision_sha256": r.revision_sha256, "outcome": "proposed", **r.payload}
+        result[key] = [{identifier: r.id, "revision_sha256": r.revision_sha256, "outcome": proposal_outcome(db, r, "contract_finding" if key == "findings" else "contract_obligation"), **r.payload}
             for r in db.scalars(select(model).where(model.analysis_id == row.id).order_by(model.created_at, model.id))]
     return result
 
@@ -173,3 +173,79 @@ def list_contracts(db, *, actor_id, workspace_id, current_terms_version):
             "versions": [{"contract_version_id": v.id, "version_id": v.version_id, "source_sha256": v.source_sha256}
                 for v in db.scalars(select(ContractVersion).where(ContractVersion.contract_id == contract.id))]})
     return {"items": items}
+
+
+def proposal_outcome(db, row, target_type):
+    from app.services import legal_review
+    from app.db.models.legal_review import LegalReview
+    review = db.scalar(select(LegalReview).where(LegalReview.workspace_id == row.workspace_id,
+        LegalReview.target_type == target_type, LegalReview.target_id == row.id,
+        LegalReview.target_revision_sha256 == row.revision_sha256))
+    return legal_review.status(db, review) if review else "proposed"
+
+
+def proposal_source(db, target_type, target_id, workspace_id):
+    model = {"contract_finding": ContractFinding, "contract_obligation": ObligationProposal}.get(target_type)
+    if model is None:
+        raise ContractConflict("contract_target_invalid")
+    row = db.scalar(select(model).where(model.id == target_id, model.workspace_id == workspace_id))
+    if row is None:
+        raise LegalAccessDenied()
+    analysis = db.get(ContractAnalysis, row.analysis_id)
+    version = db.get(ContractVersion, analysis.contract_version_id)
+    return row, analysis, version
+
+
+def validate_citations(db, *, actor_id, workspace_id, citations, current_terms_version, operation="read", requester_id=None):
+    if not citations:
+        raise ContractConflict("contract_citations_required")
+    for citation in citations:
+        document_id, version_id, span_id = (UUID(str(citation[k])) for k in ("document_id", "version_id", "span_id"))
+        authorize_document(db, actor_id, workspace_id, document_id, current_terms_version=current_terms_version,
+            operation=operation, requester_id=requester_id)
+        version_source(db, actor_id=actor_id, workspace_id=workspace_id, document_id=document_id,
+            version_id=version_id, current_terms_version=current_terms_version)
+        source = resolve_span(db, actor_id=actor_id, workspace_id=workspace_id, document_id=document_id,
+            version_id=version_id, span_id=span_id, current_terms_version=current_terms_version)
+        if citation["quote"] != source["quote"] or citation.get("source_sha256") != source["source_sha256"]:
+            raise ContractConflict("contract_citation_mismatch")
+
+
+def authorize_proposal(db, ctx, target_id, target_type):
+    from app.core.config import settings
+    row, analysis, version = proposal_source(db, target_type, target_id, ctx.workspace_id)
+    if row.organization_id != ctx.organization_id:
+        raise LegalAccessDenied()
+    operation = "review_legal" if ctx.role == "legal_reviewer" and ctx.actor_id != row.requester_id else "read"
+    validate_citations(db, actor_id=ctx.actor_id, workspace_id=ctx.workspace_id, citations=row.payload["citations"],
+        current_terms_version=settings.current_terms_version, operation=operation, requester_id=row.requester_id)
+
+
+def approve_proposal(db, review):
+    from app.services import legal_events
+    row, analysis, version = proposal_source(db, review.target_type, review.target_id, review.workspace_id)
+    if row.revision_sha256 != review.target_revision_sha256 or row.requester_id != review.requester_id:
+        raise ContractConflict("contract_review_revision_mismatch")
+    if review.target_type == "contract_obligation":
+        legal_events.emit(db, workspace_id=review.workspace_id, event_type="legal.contract.obligation_accepted",
+            idempotency_key="contract-obligation:" + str(row.id), payload={"proposal_id": str(row.id),
+                "proposal_sha256": row.revision_sha256, "review_id": str(review.id), "requester_id": str(row.requester_id),
+                "document_id": str(version.document_id), "version_id": str(version.version_id),
+                "source_sha256": version.source_sha256, **row.payload})
+
+
+def submit_proposal(db, *, actor_id, workspace_id, current_terms_version, target_type, target_id):
+    from app.services import legal_review
+    row, analysis, version = proposal_source(db, target_type, target_id, workspace_id)
+    if row.requester_id != actor_id:
+        raise LegalAccessDenied()
+    authorize_document(db, actor_id, workspace_id, version.document_id, current_terms_version=current_terms_version, operation="propose")
+    return legal_review.submit(db, workspace_id=workspace_id, target_type=target_type, target_id=row.id,
+        target_revision_sha256=row.revision_sha256, requester_id=actor_id,
+        idempotency_key=target_type + ":" + str(row.id), current_terms_version=current_terms_version)
+
+
+from app.services import legal_review
+for _kind in ("contract_finding", "contract_obligation"):
+    legal_review.register_target(_kind, on_approve=approve_proposal,
+        authorize=lambda db, ctx, tid, kind=_kind: authorize_proposal(db, ctx, tid, kind))

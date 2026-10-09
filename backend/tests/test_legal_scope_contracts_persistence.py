@@ -26,7 +26,9 @@ class ContractPersistenceTests(unittest.TestCase):
         self.fixture.setUp()
         self.addCleanup(self.fixture.doCleanups)
         self.db = self.fixture.db
-        tables = {t for t in Base.metadata.tables.values() if t.name in models.TABLES}
+        from app.db.models.legal_review import LegalReview, LegalReviewDecision, LegalEvent
+        tables = {t for t in Base.metadata.tables.values() if t.name in models.TABLES} | {
+            LegalReview.__table__, LegalReviewDecision.__table__, LegalEvent.__table__}
         pending = list(tables)
         while pending:
             for fk in pending.pop().foreign_keys:
@@ -108,6 +110,56 @@ class ContractPersistenceTests(unittest.TestCase):
         with self.assertRaises(IntegrityError):
             self.db.execute(row.__table__.insert().values(**values))
         self.db.rollback()
+
+    def test_independent_obligation_review_emits_once_and_rejects_self_or_forged_hash(self):
+        from app.db.models.legal_review import LegalReview, LegalReviewDecision, LegalEvent
+        from app.services import legal_review
+        Base.metadata.create_all(self.fixture.engine, tables=[LegalReview.__table__, LegalReviewDecision.__table__, LegalEvent.__table__])
+        result = self.analyze()
+        proposal = result["obligations"][0]
+        self.fixture.grant(self.fixture.bob, role="legal_reviewer")
+        for operation in ("read", "review_legal"):
+            self.db.add(DocumentAccess(document_id=self.source.document_id, organization_id=self.fixture.ws.organization_id,
+                workspace_id=self.fixture.ws.id, user_id=self.fixture.bob.id, operation=operation))
+        self.db.commit()
+        review = self.service.submit_proposal(self.db, target_type="contract_obligation", target_id=proposal["proposal_id"], **self.args)
+        self.db.commit()
+        self.assertFalse(legal_review.is_approved(self.db, workspace_id=self.fixture.ws.id,
+            target_type="contract_obligation", target_id=proposal["proposal_id"], target_revision_sha256=proposal["revision_sha256"]))
+        with self.assertRaises(LegalAccessDenied):
+            legal_review.decide(self.db, workspace_id=self.fixture.ws.id, review_id=review.id,
+                reviewer_id=self.fixture.alice.id, decision="approve", rationale="synthetic", current_terms_version="1.0")
+        legal_review.decide(self.db, workspace_id=self.fixture.ws.id, review_id=review.id,
+            reviewer_id=self.fixture.bob.id, decision="approve", rationale="synthetic", current_terms_version="1.0")
+        self.db.commit()
+        legal_review.decide(self.db, workspace_id=self.fixture.ws.id, review_id=review.id,
+            reviewer_id=self.fixture.bob.id, decision="approve", rationale="synthetic", current_terms_version="1.0")
+        self.db.commit()
+        events = list(self.db.scalars(select(LegalEvent).where(LegalEvent.event_type == "legal.contract.obligation_accepted")))
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0].payload["proposal_sha256"], proposal["revision_sha256"])
+        self.assertEqual(events[0].payload["normalized_deadline"], None)
+
+    def test_playbook_requires_exact_independent_approval_before_analysis(self):
+        from app.services import legal_playbooks
+        from app.schemas.legal_contract import PlaybookRequest
+        from app.db.models.legal_review import LegalReview, LegalReviewDecision
+        from app.services import legal_review
+        Base.metadata.create_all(self.fixture.engine, tables=[LegalReview.__table__, LegalReviewDecision.__table__])
+        request = PlaybookRequest(name="Synthetic payment", version="v1", legal_basis="Synthetic fixture only",
+            jurisdiction="Fictional Territory", rules=[{"kind": "forbidden_text", "clause_type": "payment", "pattern": "30 days", "label": "Synthetic unusual term"}])
+        book = legal_playbooks.create(self.db, request=request, **self.args)
+        self.db.commit()
+        contract = self.create()
+        with self.assertRaises(self.service.ContractConflict):
+            self.analyze(contract, playbook_id=book["playbook_id"])
+        self.fixture.grant(self.fixture.bob, role="legal_reviewer")
+        legal_review.decide(self.db, workspace_id=self.fixture.ws.id, review_id=book["review_id"],
+            reviewer_id=self.fixture.bob.id, decision="approve", rationale="Synthetic playbook approval", current_terms_version="1.0")
+        self.db.commit()
+        result = self.analyze(contract, playbook_id=book["playbook_id"])
+        self.assertEqual(result["findings"][0]["kind"], "deviation")
+        self.assertTrue(result["findings"][0]["rule_id"])
 
 
 @unittest.skipUnless(os.environ.get("LEGAL_TEST_DATABASE_URL"), "Disposable PostgreSQL not selected")

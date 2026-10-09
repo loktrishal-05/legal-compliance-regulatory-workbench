@@ -32,7 +32,8 @@ def analyze_sources(sources, *, playbook_rules=(), quality="ready"):
     for item in sources:
         if not isinstance(item["quote"], str) or not item["quote"].strip():
             raise ValueError("empty_contract_span")
-        citation = {"span_id": str(item["span_id"]), "quote": item["quote"], "locator": item.get("locator", {})}
+        citation = {"span_id": str(item["span_id"]), "quote": item["quote"], "locator": item.get("locator", {}),
+                    **{key: str(item[key]) for key in ("document_id", "version_id", "source_sha256", "extraction_id") if key in item}}
         # One stored block can contain several headings; each remains tied to its exact original span.
         for line in item["quote"].splitlines():
             if not line.strip():
@@ -86,7 +87,7 @@ def analyze_sources(sources, *, playbook_rules=(), quality="ready"):
             findings.append({"kind": "missing_clause", "rule_id": rule["rule_id"],
                 "rationale": "Expected clause absent from inspected extraction" if established else "absence not established: extraction/coverage requires verification",
                 "absence_established": established, "coverage": coverage,
-                "citations": [{"span_id": str(s["span_id"]), "quote": s["quote"], "locator": s.get("locator", {})} for s in sources]})
+                "citations": [c for clause in clauses for c in clause["citations"]]})
         elif rule["kind"] == "forbidden_text":
             needle = rule.get("pattern", "").casefold()
             if not needle:
