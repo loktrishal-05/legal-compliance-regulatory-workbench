@@ -1,0 +1,12 @@
+1. Parties
+This synthetic subscription is between Cloud Vendor and Delta Customer.
+2. Services
+Provider shall supply access to the test platform while the subscription is active.
+3. Payment
+Customer shall pay the subscription fee within 15 days of invoice.
+4. Renewal
+The subscription renews annually unless either party gives 60 days written notice.
+5. Notice
+Notices must be sent to the contract contact in writing.
+6. Data Protection
+Customer must not upload real personal data to this synthetic test platform.
