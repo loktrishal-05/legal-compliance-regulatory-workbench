@@ -77,6 +77,7 @@ test('landing tells the honest story without video and starts without motion', a
     assert.match(html, /not automatically air-gapped/)
     assert.equal(html.replaceAll('not tamper-proof', '').toLowerCase().includes('tamper-proof'), false)
     // Static, fully readable markup; animation is added client-side only when reduced motion is off.
-    assert.match(html, /<div class="landing" data-theme="dark">/)
+    // Approved light direction (docs/DESIGN_DIRECTION.md); still static markup with motion added client-side only.
+    assert.match(html, /<div class="landing" data-theme="light">/)
   } finally { await server.close() }
 })
