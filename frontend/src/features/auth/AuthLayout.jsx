@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useMatches } from 'react-router'
-import { playbackMode, readMediaEnvironment } from './authModel.js'
+import { authMediaSources, playbackMode, readMediaEnvironment } from './authModel.js'
 import { Icon, Logo } from '../../components/ui.jsx'
 import { useBackendHealth } from '../../hooks/useBackendHealth.js'
 import '../../styles/auth.css'
-import { DEVELOPMENT_AUTH_MEDIA, PRODUCT_NAME } from '../../product.js'
+import { PRODUCT_NAME } from '../../product.js'
 
 // Moving between sign-in, sign-up and recovery crossfades the scene instead of cutting it.
 function useCrossfade(media) {
@@ -50,8 +50,8 @@ const STORIES = {
 }
 const PROOF = [
   ['shield', 'Private AI policy', 'local/private inference only; provisioning is required'],
-  ['agent', 'Development migration', 'legal workflows are not yet available'],
-  ['check', 'Human review', 'existing advisory review infrastructure is retained'],
+  ['agent', 'Development build', 'synthetic demo data; not legal advice'],
+  ['check', 'Human review', 'source-linked proposals require independent decisions'],
 ]
 
 export default function AuthLayout() {
@@ -62,7 +62,7 @@ export default function AuthLayout() {
   const [userPaused, setUserPaused] = useState(false)
   const video = useRef(null)
   const { status } = useBackendHealth()
-  const media = DEVELOPMENT_AUTH_MEDIA
+  const media = authMediaSources(handle.authMedia, env?.narrow)
   const mode = failed || !media.video ? 'poster' : playbackMode(env)
 
   useEffect(() => { document.title = `${handle.title || 'Sign in'} · ${PRODUCT_NAME}` }, [handle.title])
@@ -105,11 +105,11 @@ export default function AuthLayout() {
     <main id="main" className="auth-stage">
       <section className="auth-story" aria-label={`About ${PRODUCT_NAME}`}>
         <p className="auth-story-title" key={handle.authMedia}>{STORIES[handle.authMedia] || STORIES.login}</p>
-        <p className="auth-story-lede">{PRODUCT_NAME}. Contract intelligence, compliance monitoring and cited summaries are the target; this build currently provides the reusable platform foundation.</p>
+        <p className="auth-story-lede">Review contracts, track compliance evidence and read cited summaries in one workspace. Verify every proposal against its source.</p>
         <ul className="auth-proof">{PROOF.map(([icon, figure, text]) => <li key={figure}><Icon name={icon} size={18} /><span><strong>{figure}</strong> {text}</span></li>)}</ul>
       </section>
       <div className="auth-card"><Outlet /></div>
     </main>
-    <footer className="auth-foot">Development foundation · server-controlled accounts · no legal advice or compliance certification</footer>
+    <footer className="auth-foot">Development build — synthetic demo data; not legal advice</footer>
   </div>
 }

@@ -353,3 +353,5 @@ Status: MVP implemented + tested on synthetic fixtures with deterministic profil
 
 ## Final local build checkpoint 1 � 2026-10-10
 Initial interrupted combined run failed (deployment migration/dependency gaps; run overlapped cleanup, so not a stable acceptance run). Deployment-only changes removed under owner direction. Stable focused command: docker compose -p lrw-c -f infra/docker-compose.legal-core-test.yml run --rm tests python -B -m unittest discover -s tests -p test_legal_scope_help*.py -v: 8 run, 7 PASS, 1 SKIP (pinned ONNX absent). Frontend npm test: 62 PASS; lint 0 errors/2 pre-existing session fast-refresh warnings; build PASS. Default fallback model field now null, no false claim of model execution. Full legal-core, migration validator and local/browser journeys still pending.
+
+Final local checkpoint 2: frontend 63/63 PASS, lint zero errors/two inherited fast-refresh warnings, build PASS. Auth frame visual checks triggered watermark crop offset correction. Current legal guide video 12.14MB (under 30MB). Legacy terms/resources preserved. Motion/save-data poster policy retained. Local browser contrast/responsive/journeys pending.

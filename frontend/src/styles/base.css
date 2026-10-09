@@ -166,3 +166,10 @@ pre { overflow: auto; max-height: 360px; padding: var(--space-3); border-radius:
 .check { display: flex; align-items: flex-start; gap: var(--space-2); color: var(--text); font-weight: 600; }
 .check.confirm { margin-top: var(--space-3); }
 .gate { margin: var(--space-3) 0 0; color: var(--human); font-weight: 700; } .gate.ready { color: var(--ok); }
+/* Active legal identity shares the existing brand font and calm workbench surfaces. */
+.brand-lockup { display: inline-flex; align-items: center; gap: .65rem; font-family: var(--font-brand); font-size: .85rem; font-weight: 650; line-height: 1.25; }
+.brand-lockup > .brand-img { flex-shrink: 0; border-radius: 9px; object-fit: cover; }
+.legal-agent-icon { float: left; margin: 0 1rem .75rem 0; border-radius: 50%; }
+.legal-guide-video { display: block; width: 100%; max-width: 960px; border-radius: 12px; }
+.legal-guide { max-width: 80ch; overflow-wrap: anywhere; }
+.legal-guide :is(h3,h4) { scroll-margin-top: 6rem; margin-top: 2rem; }

@@ -19,7 +19,8 @@ test('browser and installation metadata identify the legal development product',
   assert.equal(pkg.name, 'legal-compliance-regulatory-workbench-frontend')
   assert.equal(lock.name, pkg.name)
   assert.equal(lock.packages[''].name, pkg.name)
-  assert.ok(manifest.icons.every(icon => icon.src.includes('legal-')))
+  assert.deepEqual(manifest.icons.map(icon => icon.sizes), ['192x192', '512x512'])
+  assert.match(manifest.description, /synthetic demo data; not legal advice/)
 })
 
 test('active identity and landing distinguish planned legal work from legacy infrastructure', async () => {
@@ -32,21 +33,21 @@ test('active identity and landing distinguish planned legal work from legacy inf
     const { default: LandingPage } = await server.ssrLoadModule('/src/features/landing/LandingPage.jsx')
     const html = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(LandingPage)))
     assert.match(html, /Legal &amp; Regulatory/)
-    assert.match(html, /Development migration/)
-    assert.match(html, /not yet available/i)
+    assert.match(html, /Development build.*synthetic demo data; not legal advice/)
+    assert.match(html, /not accepted production capability/i)
     for (const obsolete of ['Industrial intelligence', 'your plant.', 'Sovereign AI Workbench', '890', 'workbench-dashboard.webp', 'sovereign-mark.png']) assert.ok(!html.includes(obsolete), obsolete)
     assert.ok(!html.includes('<video'))
   } finally { await server.close() }
 })
 
-test('active sign-in uses neutral media and honest migration copy', async () => {
+test('active sign-in starts on the approved poster and states the demo limitation', async () => {
   const server = await vite()
   try {
     const { default: AuthLayout } = await server.ssrLoadModule('/src/features/auth/AuthLayout.jsx')
     const router = createMemoryRouter([{ path: '/login', handle: { authMedia: 'login', title: 'Sign in' }, element: createElement(AuthLayout) }], { initialEntries: ['/login'] })
     const html = renderToStaticMarkup(createElement(RouterProvider, { router }))
-    assert.ok(!html.includes('/assets/auth/auth-bg-') && !html.includes('<video'))
-    assert.match(html, /Development migration/)
+    assert.ok(html.includes('/assets/auth/auth-bg-01-poster.webp') && !html.includes('<video'))
+    assert.match(html, /synthetic demo data; not legal advice/)
     assert.ok(!html.includes('nothing leaves your infrastructure'))
     router.dispose()
   } finally { await server.close() }
@@ -58,7 +59,7 @@ test('help keeps original terms clearly labelled as legacy instead of rewriting 
     const { ResourcesView } = await server.ssrLoadModule('/src/features/resources/ResourcesView.jsx')
     const html = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(ResourcesView)))
     assert.match(html, /Legacy migration terms/)
-    assert.match(html, /legal-platform terms.*pending approval/i)
+    assert.match(html, /legal-platform terms.*draft pending approval/i)
     assert.match(html, /sovereign-workbench-terms-v1.0.docx/)
   } finally { await server.close() }
 })

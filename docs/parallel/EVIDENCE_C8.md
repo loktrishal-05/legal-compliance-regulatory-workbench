@@ -57,3 +57,6 @@ Page pattern: `const { workspace } = useWorkspace(); const paths = useMemo(() =>
 ## Requests to A
 
 (none yet)
+
+## Final build branding/media checkpoint - 2026-10-10
+Generated supplied middle-third navy mark and right-third app icon, PNG/ICO favicons (32/180/192/512) and eight 256px WebP workflow icons. Human-review artwork explicitly labels a human gate. Six 8-second H.264 auth clips (desktop/mobile), posters and 12,136,088-byte guide video generated with the prompt ffmpeg settings; desktop crop offsets changed to 0:0 after visual inspection showed centered crops retained corner watermark fragments. In-app legal guide and v2 draft reuse exact repository Markdown; legacy resources/active v1.0 consent preserved. Auth uses approved footage only when motion/data allow, starts on poster, has pause control and dark overlay. Development notice/sign-in aside/metadata now state synthetic demo data and no legal advice. Frontend: 63/63 PASS, lint 0 errors/2 inherited warnings, build PASS. No new dependency. Initial public assets 35,676,958 bytes; after replacement/new guide/icons 37,697,299 bytes (new content adds ~2MB overall; guide source 48,077,129 -> 12,136,088). LegalHelpPage remains a lazy ~26.67KB JS chunk. Next: remaining pages/dashboard and size pass.

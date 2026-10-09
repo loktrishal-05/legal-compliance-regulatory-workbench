@@ -1,12 +1,13 @@
 {
   "name": "Legal & Regulatory Assurance Platform",
   "short_name": "LRA Platform",
-  "description": "Development migration toward evidence-first legal workflows; legal capabilities are not yet available.",
-  "start_url": "/app/dashboard",
+  "description": "Development build — synthetic demo data; not legal advice",
+  "start_url": "/app/legal/dashboard",
   "display": "standalone",
   "background_color": "#020e21",
   "theme_color": "#020e21",
   "icons": [
-    { "src": "/assets/branding/legal-mark.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ]
 }

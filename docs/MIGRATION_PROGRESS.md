@@ -286,3 +286,5 @@ Agent A completed Steps 0, 1, 2, 6, 7, 9 and 11 MVP slices: commits 746e7c4, f79
 
 ## Final local build checkpoint 1 � 2026-10-10
 Inspected interrupted OpenCode changes; restored deployment-only auth/config/model-registration/intake/extraction/jobs edits and removed its new deployment files/0032/packaging/tests. Retained public-guide help route/service, bounded optional ONNX adapter and two-scope assistant launcher/voice UI. Guides included in local image. Focused help checks: 8 run, 7 passed, 1 absent-model skip; frontend 62/62, lint 0 errors/2 inherited warnings, build passed. No ONNX files installed or inference run. Cloud deployment cancelled. Remaining pages/media/full validation in progress.
+
+Final local checkpoint 2: approved branding/auth/guide media and truthful development copy implemented; 63 frontend checks/lint/build green. Current legal guide/v2 draft rendered in-app without changing enforced terms. K pages/dashboard/full M verification remain in progress.

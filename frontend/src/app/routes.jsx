@@ -73,7 +73,7 @@ export const routes = [{
           { path: 'audit', element: <RequireAuth roles={REVIEWERS} />, children: [indexPage('AuditPage', 'Audit')] },
           page('sovereignty', 'SovereigntyPage', 'Private runtime'),
           page('resources', 'ResourcesPage', 'Government Resources'),
-          page('help', 'HelpPage', 'Help & Resources'),
+          legalPage('help', () => import('../features/resources/LegalHelpPage.jsx'), 'default', 'Help & Resources'),
           { path: 'admin', element: <RequireAuth roles={ADMINS} />, children: [
             indexPage('AdminPage', 'Administration'),
             page('*', 'AdminPage', 'Administration'),
