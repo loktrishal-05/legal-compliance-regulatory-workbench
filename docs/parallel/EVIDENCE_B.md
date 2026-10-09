@@ -59,6 +59,13 @@ Independent obligation approval emits one `legal.contract.obligation_accepted` e
 
 Next: routes/exact API examples, source redline/collision proposals, summaries/exports and assistant. Additional forged-hash/matter/role/revocation tests remain integration hardening work, not implied by this 21-test milestone.
 
+### Milestone B5 — summaries/exports and fake-output/redline validation GREEN
+
+- Summaries discovery command (`-p "test_legal_scope_summaries*.py"`): RED six intended missing-service errors; GREEN **6/6 PASS** on SQLite/PostgreSQL. All seven profiles and legal/business audience variants preserve all source statements/conditions, exact citations, coverage/no omitted spans, replay and independent approval. Unapproved exports refuse; approved JSON equals the approved content; DOCX ZIP and PDF embedded manifests equal JSON byte-for-content after parsing. Visible PDF conditions checked across reflow. Revoked/cross-tenant export denied.
+- Advanced contracts command (`-p "test_legal_scope_contracts_advanced.py"`): RED two missing-feature errors; GREEN **2/2 PASS**. Strict fake-gateway validator rejects authority/role extras, garbage/empty statements, forged IDs/quotes/claims and injection. Exact redline reuses `regulatory_versions.exact_diff`; literal deadline/duty collision remains review-only. No gateway/model executed.
+- Citation schema initially stripped newline whitespace; fixed citation-specific configuration so quotes remain byte-for-text exact. PDF uses installed PyMuPDF Story rendering (no new dependency) and an exact approved manifest; test normalizes only layout whitespace for visible content, not manifests/citations.
+- Thin slice: summary profiles/audiences are extractive full-coverage views, not evaluated abstractive audience rewriting; collisions are literal heuristics, not established legal incompatibility. Missing date/applicability/change inputs remain explicitly labelled.
+
 ## Files / FR scope
 
 Owned files only, as in binding plan. Intended FRs: FR-012..025, FR-048..053, FR-064/065, supporting source/auth/review/audit invariants.

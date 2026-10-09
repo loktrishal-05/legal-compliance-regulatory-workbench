@@ -82,6 +82,7 @@ class ConversationRequest(Command):
 
 
 class GatewayCitation(Command):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)
     span_id: UUID
     quote: str = Field(min_length=1, max_length=64000)
 

@@ -107,3 +107,53 @@ def analyze_sources(sources, *, playbook_rules=(), quality="ready"):
         "rule_version": RULES, "status": "needs_review", "clauses": clauses, "facts": facts,
         "parties": parties, "obligations": obligations, "findings": findings,
         "coverage": coverage, "uncertainties": sorted(set(uncertainties)), "review_required": True}
+
+
+def validate_gateway_output(output, sources):
+    """A fake/injected gateway can propose exact extracts, never acceptance or unsupported meaning."""
+    from app.schemas.legal_contract import GatewayOutput
+    parsed = GatewayOutput.model_validate(output)
+    by_id = {str(s["span_id"]): s for s in sources}
+    if any(INJECTION.search(s["quote"]) for s in sources):
+        raise ValueError("untrusted_document_instructions")
+    for statement in parsed.statements:
+        quotes = []
+        for citation in statement.citations:
+            source = by_id.get(str(citation.span_id))
+            if source is None or citation.quote != source["quote"]:
+                raise ValueError("model_citation_mismatch")
+            quotes.append(citation.quote.strip())
+        if statement.text not in quotes or statement.category != "source_fact":
+            raise ValueError("model_interpretation_requires_review")
+    return {"status": "needs_review", "review_required": True, "statements": parsed.model_dump(mode="json")["statements"],
+        "profile_version": "legal-contract-fake-gateway-v1", "schema_version": SCHEMA,
+        "prompt_version": "legal-untrusted-source-v1", "rule_version": RULES}
+
+
+def compare_sources(old, new):
+    from app.services.regulatory_versions import exact_diff
+    left, right = analyze_sources(old), analyze_sources(new)
+    old_sections = [(str(c["ordinal"]) + ":" + c["title"], c["text"]) for c in left["clauses"]]
+    new_sections = [(str(c["ordinal"]) + ":" + c["title"], c["text"]) for c in right["clauses"]]
+    return {"changes": [{"section": c.section_ref, "kind": c.kind, "text_diff": list(c.text_diff)}
+        for c in exact_diff(old_sections, new_sections)], "old_sources": old, "new_sources": new,
+        "qualified_summary": "Exact source additions/removals preserved; legal meaning and materiality require review.",
+        "status": "needs_review", "profile_version": PROFILE, "schema_version": SCHEMA,
+        "prompt_version": PROMPT, "rule_version": RULES}
+
+
+def collision_proposals(left, right):
+    a, b = analyze_sources(left)["obligations"], analyze_sources(right)["obligations"]
+    output = []
+    # ponytail: literal actor/action-token matching only; semantic conflict evaluation is a later approved profile.
+    for x in a:
+        for y in b:
+            if x["actor"] != y["actor"] or x["action"].split()[0].casefold() != y["action"].split()[0].casefold():
+                continue
+            if x["original_deadline_phrase"] and y["original_deadline_phrase"] and x["original_deadline_phrase"] != y["original_deadline_phrase"]:
+                output.append({"kind": "deadline_collision", "rationale": "Different source deadline phrases; triggers/conditions and party identity may differ. Conflict is not established.",
+                    "citations": x["citations"] + y["citations"], "review_required": True})
+            elif {x["obligation_type"], y["obligation_type"]} == {"duty", "prohibition"}:
+                output.append({"kind": "duty_collision", "rationale": "Potential opposing literal duties; legal compatibility requires review.",
+                    "citations": x["citations"] + y["citations"], "review_required": True})
+    return output
