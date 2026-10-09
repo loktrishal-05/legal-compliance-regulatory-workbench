@@ -237,9 +237,17 @@ def authorize_proposal(db, ctx, target_id, target_type):
 
 def approve_proposal(db, review):
     from app.services import legal_events
+    from app.core.config import settings
     row, analysis, version = proposal_source(db, review.target_type, review.target_id, review.workspace_id)
     if row.revision_sha256 != review.target_revision_sha256 or row.requester_id != review.requester_id:
         raise ContractConflict("contract_review_revision_mismatch")
+    expected = canonical_hash({"analysis": str(row.analysis_id), "collision": row.payload}) if (
+        row.payload.get("kind") in {"deadline_collision", "duty_collision"}) else canonical_hash({
+        "analysis": analysis.revision_sha256, "proposal": row.payload})
+    if row.revision_sha256 != expected:
+        raise ContractConflict("contract_proposal_integrity_failed")
+    validate_citations(db, actor_id=row.requester_id, workspace_id=row.workspace_id,
+        citations=row.payload["citations"], current_terms_version=settings.current_terms_version, operation="propose")
     if review.target_type == "contract_obligation":
         legal_events.emit(db, workspace_id=review.workspace_id, event_type="legal.contract.obligation_accepted",
             idempotency_key="contract-obligation:" + str(row.id), payload={"proposal_id": str(row.id),

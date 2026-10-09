@@ -118,6 +118,20 @@ class ContractHardeningTests(unittest.TestCase):
         self.db.commit()
         self.assertEqual(len(list(self.db.scalars(select(LegalEvent).where(LegalEvent.event_type == "legal.contract.analysis_requested")))), 1)
 
+    def test_requester_revoked_before_review_blocks_accepted_obligation_release(self):
+        proposal = self.fixture.analyze()["obligations"][0]
+        reviewer = self.reviewer()
+        review = self.service.submit_proposal(self.db, target_type="contract_obligation", target_id=proposal["proposal_id"], **self.args)
+        self.db.commit()
+        self.db.execute(update(DocumentAccess).where(DocumentAccess.user_id == self.args["actor_id"],
+            DocumentAccess.operation == "propose").values(is_active=False))
+        self.db.commit()
+        with self.assertRaises(LegalAccessDenied):
+            self.decide(review, reviewer)
+        self.db.rollback()
+        self.assertEqual(list(self.db.scalars(select(LegalReviewDecision))), [])
+        self.assertEqual(list(self.db.scalars(select(LegalEvent))), [])
+
 
 @unittest.skipUnless(os.environ.get("LEGAL_TEST_DATABASE_URL"), "Disposable PostgreSQL not selected")
 class ContractHardeningPostgresTests(ContractHardeningTests):

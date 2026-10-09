@@ -163,6 +163,10 @@ New endpoint **POST `/contracts/{contract_id}/versions`**, body `{"document_id":
 
 A's checkpoint confirms worker imports every legal service, so B handlers/targets registration integration request is resolved. B still awaits A's final actual accepted-obligation consumer/combined E2E evidence; emits confirmed agreed payload without guessing due dates.
 
+### Milestone B9 — requester revocation before approval GREEN
+
+Hardening target RED **two actual assertion failures**: approving after originating analyst's propose grant was revoked still emitted accepted obligation. Fixed in shared B approval callback: recompute proposal hash against immutable analysis/collision inputs, verify exact requested revision/requester, and reauthorize every cited document for originating propose permission before release. Same hardening target GREEN **12/12 PASS**, SQLite/PostgreSQL; failed approval rolls back both decision and outbox event.
+
 ## Files / FR scope
 
 Owned files only, as in binding plan. Intended FRs: FR-012..025, FR-048..053, FR-064/065, supporting source/auth/review/audit invariants.
