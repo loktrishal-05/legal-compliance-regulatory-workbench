@@ -12,7 +12,14 @@ Boundary verified: authorized root/origin, branch integration/backend-continuati
 
 Files: `legal_regulatory_projection.py`, `test_legal_scope_regulatory_projection.py`, synthetic fixture README and retention-v1/v2 JSON. Existing pure helpers unchanged. Next: scoped registry/version models and service persistence tests.
 
+Compliance snapshot RED: missing `legal_compliance_snapshot`; GREEN **4/4** using `docker compose -p lrw-c -f infra/docker-compose.legal-core-test.yml run --rm tests python -B -m unittest discover -s tests -p "test_legal_scope_compliance*.py" -v`. Reuses existing six-state evaluator; covers all states, conflicting evidence, future validity/exclusive expiry and unchanged historical snapshot versus stale current projection. These are trusted-input adapter tests, not evidence-acceptance/API/persistence acceptance. Files: `legal_compliance_snapshot.py`, `test_legal_scope_compliance_snapshot.py`.
+
+Regulatory persistence work is uncommitted RED pending A's audit allowlist. Draft 0029 body now fills the committed f79c6a9 stub; model definitions, proposals, manual linking/import, source review callbacks and routes are under development and not yet registered in the application. No acceptance claim.
+
 ## Requests to A
+
+- **Current RED blocker:** registry suite is 7 passing / 2 errors because `LEGAL_REGULATORY_RECORDED` is rejected by `ck_audit_events_event_type`. Keep this fail-closed; please add both requested domain event names to ORM + migration 0027 + legacy exclusion. C has not weakened or mocked the audit check.
+- C needs review target `regulatory_source` in addition to the allocated targets, to approve an exact registry revision independently before manual imports. Registry approval is never accepted from client fields.
 
 - Register C tables in migration parity validation when models land; C cannot edit the shared validator.
 - Provide a legal domain audit event type (and exclude it from legacy audit reads) for regulatory/compliance transactional writes. Current audit type allowlist and legal-policy audit exclusion are A-owned. Proposed names: LEGAL_REGULATORY_RECORDED and LEGAL_COMPLIANCE_RECORDED.
