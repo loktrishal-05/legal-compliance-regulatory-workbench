@@ -53,6 +53,10 @@ def analyze_sources(sources, *, playbook_rules=(), quality="ready"):
             if INJECTION.search(line):
                 uncertainties.append("untrusted_document_instructions")
                 continue
+            if re.search(r"\b(?:liability is unlimited|unlimited liability|sole discretion|irrevocable)\b", line, re.I):
+                findings.append({"kind": "unusual_term", "rule_id": None,
+                    "rationale": "Literal synthetic keyword flag; unusualness and legal risk require independent review.",
+                    "citations": [citation]})
             party = re.search(r"\bbetween\s+(.+?)\s+and\s+(.+?)[.]?$", line, re.I)
             if party and current["clause_type"] == "parties":
                 for name in party.groups():

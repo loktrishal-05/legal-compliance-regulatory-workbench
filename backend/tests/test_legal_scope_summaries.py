@@ -85,6 +85,42 @@ class SummaryTests(unittest.TestCase):
             with self.assertRaises(LegalAccessDenied):
                 self.service.export(self.db, summary_id=result["summary_id"], format=format, **self.args)
 
+    def test_cross_document_synthesis_keeps_per_version_citations_and_conflict_warning(self):
+        from app.schemas.legal_contract import SourceRequest
+        f = self.fixture.fixture
+        second = f.prepare(b"1. Payment\nBuyer shall pay within 15 days of invoice.\n", filename="synthetic-other.txt")
+        f.process(second)
+        result = self.create(sources=self.request.sources + [SourceRequest(document_id=second.document_id, version_id=second.version_id)])
+        self.assertEqual({c["version_id"] for s in result["statements"] for c in s["citations"]},
+            {str(self.fixture.source.version_id), str(second.version_id)})
+        self.assertTrue(result["contradictions"])
+        self.assertIn("cross_document_conflict_requires_review", result["uncertainties"])
+        self.assertEqual(len(self.service.list_summaries(self.db, **self.args)["items"]), 1)
+        self.db.execute(update(DocumentAccess).where(DocumentAccess.document_id == second.document_id).values(is_active=False))
+        self.db.commit()
+        self.assertEqual(self.service.list_summaries(self.db, **self.args), {"items": []})
+
+    def test_unicode_exports_preserve_source_and_single_version_change_has_missing_information(self):
+        from app.schemas.legal_contract import SourceRequest
+        f = self.fixture.fixture
+        source = f.prepare("1. Payment\nBuyer shall pay ₹100, provided consent remains valid.\n".encode(), filename="synthetic-unicode.txt")
+        f.process(source)
+        result = self.create(sources=[SourceRequest(document_id=source.document_id, version_id=source.version_id)], profile="change")
+        self.assertIn("A second version is required to establish change.", result["missing_information"])
+        f.grant(f.bob, role="legal_reviewer")
+        for op in ("read", "review_legal"):
+            self.db.add(DocumentAccess(document_id=source.document_id, organization_id=f.ws.organization_id,
+                workspace_id=f.ws.id, user_id=f.bob.id, operation=op))
+        self.db.commit()
+        from app.services import legal_review
+        legal_review.decide(self.db, workspace_id=f.ws.id, review_id=result["review_id"], reviewer_id=f.bob.id,
+            decision="approve", rationale="Synthetic Unicode review", current_terms_version="1.0")
+        self.db.commit()
+        import pymupdf
+        data, _ = self.service.export(self.db, summary_id=result["summary_id"], format="pdf", **self.args)
+        with pymupdf.open(stream=data, filetype="pdf") as pdf:
+            self.assertIn("₹100", "".join(p.get_text() for p in pdf))
+
 
 @unittest.skipUnless(os.environ.get("LEGAL_TEST_DATABASE_URL"), "Disposable PostgreSQL not selected")
 class SummaryPostgresTests(SummaryTests):

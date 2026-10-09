@@ -78,6 +78,34 @@ class AssistantTests(unittest.TestCase):
         self.assertEqual(result["status"], "degraded")
         self.assertIn("model_unavailable", result["uncertainties"])
 
+    def test_unknown_matter_other_owner_and_legal_hold_deny_memory_operations(self):
+        from app.db.models.legal_scope import LegalDocumentScope
+        with self.assertRaises(LegalAccessDenied):
+            self.service.create_conversation(self.db, matter_id=uuid4(), **self.args)
+        cid = self.service.create_conversation(self.db, matter_id=None, **self.args)["conversation_id"]
+        self.db.commit()
+        self.ask(conversation_id=cid)
+        self.fixture.fixture.grant(self.fixture.fixture.bob, role="auditor")
+        with self.assertRaises(LegalAccessDenied):
+            self.service.get_conversation(self.db, conversation_id=cid, **(self.args | {"actor_id": self.fixture.fixture.bob.id}))
+        self.db.execute(update(LegalDocumentScope).where(LegalDocumentScope.document_id == self.fixture.source.document_id).values(legal_hold=True))
+        self.db.commit()
+        with self.assertRaises(self.fixture.service.ContractConflict):
+            self.service.delete_conversation(self.db, conversation_id=cid, **self.args)
+        self.assertEqual(len(self.service.get_conversation(self.db, conversation_id=cid, **self.args)["messages"]), 1)
+        self.assertEqual(len(self.service.list_conversations(self.db, **self.args)["items"]), 1)
+
+    def test_fake_gateway_authority_garbage_refused_and_default_never_calls_gateway(self):
+        from types import SimpleNamespace
+        gateway = type("FakeGateway", (), {"generate_structured": lambda self, **kwargs: SimpleNamespace(value={"accepted": True, "statements": []})})()
+        with patch.object(self.service, "MODEL_ENABLED", True), patch.object(self.service, "TEST_GATEWAY", gateway):
+            result = self.ask()
+        self.assertEqual(result["status"], "refused")
+        self.assertEqual(result["statements"], [])
+        self.assertIn("model_output_rejected", result["uncertainties"])
+        with patch.object(self.service, "TEST_GATEWAY", gateway):
+            self.assertEqual(self.ask()["status"], "qualified")
+
 
 @unittest.skipUnless(os.environ.get("LEGAL_TEST_DATABASE_URL"), "Disposable PostgreSQL not selected")
 class AssistantPostgresTests(AssistantTests):

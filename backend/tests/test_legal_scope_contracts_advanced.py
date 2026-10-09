@@ -34,6 +34,13 @@ class ContractAdvancedTests(unittest.TestCase):
         self.assertTrue(proposals[0]["review_required"])
         self.assertEqual(proposals[0]["kind"], "deadline_collision")
 
+    def test_unusual_terms_and_literal_internal_conflicts_remain_cited_proposals(self):
+        from app.services.legal_contract_analysis import analyze_sources
+        result = analyze_sources(sources("1. Liability\nLiability is unlimited at the sole discretion of Supplier.\n2. Confidentiality\nBuyer shall disclose the report.\nBuyer shall not disclose the report.\n"))
+        self.assertEqual({f["kind"] for f in result["findings"]}, {"unusual_term", "internal_conflict"})
+        self.assertTrue(all(f["citations"] for f in result["findings"]))
+        self.assertEqual(result["status"], "needs_review")
+
 
 if __name__ == "__main__":
     unittest.main()

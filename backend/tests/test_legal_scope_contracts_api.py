@@ -94,6 +94,32 @@ class ContractApiTests(unittest.TestCase):
         self.assertEqual(denied.status_code, 404)
         self.assertEqual(self.client.delete(self.prefix + f"/conversations/{cid}").status_code, 200)
 
+    def test_version_redline_collision_and_source_revocation_http(self):
+        initial = self.client.post(self.prefix + "/contracts", json=self.body).json()
+        f = self.fixture.fixture
+        second = f.prepare(b"1. Payment\nBuyer shall pay within 15 days of invoice, provided the invoice is valid.\n", filename="second.txt")
+        f.process(second)
+        linked = self.client.post(self.prefix + f"/contracts/{initial['contract_id']}/versions",
+            json={"document_id": str(second.document_id), "version_id": str(second.version_id)})
+        self.assertEqual(linked.status_code, 201, linked.text)
+        diff = self.client.get(self.prefix + f"/contracts/{initial['contract_id']}/redline",
+            params={"from": initial["contract_version_id"], "to": linked.json()["contract_version_id"]})
+        self.assertEqual(diff.status_code, 200, diff.text)
+        self.assertTrue(diff.json()["changes"])
+        other = self.client.post(self.prefix + "/contracts", json={"document_id": str(second.document_id),
+            "version_id": str(second.version_id), "title": "Synthetic second"}).json()
+        request = {"left_contract_id": initial["contract_id"], "left_version_id": initial["contract_version_id"],
+            "right_contract_id": other["contract_id"], "right_version_id": other["contract_version_id"]}
+        collision = self.client.post(self.prefix + "/contract-findings/collisions", json=request)
+        self.assertEqual(collision.status_code, 201, collision.text)
+        self.assertEqual(len(collision.json()["finding_ids"]), 1)
+        self.db.execute(update(DocumentAccess).where(DocumentAccess.document_id == second.document_id).values(is_active=False))
+        self.db.commit()
+        findings = self.client.get(self.prefix + "/contract-findings")
+        self.assertEqual(findings.json()["items"], [])
+        analysis = self.client.get(self.prefix + f"/contracts/{initial['contract_id']}/versions/{initial['contract_version_id']}/analysis")
+        self.assertEqual(analysis.json()["findings"], [])
+
 
 if __name__ == "__main__":
     unittest.main()
