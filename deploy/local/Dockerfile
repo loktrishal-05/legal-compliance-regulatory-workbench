@@ -18,6 +18,7 @@ RUN pip install --no-cache-dir fastapi==0.141.1 starlette==1.7.0 pydantic==2.13.
 WORKDIR /app
 COPY backend /app/backend
 COPY deploy/local /app/deploy/local
+COPY docs/product-resources/LEGAL_PLATFORM_USER_GUIDE.md docs/product-resources/LEGAL_PLATFORM_TERMS_AND_CONDITIONS_v2.0_DRAFT.md /app/docs/product-resources/
 COPY --from=web /web/dist /srv/frontend
 RUN useradd --uid 10001 --create-home workbench && mkdir -p /data && chown workbench /data \
     && sed -i 's/\r$//' /app/deploy/local/entrypoint.sh

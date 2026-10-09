@@ -4,7 +4,60 @@ Started 2026-10-09 on `integration/backend-continuation-20261007`, authorized ro
 
 ## Current milestone
 
-In progress: synthetic corpus and RED deterministic clause/fact/obligation tests; then immutable tenant-bound contract models and persistence. Migration 0028 is not edited until A's committed stub exists. All outputs remain proposals/needs-review unless the exact target/hash has approved independent review.
+**Resume 2026-10-10:** prior contract/summary/assistant checkpoint was preserved by A (`2e4d0b9`); latest checked HEAD `6015627`. Owner assigns slim legal-only deployment, PostgreSQL originals (0032), isolated ONNX application-help bot, assistant/voice frontend, and Netlify/HF/Neon packaging. Tasks 1–3 and local package preparation authorized; deployment/account changes/Neon migration wait for explicit login/environment confirmation. No GitHub push by B. Docker Desktop `desktop-linux` running (29.6.2); `lrw-b` compose configuration verified. A owns demo seed/dashboard/login; C owns other pages/media; avoid those overlapping paths.
+
+All legal outputs remain proposals/needs-review unless exact target/hash has approved independent review. Deployment is a **public synthetic demo**, not confidential/pilot acceptance. Existing local/private configuration remains default.
+
+### Verified help model research (no download or inference yet)
+
+- Official instruction/chat base: `Qwen/Qwen3-0.6B`, revision `c1899de289a04d12100db370d81485cdf75e47ca`; official HF metadata says Apache-2.0, verified upstream LICENSE (Copyright 2024 Alibaba Cloud). Model branding 0.6B; metadata total parameters 751,632,384.
+- Existing community ONNX conversion: `onnx-community/Qwen3-0.6B-ONNX`, revision `1e0a4a196ecabdf9a879664110574563d3f372d3` (verified HF API, 2026-10-07 update). **Export is community-maintained, not an official Qwen export.** Card identifies exact official base; weight license comes from that base, not an invented export license tag.
+- CPU GenAI-compatible int4 artifact subdirectory verified: `onnxruntime/cpu_and_mobile/cpu-int4-kld-block-128/`; existing `model.onnx`, `genai_config.json`, tokenizer/config/chat-template files. Config type `qwen3`, 28 layers, 8 KV heads, head size 128. Runtime will override export sampling defaults with greedy temperature-zero semantics and bounded context/tokens/time.
+- Metadata URLs: `https://huggingface.co/api/models/Qwen/Qwen3-0.6B`, `https://huggingface.co/api/models/onnx-community/Qwen3-0.6B-ONNX`; pinned configuration and upstream LICENSE retrieved with `/resolve/<revision>/...`. Packaging retains upstream license/provenance.
+- `python -m pip index versions onnxruntime-genai` verified version **0.17.1** exists; no application dependency installed yet. Ordinary tests use fakes; optional model smoke skips when files are absent.
+
+### Deployment coordination requests to A/C
+
+- B must touch `core/config.py`, `legal_intake.py`, `legal_extraction.py`, `legal_jobs.original`, gateway registry, new `main_deploy.py`/0032 and assistant UI per latest assignment; A/C should avoid these deployment paths while B works. Existing job claim/lease/retry logic is reused unchanged.
+- A: demo seed must select the new PostgreSQL original-store policy when `LEGAL_ORIGINAL_STORE=postgres` so seeded originals survive Space restarts; do not write secrets or enable real-upload scan bypass. B will preserve real upload quarantine without healthy scanning.
+- C: keep `features/legal/assistant/` for B. B adds only assistant lazy-route replacement and floating launcher integration to shared app shell; preserve your branding/nav/other route changes. Help corpus remains only the in-repo guide and **not-in-force** terms draft; active terms version stays 1.0.
+- A folds new evidence into living guide/progress/validation/handoff; B records only own evidence here. Public Neon/TLS support must be explicit demo-only, leaving confidential/private runtime validation intact.
+
+### Task 1 current validation / request to A
+
+RED: `test_legal_scope_deploy.py` three intended missing-entrypoint failures/errors; `test_legal_scope_original_blobs.py` six intended missing-model errors. Blob GREEN **6/6 PASS** (SQLite/PostgreSQL): duplicate/create-only, exact original/parser read, default filesystem unaffected, and scanner absence remains quarantined. New source head **0032_legal_original_blobs**, down_revision 0031; filesystem metadata defaults remain backwards-compatible.
+
+**A dependency request:** existing bounded image lacks `email-validator`, required by the existing auth router's real input validation. Slim import/session checks currently fail collection on that dependency, not on forbidden heavy imports. Please add the already-locked `email-validator==2.3.0` to `infra/Dockerfile.legal-core-test` and rebuild your shared image (B does not weaken/mock email validation or rebuild your image). This also supports your demo-auth seed tests. B's new pinned deploy requirements include it and ONNX GenAI; image build/dependency acceptance stays explicit.
+
+**A migration coordination:** 0032 is the newly authorized source head; please update your hardcoded source-head expectation in `test_legal_scope_migration.py` from 0031 to 0032. B adds its own source-store migration/trigger checks. New model registered with one additive line; no old migration or applied records rewritten.
+
+### Task 2 help API GREEN (ordinary tests; real model absent)
+
+RED six intended missing-help/runtime errors; GREEN `-p "test_legal_scope_help*.py"`: **7 tests, 6 PASS, one intentionally skipped real-model smoke** because the pinned files are absent. Fake-runtime checks cover advice/off-topic/injection refusal, exact public-guide citations, no tenant retrieval, structured authority/forged-ID rejection, outage fallback, draft-not-in-force status, and 10 requests/minute/user. Real-cookie HTTP checks cover terms/session/origin/rate/extra fields. No model downloaded or executed yet.
+
+`POST /v1/help/chat` body only `{"question":"How do I upload a document?"}`; 200 response `{"status":"answered|degraded|refused","answer":"<exact selected public guide sections>","citations":[{"section_id":"<source:heading:chunk>","title":"<guide heading>","source":"guide|terms-draft","source_filename":"<allow-listed markdown filename>","source_sha256":"<hex>","quote":"<exact guide text>","document_status":"development_guide|draft_not_in_force","href":"/app/help?guide_section=<heading>"}],"reason":"<safe code>","scope":"public_application_guide_only","model":"Qwen/Qwen3-0.6B","profile_version":"legal-help-guide-selection-v1"}`. Unauthorized session 401, stale terms 403, bad origin 403, extra tenant/model fields 422, per-user rate exceeded 429 with Retry-After 60.
+
+The ONNX model selects only permitted section IDs through the existing structured gateway; the server assembles exact guide text. Arbitrary generated prose/legal claims are never released, even with a citation. Model unavailable/invalid -> honest `degraded` best-section fallback; off-topic/advice -> `refused` before the model. Local CPU adapter verifies pinned provenance/path allowlist, disallows tools/reasoning/nonzero temperature, bounds context 2048/output 128/deadline 30s, and uses a secret-free subprocess so timeout actually kills inference. Only help uses this runtime; document assistant stays deterministic.
+
+### Assistant UI direction contract — confirmed by owner
+
+**Mode / thesis:** Operate/Read. One evidence-first assistant with clearly separate public help and authorized document scopes; no rebranding or cinematic workbench effects.
+
+**Own-world:** inherit current calm workbench tokens, typography, native controls and source-link conventions. No new assets/libraries or changes to C's branding.
+
+**Story:** users select Help or Ask my documents, review a typed/cited answer, inspect source, and manage their own history. Missing access/support/model capability is explicit.
+
+**First viewport:** title and two tabs above a labelled question field; document tab adds workspace/matter/history controls; cited result follows in a readable region. Floating native dialog uses the same panel, a visible Close action, trapped focus and Escape.
+
+**Form / choice:** precisely specified extension, no concept tournament; owner confirmed "Use existing workbench" via question tool. Voice output selects only browser-reported local voices; voice input is unsupported-hidden, opt-in, off by default, and never auto-submits.
+
+**Finish:** bounded desktop/mobile and keyboard verification, existing frontend test/lint/build, no tenant data in Help, and a read-only finish review; preserve DESIGN.md and user's existing artifacts. No shipping raster assets created by B.
+
+### Packaging handoff offered to owner — 2026-10-10
+
+Owner asks to share remaining work with Codex. Prompt saved at `docs/parallel/PROMPT_CODEX_DEPLOY_PACKAGING_2026-10-10.md`. B now reserves backend/slim runtime/ONNX/help/UI/Dockerfile/model downloader/test overlay; packaging helper owns **only** `netlify.toml`, `docs/DEPLOY_NETLIFY_HF_NEON.md`, `deploy/hf-space/publish_space.py`, `backend/tests/test_legal_scope_deploy_packaging.py`, and `docs/parallel/EVIDENCE_DEPLOY_PACKAGING.md`. B will not duplicate those files while that handoff is active. Existing C session keeps other frontend/media pages. No cloud deployment is delegated before owner login/Neon confirmation.
+
+Current B verification: own model-free slim dependency image built (A's core image untouched); slim import/session/origin/cron/worker/Neon/cookie tests **5/5 PASS**; original-store tests **9/9 PASS**; help tests **8 tests, 7 PASS + one absent-model smoke SKIP**. Frontend **62/62 PASS**, lint zero errors/two inherited warnings, build PASS; browser/keyboard review and final combined checks still pending. Pinned model files have not been downloaded/executed; local test image uses DOWNLOAD_HELP_MODEL=false, release image defaults true. No deployment or Neon migration has occurred.
 
 ## Requests to A
 
@@ -191,3 +244,6 @@ Owned files only, as in binding plan. Intended FRs: FR-012..025, FR-048..053, FR
 ## Limitations / open gates
 
 Deterministic headings/regex/keyword slice; no claim of universal contract understanding or legal accuracy. Synthetic fixtures are authored for this repository, not counsel-approved playbooks or jurisdiction labels. Live-model evaluation, calibrated legal quality, counsel approval, enterprise/pilot/independent human acceptance remain open. No requirement is marked fully accepted.
+
+## Final-agent local-only decision � 2026-10-10 (supersedes deployment work above)
+Owner cancelled all cloud deployment and packaging. Removed interrupted optional original-store/0032/main_deploy/deploy dependencies and cloud packaging, restored deployment-only tracked edits. No hosted-database exception remains. Kept help/assistant/voice; help uses public guide and draft only, never tenant retrieval; default no model, response model=null. 8 focused checks: 7 PASS/1 absent-model SKIP; frontend 62 PASS/lint/build green. Local image copies the exact guide/draft corpus. No hosted service or model download/execution.

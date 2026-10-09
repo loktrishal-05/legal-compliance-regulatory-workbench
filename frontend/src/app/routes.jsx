@@ -52,7 +52,7 @@ export const routes = [{
             legalPage('compliance', placeholders, 'CompliancePlaceholder', 'Compliance'),
             legalPage('regulatory', placeholders, 'RegulatoryPlaceholder', 'Regulatory intelligence'),
             legalPage('summaries', placeholders, 'SummariesPlaceholder', 'Summaries'),
-            legalPage('assistant', placeholders, 'AssistantPlaceholder', 'Legal assistant'),
+            legalPage('assistant', () => import('../features/legal/assistant/AssistantPage.jsx'), 'default', 'Legal assistant'),
             legalPage('obligations', placeholders, 'ObligationsPlaceholder', 'Obligations and tasks'),
             legalPage('audit', placeholders, 'LegalAuditPlaceholder', 'Legal audit and exports'),
           ] },

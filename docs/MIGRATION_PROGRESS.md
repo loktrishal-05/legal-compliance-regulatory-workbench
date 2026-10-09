@@ -283,3 +283,6 @@ Owner-directed three-agent build (docs/parallel/PARALLEL_BUILD_PLAN_2026-10-09.m
 ## Parallel build freeze (agent A) — 2026-10-09
 
 Agent A completed Steps 0, 1, 2, 6, 7, 9 and 11 MVP slices: commits 746e7c4, f79c6a9, c4e56aa, 5ae83d1, 8d316ee, d588bf9, ec428db, adc5745, 26d4fc6, 67a64ff plus this documentation commit. Freeze: legal-core 363/363 OK, migration validator PASS fresh and 0018 to 0031, frontend test/lint/build green. Status MVP implemented + tested, not accepted. Next: owner reviews final report; push/PR only with explicit authorization; independent review before any integration.
+
+## Final local build checkpoint 1 � 2026-10-10
+Inspected interrupted OpenCode changes; restored deployment-only auth/config/model-registration/intake/extraction/jobs edits and removed its new deployment files/0032/packaging/tests. Retained public-guide help route/service, bounded optional ONNX adapter and two-scope assistant launcher/voice UI. Guides included in local image. Focused help checks: 8 run, 7 passed, 1 absent-model skip; frontend 62/62, lint 0 errors/2 inherited warnings, build passed. No ONNX files installed or inference run. Cloud deployment cancelled. Remaining pages/media/full validation in progress.
