@@ -161,6 +161,26 @@ class ContractPersistenceTests(unittest.TestCase):
         self.assertEqual(result["findings"][0]["kind"], "deviation")
         self.assertTrue(result["findings"][0]["rule_id"])
 
+    def test_extracted_event_queues_idempotent_analysis_and_worker_reauthorizes(self):
+        from app.db.models.legal_review import LegalEvent
+        from app.services import legal_events
+        event = legal_events.emit(self.db, workspace_id=self.fixture.ws.id, event_type="legal.document.extracted",
+            idempotency_key="synthetic-extracted", payload={"actor_id": str(self.fixture.alice.id),
+                "document_id": str(self.source.document_id), "version_id": str(self.source.version_id),
+                "extraction_id": str(self.extraction.extraction_id)})
+        self.service.handle_document_extracted(self.db, event)
+        self.service.handle_document_extracted(self.db, event)
+        self.db.commit()
+        jobs = list(self.db.scalars(select(LegalEvent).where(LegalEvent.event_type == "legal.contract.analysis_requested")))
+        self.assertEqual(len(jobs), 1)
+        self.service.handle_analysis_requested(self.db, jobs[0])
+        self.db.commit()
+        self.assertEqual(len(list(self.db.scalars(select(self.models.ContractAnalysis)))), 1)
+        self.db.execute(update(DocumentAccess).where(DocumentAccess.user_id == self.fixture.alice.id).values(is_active=False))
+        self.db.commit()
+        with self.assertRaises(LegalAccessDenied):
+            self.service.handle_analysis_requested(self.db, jobs[0])
+
 
 @unittest.skipUnless(os.environ.get("LEGAL_TEST_DATABASE_URL"), "Disposable PostgreSQL not selected")
 class ContractPersistencePostgresTests(ContractPersistenceTests):

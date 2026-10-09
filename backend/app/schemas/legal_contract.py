@@ -26,6 +26,13 @@ class AnalysisRequest(Command):
     playbook_id: UUID | None = None
 
 
+class CollisionRequest(Command):
+    left_contract_id: UUID
+    left_version_id: UUID
+    right_contract_id: UUID
+    right_version_id: UUID
+
+
 class PlaybookRuleRequest(Command):
     clause_type: str = Field(min_length=1, max_length=40)
     kind: Literal["required_clause", "forbidden_text"]

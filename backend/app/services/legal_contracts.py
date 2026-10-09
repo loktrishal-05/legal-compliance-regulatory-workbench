@@ -116,11 +116,11 @@ def analysis_response(db, row):
     return result
 
 
-def analyze(db, *, actor_id, workspace_id, contract_id, version_id, current_terms_version, playbook_id=None):
+def analyze(db, *, actor_id, workspace_id, contract_id, version_id, current_terms_version, playbook_id=None, extraction_id=None):
     ctx, contract, version = load_version(db, actor_id=actor_id, workspace_id=workspace_id, contract_id=contract_id,
         version_id=version_id, current_terms_version=current_terms_version, operation="propose")
     artifact, sources = stored_sources(db, actor_id=actor_id, workspace_id=workspace_id, document_id=version.document_id,
-        version_id=version.version_id, current_terms_version=current_terms_version)
+        version_id=version.version_id, current_terms_version=current_terms_version, extraction_id=extraction_id)
     rules = []
     if playbook_id:
         from app.services.legal_playbooks import approved_rules
@@ -249,3 +249,110 @@ from app.services import legal_review
 for _kind in ("contract_finding", "contract_obligation"):
     legal_review.register_target(_kind, on_approve=approve_proposal,
         authorize=lambda db, ctx, tid, kind=_kind: authorize_proposal(db, ctx, tid, kind))
+
+
+def get_analysis(db, *, actor_id, workspace_id, contract_id, version_id, current_terms_version):
+    ctx, contract, version = load_version(db, actor_id=actor_id, workspace_id=workspace_id, contract_id=contract_id,
+        version_id=version_id, current_terms_version=current_terms_version)
+    row = db.scalar(select(ContractAnalysis).where(ContractAnalysis.contract_version_id == version.id,
+        ContractAnalysis.workspace_id == workspace_id).order_by(ContractAnalysis.created_at.desc(), ContractAnalysis.id.desc()))
+    if row is None:
+        raise ExtractionBlocked("contract_analysis_required")
+    result = analysis_response(db, row)
+    validate_citations(db, actor_id=actor_id, workspace_id=workspace_id,
+        citations=[c for clause in result["clauses"] for c in clause["citations"]], current_terms_version=current_terms_version)
+    return result
+
+
+def list_related(db, *, actor_id, workspace_id, current_terms_version, kind, analysis_id=None):
+    from app.services.legal_search import readable_documents
+    ctx = authorize_workspace(db, actor_id, workspace_id, current_terms_version=current_terms_version)
+    model = {"clauses": ContractClause, "contract-findings": ContractFinding, "obligation-proposals": ObligationProposal}[kind]
+    query = select(model).join(ContractAnalysis, ContractAnalysis.id == model.analysis_id).join(ContractVersion,
+        ContractVersion.id == ContractAnalysis.contract_version_id).where(model.workspace_id == workspace_id,
+        model.organization_id == ctx.organization_id, ContractVersion.document_id.in_(readable_documents(ctx)))
+    if analysis_id:
+        query = query.where(model.analysis_id == analysis_id)
+    items = []
+    for row in db.scalars(query.order_by(model.created_at, model.id).limit(200)):
+        try:
+            validate_citations(db, actor_id=actor_id, workspace_id=workspace_id, citations=row.payload["citations"],
+                current_terms_version=current_terms_version)
+        except LegalAccessDenied:
+            continue
+        item = {"id": row.id, "analysis_id": row.analysis_id, **row.payload}
+        if kind != "clauses":
+            item.update(revision_sha256=row.revision_sha256, outcome=proposal_outcome(db, row,
+                "contract_finding" if kind == "contract-findings" else "contract_obligation"))
+        items.append(item)
+    return {"items": items}
+
+
+def redline(db, *, actor_id, workspace_id, contract_id, from_version_id, to_version_id, current_terms_version):
+    from app.services.legal_contract_analysis import compare_sources
+    groups = []
+    for version_id in (from_version_id, to_version_id):
+        ctx, contract, version = load_version(db, actor_id=actor_id, workspace_id=workspace_id, contract_id=contract_id,
+            version_id=version_id, current_terms_version=current_terms_version)
+        artifact, items = stored_sources(db, actor_id=actor_id, workspace_id=workspace_id, document_id=version.document_id,
+            version_id=version.version_id, current_terms_version=current_terms_version)
+        groups.append([{k: str(v) if isinstance(v, UUID) else v for k,v in s.items()} for s in items])
+    return compare_sources(*groups)
+
+
+def propose_collisions(db, *, request, actor_id, workspace_id, current_terms_version):
+    from app.services.legal_contract_analysis import collision_proposals
+    groups, left = [], None
+    for cid, vid in ((request.left_contract_id, request.left_version_id), (request.right_contract_id, request.right_version_id)):
+        ctx, contract, version = load_version(db, actor_id=actor_id, workspace_id=workspace_id, contract_id=cid,
+            version_id=vid, current_terms_version=current_terms_version, operation="propose")
+        result = analyze(db, actor_id=actor_id, workspace_id=workspace_id, contract_id=cid,
+            version_id=vid, current_terms_version=current_terms_version)
+        left = left or result["analysis_id"]
+        artifact, items = stored_sources(db, actor_id=actor_id, workspace_id=workspace_id, document_id=version.document_id,
+            version_id=version.version_id, current_terms_version=current_terms_version)
+        groups.append(items)
+    ids = []
+    for payload in collision_proposals(*groups):
+        digest = canonical_hash({"analysis": str(left), "collision": payload})
+        row = db.scalar(select(ContractFinding).where(ContractFinding.analysis_id == left,
+            ContractFinding.workspace_id == workspace_id, ContractFinding.revision_sha256 == digest))
+        if row is None:
+            row = ContractFinding(id=uuid4(), **scope(ctx), analysis_id=left, requester_id=actor_id,
+                revision_sha256=digest, payload=payload)
+            db.add(row)
+            db.flush()
+            audit(db, ctx, "contract_collision_proposed", row.id)
+        ids.append(row.id)
+    return {"finding_ids": ids, "status": "needs_review"}
+
+
+def handle_document_extracted(db, event):
+    from app.db.models import Document
+    from app.core.config import settings
+    from app.services import legal_events
+    data = event.payload
+    document = db.scalar(select(Document).where(Document.id == UUID(data["document_id"])))
+    if document is None or document.document_type != "contract":
+        return
+    actor_id = UUID(data["actor_id"])
+    result = create_contract(db, actor_id=actor_id, workspace_id=event.workspace_id,
+        document_id=document.id, version_id=UUID(data["version_id"]), title=document.filename,
+        current_terms_version=settings.current_terms_version)
+    legal_events.emit(db, workspace_id=event.workspace_id, event_type="legal.contract.analysis_requested",
+        idempotency_key="analysis:" + data["extraction_id"], payload={"actor_id": str(actor_id),
+            "contract_id": str(result["contract_id"]), "contract_version_id": str(result["contract_version_id"]),
+            "extraction_id": data["extraction_id"]})
+
+
+def handle_analysis_requested(db, event):
+    from app.core.config import settings
+    data = event.payload
+    analyze(db, actor_id=UUID(data["actor_id"]), workspace_id=event.workspace_id,
+        contract_id=UUID(data["contract_id"]), version_id=UUID(data["contract_version_id"]),
+        extraction_id=UUID(data["extraction_id"]), current_terms_version=settings.current_terms_version)
+
+
+from app.services import legal_events
+legal_events.register_handler("legal.document.extracted", handle_document_extracted)
+legal_events.register_handler("legal.contract.analysis_requested", handle_analysis_requested)
