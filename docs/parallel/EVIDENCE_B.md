@@ -12,7 +12,7 @@ In progress: synthetic corpus and RED deterministic clause/fact/obligation tests
 - Please make review target authorization check **all cited documents** for requester/read/reviewer access, not workspace membership alone. B can expose a resolver per target returning document IDs/hash/requester. Playbooks need scoped legal reviewer authority without a self-grant; summary approval must inspect every cited source.
 - Proposed `legal.contract.obligation_accepted` payload: `proposal_id`, `proposal_sha256`, `review_id`, `requester_id`, `document_id`, `version_id`, `source_sha256`, `actor`, `action`, `obligation_type`, `trigger`, `conditions`, `original_deadline_phrase`, `uncertainties`, `citations` (stored span IDs/quotes/locators). B never chooses a normalized legal due date; A's accepted-obligation handoff must keep ambiguous dates pending human confirmation.
 - `legal.document.extracted` payload needs originating `actor_id`, workspace/document/version/extraction IDs. B handler will recognize registered contracts or document type `contract`, then queue deterministic analysis using your job API; please freeze that API and worker handler registration contract.
-- B will use existing audit type `LEGAL_CONTRACT_RECORDED` through 0028 for redacted domain metadata (no source text), plus your review/outbox events. Please add it to ORM audit vocabulary and scoped root exclusion (A-owned files).
+- Audit request resolved: B reuses A's new `LEGAL_ACTIVITY_RECORDED` (0027) for redacted contract/summary/chat metadata; no extra event enum/migration needed. Intermediate persistence tests correctly rejected the initially proposed unregistered event type; no audit checks weakened.
 - Please extend migration parity/validator registration for B's tables after models land; B cannot edit the A-owned validator/test. B adds its own migration/immutability checks in contract test files.
 
 ## Requests to B
@@ -36,6 +36,14 @@ Command: `docker compose -p lrw-b -f infra/docker-compose.legal-core-test.yml ru
 - Files: `services/legal_contract_analysis.py`, `tests/test_legal_scope_contracts.py`, four TXT fixtures + provenance/expected-label README. No migration/shared registration changes yet.
 - Outputs record `legal-contract-deterministic-v1`, `legal-contract-output-v1`, `no-model-deterministic-v1`, `synthetic-keyword-rules-v1`. All remain `needs_review`.
 - Golden numerical benchmark and persistence/HTTP/model-output/denial checks follow; six pure tests are not full FR acceptance.
+
+### Milestone B2 — immutable contract persistence GREEN
+
+Same contracts discovery command: RED **10 intended missing-model errors** with six earlier tests passing; GREEN **16/16 PASS**, including five SQLite and five real disposable PostgreSQL persistence checks. An intermediate run rejected unregistered audit vocabulary; reused A's `LEGAL_ACTIVITY_RECORDED`, leaving constraint/atomicity intact.
+
+Implemented `db/models/legal_contract.py` and `services/legal_contracts.py`: tenant/source-qualified contracts/versions/analysis/parties/facts/clauses/clause-span links/findings/obligation proposals; immutable ORM revisions, idempotent source/analysis replay, current grants, no globally merged parties, all-child rollback on mandatory audit failure. Models also allocate summary/playbook/chat tables for later owned service slices. Full migration SQL/triggers/API and review callbacks are next, not claimed delivered by ORM-only tests.
+
+Shared migration stubs landed in A commit `f79c6a9`; 0028 now available for B. Shared model registration not yet changed.
 
 ## Files / FR scope
 
