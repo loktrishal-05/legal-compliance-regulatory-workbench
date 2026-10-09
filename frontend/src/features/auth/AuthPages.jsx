@@ -1,3 +1,4 @@
+import { DemoAccount } from './DemoAccount.jsx'
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { useSession } from '../../app/session.jsx'
@@ -86,6 +87,7 @@ export function LoginPage() {
       {error && <p className="field-error" role="alert">{error}</p>}
       <button type="submit" className="primary" disabled={busy || !username.trim() || !password}>{busy ? 'Signing in…' : 'Sign in'}</button>
     </form>
+    <DemoAccount onFill={(user, secret) => { setUsername(user); setPassword(secret); setError('') }} />
     <GoogleSignIn enabled={caps.google} next={next} />
     <div className="auth-links"><Link to="/forgot-password">Forgot password?</Link><Link to="/signup">Create an account</Link></div>
   </>

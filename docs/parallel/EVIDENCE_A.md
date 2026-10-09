@@ -168,3 +168,29 @@ Enterprise IdP/SSO/MFA/step-up (FR-001/005); legal-pack, jurisdiction and pilot 
 ## Freeze results
 
 Legal-core suite `-p "test_legal_scope*.py"`: Ran 363, OK. Migration validator PASS (fresh, 0018 -> 0031). Frontend: npm test 44/44, lint 0 errors / 2 pre-existing warnings, build OK.
+
+## Final-push Part 1 (2026-10-10)
+
+**Dashboard** `GET /v1/workspaces/{id}/dashboard` (`app/services/legal_dashboard.py`). Every count runs over objects the caller can read right now (same checks as the item APIs); there are no totals over denied objects. Shape:
+
+```json
+{"workspace_id": "<uuid>", "generated_at": "<iso>",
+ "documents_by_status": {"ready": 3, "quarantined": 1},
+ "jobs_by_state": {"succeeded": 2, "failed": 1},
+ "reviews_pending_by_target": {"contract_obligation": 1, "evidence_acceptance": 2},
+ "tasks_by_status": {"open": 2, "in_progress": 1},
+ "obligations_due": {"weeks": [{"week_start": "2026-10-10", "count": 0}, "... 8 weeks"], "overdue": 0},
+ "assessments_by_state": {"satisfied": 1, "partially_satisfied": 0, "unsatisfied": 1, "insufficient_evidence": 1, "not_applicable": 0, "needs_review": 0},
+ "assessments_stale": 1,
+ "findings_by_status": {"approved": 0, "pending_review": 1},
+ "evidence_expiring": {"expired": 1, "30": 0, "60": 0, "90": 1},
+ "regulatory_sources_by_freshness": {"fresh": 1}}
+```
+
+Tests: `test_legal_scope_dashboard.py` 4/4 (SQLite + PG): counts for a granted analyst; an auditor sees document-bound counts only while holding a source grant (revocation drops documents, obligations and tasks to zero); another tenant sees nothing and cannot query this workspace.
+
+**Demo seed** `python -m scripts.legal_demo_seed` refuses unless `LEGAL_DEMO_MODE=true` and all six `DEMO_<ROLE>_PASSWORD` values (12+ chars) are set; it is idempotent (an existing demo organization means `already_seeded`). Six users, not four: independent review needs a proposer plus distinct legal and compliance reviewers (demo-admin, demo-counsel, demo-compliance, demo-analyst, demo-owner, demo-auditor). It works through the real audited services: two contracts with analysis and one approved obligation (approved by counsel, deadline confirmed, owner assigned), a regulatory source/versions/watchlist/applicability/change, compliance assessments in several states (satisfied, insufficient_evidence, unsatisfied with a finding), one evidence version that really expires so the current projection goes stale and a task opens, plus tasks, notifications and audit events. Fixture provenance is recorded as scan policy `synthetic-fixture-operator-seeded-not-malware-scanned`; real uploads still require a configured scanner. Terms acceptance for the synthetic demo accounts is recorded at seed time. Seeding found and fixed a real data issue: overlapping regulatory versions (no `effective_until`) correctly forced every assessment to needs_review, so the seed now uses half-open intervals. Tests: `test_legal_scope_demo_seed.py` 2/2 (refusal guards; migrated PG seed twice = idempotent; dashboard shows a stale assessment and one due obligation).
+
+**Demo login** (`frontend/src/features/auth/DemoAccount.jsx`, `demoAccount.js`): rendered only when `VITE_DEMO_MODE === 'true'` at build time; a role select plus "Use demo account" FILLS the identifier/password fields from `VITE_DEMO_<ROLE>_USERNAME|PASSWORD` and never submits; shows "Demo data only — synthetic". `VITE_*` values are embedded in the public bundle, so only synthetic demo passwords may be used. Env-gating test `demoAccount.test.js` (off by default and for anything but exactly "true").
+
+**Checks:** frontend 57/57 tests, lint 0 errors, build OK. Full legal-core suite: Ran 391, failures=2, errors=8. All 10 come from agent B's UNCOMMITTED Task 1 work in the shared tree (untracked `0032_legal_original_blobs.py` moves the migration head; `test_legal_scope_deploy` needs `email_validator`, which the test image lacks, and a `legal_original_store` setting from B's uncommitted config change). My new tests pass. These must be green, or B's work committed with the head assertion updated, before "final".

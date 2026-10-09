@@ -114,6 +114,14 @@ def terms():
     return settings.current_terms_version
 
 
+@router.get("/{workspace_id}/dashboard")
+def dashboard(workspace_id: UUID, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    """Counts over objects the caller may currently read; never totals that include denied objects."""
+    from app.services.legal_dashboard import dashboard as aggregates
+    return run(db, user, workspace_id, lambda: aggregates(db, actor_id=user.id, workspace_id=workspace_id,
+        current_terms_version=terms()), "dashboard", commit=False)
+
+
 @router.get("/{workspace_id}/obligations")
 def list_obligations(workspace_id: UUID, limit: int = Query(100, ge=1, le=500), offset: int = Query(0, ge=0),
                      db: Session = Depends(get_db), user: User = Depends(get_current_user)):
