@@ -36,3 +36,4 @@ from app.api.routes import legal_review as legal_review_routes; api_router.inclu
 from app.api.routes import legal_regulatory; api_router.include_router(legal_regulatory.router)
 from app.api.routes import legal_contracts; api_router.include_router(legal_contracts.router)
 from app.api.routes import legal_obligations as legal_obligation_routes; api_router.include_router(legal_obligation_routes.router)
+from app.api.routes import legal_compliance as legal_compliance_routes; api_router.include_router(legal_compliance_routes.router)
