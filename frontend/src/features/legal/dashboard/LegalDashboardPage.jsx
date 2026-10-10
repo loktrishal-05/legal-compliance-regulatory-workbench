@@ -6,7 +6,7 @@ import { Icon } from '../../../components/ui.jsx'
 import { useResource } from '../../../hooks/useApi.js'
 import { legalPaths, query } from '../shared/legalApi.js'
 import { LegalResource } from '../shared/LegalShared.jsx'
-import { COMPLIANCE_STATES, countEntries, displayTime, donutSlices, niceMax, readableLabel, share, weekEntries } from '../shared/viewModel.js'
+import { COMPLIANCE_STATES, countEntries, displayTime, donutSlices, niceMax, share, weekEntries } from '../shared/viewModel.js'
 import { useWorkspace } from '../shared/workspace.js'
 import './dashboard.css'
 
@@ -23,7 +23,7 @@ const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(pre
 export function LegalDashboardPage() {
   const { workspace } = useWorkspace()
   const resource = useResource(`${legalPaths(workspace.workspace_id).workspace}/dashboard`)
-  return <div className="report" data-theme="dark">
+  return <div className="report">
     <header className="report-bar">
       <div><h1 data-page-title tabIndex={-1}>Legal assurance report</h1>
         <p>{workspace.name} · only records you can open right now are counted · not a compliance certificate</p></div>
@@ -163,7 +163,7 @@ function Donut({ entries, sum, mark, selectedKey, onSelect, focused }) {
       {donutSlices(entries).map(s => s.length > 0 && <circle key={s.key} {...mark(s)} className="report-mark" cx="60" cy="60" r="46" pathLength="100"
         stroke={s.color} strokeDasharray={`${Math.max(s.length - 0.8, 0.4)} ${100 - Math.max(s.length - 0.8, 0.4)}`} strokeDashoffset={25 - s.offset} />)}
       <text x="60" y="60" className="report-donut-value">{active ? active.count : sum}</text>
-      <text x="60" y="74" className="report-donut-label">{active ? readableLabel(active.key) : 'assessments'}</text>
+      <text x="60" y="74" className="report-donut-label">{active ? (active.label.length > 14 ? 'selected' : active.label) : 'assessments'}</text>
     </svg>
     <ul className="report-legend">{entries.map(e => <li key={e.key} data-dim={selectedKey && selectedKey !== e.key ? '' : undefined}>
       <button type="button" tabIndex={-1} onClick={() => onSelect(e)}><span className="report-swatch" style={{ background: e.color }} aria-hidden="true" />

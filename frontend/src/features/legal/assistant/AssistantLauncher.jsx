@@ -26,7 +26,7 @@ function AssistantDialog({ onClose }) {
   }
   return <dialog className="assistant-dialog" ref={dialog} aria-labelledby={titleId} onKeyDown={trap}
     onCancel={event => { event.preventDefault(); onClose() }}>
-    <header className="assistant-dialog-heading" data-theme="dark">
+    <header className="assistant-dialog-heading">
       <AssistantAvatar size={44} />
       <div><h2 id={titleId}>Assistant</h2><p>Every answer cites its source · not legal advice</p></div>
       <button type="button" className="assistant-close" onClick={onClose} aria-label="Close assistant"><Icon name="close" size={18} /></button>
@@ -37,7 +37,7 @@ function AssistantDialog({ onClose }) {
 
 export default function AssistantLauncher() {
   const [open, setOpen] = useState(false)
-  return <><button type="button" className="assistant-launcher" data-theme="dark" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)}>
+  return <><button type="button" className="assistant-launcher" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)}>
     <AssistantAvatar size={40} />
     <span className="assistant-launcher-text"><strong>Assistant</strong><small>Help · cited answers</small></span></button>
     {open && <AssistantDialog onClose={() => setOpen(false)} />}</>
