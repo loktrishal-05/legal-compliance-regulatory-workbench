@@ -39,3 +39,13 @@ export function weekEntries(due) {
   return Number.isInteger(due.overdue)
     ? [{ key: 'overdue', label: 'Overdue', count: due.overdue, href: '/app/legal/obligations?overdue=true', alert: true }, ...weeks] : weeks
 }
+
+// Axis ceiling for count charts: 1-2-5 steps, so gridlines land on whole, readable numbers.
+export function niceMax(value) {
+  if (!(value > 0)) return 1
+  if (value <= 5) return Math.ceil(value)
+  const magnitude = 10 ** Math.floor(Math.log10(value))
+  return [1, 2, 5, 10].map(step => step * magnitude).find(step => step >= value)
+}
+
+export const share = (count, total) => (total > 0 ? Math.round(count / total * 100) : 0)

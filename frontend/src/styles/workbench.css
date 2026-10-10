@@ -343,8 +343,27 @@ button.danger:hover:not(:disabled) { border-color: var(--danger); background: co
 .panel > .toolbar + .review-notice { margin-top: var(--space-4); }
 .pid-regions { overflow-x: hidden; } .pid-regions .queue-row-title { white-space: normal; overflow-wrap: anywhere; }
 
-/* Legal dashboard: hand-written SVG charts */
-.legal-dashboard-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
-.legal-dashboard-grid svg [role="link"]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-.legal-legend { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); }
-.legal-legend span { display: inline-block; width: 0.8em; height: 0.8em; border-radius: 2px; }
+
+/* ── Instrument frame: the night register wraps the calm work surface ─ */
+.shell-topbar[data-theme="dark"] { border-bottom-color: rgba(128, 176, 232, 0.14); background: color-mix(in srgb, var(--brand-navy) 92%, transparent); color: var(--text); box-shadow: 0 1px 0 rgba(53, 215, 232, 0.08), 0 10px 30px rgba(2, 14, 33, 0.18); }
+.shell-topbar[data-theme="dark"] .shell-brand { padding: 0; background: none; }
+.shell-topbar[data-theme="dark"] .search-trigger { background: rgba(14, 42, 76, 0.55); }
+.shell-nav[data-theme="dark"] { border-right-color: rgba(128, 176, 232, 0.12); color: var(--text);
+  background: radial-gradient(26rem 18rem at 0% 0%, rgba(53, 215, 232, 0.08), transparent 70%), linear-gradient(180deg, #041329, var(--brand-navy)); }
+.shell-nav[data-theme="dark"] .nav-label { color: rgba(143, 227, 240, 0.72); }
+.shell-nav[data-theme="dark"] .nav-link { position: relative; color: var(--text-muted); transition: background var(--dur) var(--ease-out), color var(--dur) var(--ease-out); }
+.shell-nav[data-theme="dark"] .nav-link:hover { background: rgba(14, 42, 76, 0.7); color: var(--text); }
+.shell-nav[data-theme="dark"] .nav-link.active { background: linear-gradient(90deg, rgba(53, 215, 232, 0.16), rgba(53, 215, 232, 0.03)); color: #f5f9fe; }
+.shell-nav[data-theme="dark"] .nav-link.active svg { color: var(--ai-cyan); }
+.shell-nav[data-theme="dark"] .nav-link.active::before { content: ""; position: absolute; left: -8px; top: 50%; width: 3px; height: 18px; border-radius: 2px; background: var(--ai-cyan); transform: translateY(-50%); }
+.shell-nav[data-theme="dark"] .nav-note { border-color: rgba(128, 176, 232, 0.16); background: rgba(4, 19, 41, 0.6); }
+.shell-main { background: radial-gradient(70rem 22rem at 30% -6rem, color-mix(in srgb, var(--ai) 7%, transparent), transparent 70%); }
+.page-header h1 { font-family: var(--font-brand); font-weight: 700; font-stretch: 108%; letter-spacing: -0.03em; line-height: 1.02; text-wrap: balance; }
+.page-header { animation: header-in 0.6s var(--ease-expo) both; }
+@keyframes header-in { from { transform: translateY(6px); } }
+.legal-agent-icon { box-shadow: 0 0 0 1px var(--line), 0 6px 16px rgba(15, 35, 65, 0.12); }
+@media (min-width: 1025px) { .shell:has(.shell-nav[data-theme="dark"]) { background: linear-gradient(90deg, var(--brand-navy) var(--shell-nav), transparent 0); } }
+@media (max-width: 520px) { .shell-topbar .brand-lockup > span { display: none; } }
+.page-header > div:has(> .legal-agent-icon) { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: var(--space-4); }
+.page-header > div > .legal-agent-icon { float: none; margin: 0; }
+.page-header > div:has(> .legal-agent-icon) > .page-description { grid-column: 1 / -1; margin-top: var(--space-2); }

@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Icon } from '../../../components/ui.jsx'
-import AssistantPanel from './AssistantPanel.jsx'
+import AssistantPanel, { AssistantAvatar } from './AssistantPanel.jsx'
 import { nextFocusIndex } from './assistantModel.js'
 
 function AssistantDialog({ onClose }) {
@@ -16,7 +16,7 @@ function AssistantDialog({ onClose }) {
   function trap(event) {
     if (event.key === 'Escape') { event.preventDefault(); onClose(); return }
     if (event.key !== 'Tab') return
-    const focusable = [...dialog.current.querySelectorAll('button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]')]
+    const focusable = [...dialog.current.querySelectorAll('button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), summary, [tabindex="0"]')]
       .filter(element => element.tabIndex >= 0 && element.getClientRects().length)
     const index = focusable.indexOf(document.activeElement)
     if (index < 0 || event.shiftKey && index === 0 || !event.shiftKey && index === focusable.length - 1) {
@@ -26,15 +26,19 @@ function AssistantDialog({ onClose }) {
   }
   return <dialog className="assistant-dialog" ref={dialog} aria-labelledby={titleId} onKeyDown={trap}
     onCancel={event => { event.preventDefault(); onClose() }}>
-    <header className="assistant-dialog-heading"><h2 id={titleId}>Help &amp; document assistant</h2>
-      <button type="button" className="button" onClick={onClose}>Close</button></header>
-    <AssistantPanel onNavigate={onClose} loadWorkspaceForDocuments />
+    <header className="assistant-dialog-heading" data-theme="dark">
+      <AssistantAvatar size={44} />
+      <div><h2 id={titleId}>Assistant</h2><p>Every answer cites its source · not legal advice</p></div>
+      <button type="button" className="assistant-close" onClick={onClose} aria-label="Close assistant"><Icon name="close" size={18} /></button>
+    </header>
+    <AssistantPanel onNavigate={onClose} loadWorkspaceForDocuments compact />
   </dialog>
 }
 
 export default function AssistantLauncher() {
   const [open, setOpen] = useState(false)
-  return <><button type="button" className="assistant-launcher" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)}>
-    <Icon name="help" /><span>Help &amp; ask documents</span></button>
+  return <><button type="button" className="assistant-launcher" data-theme="dark" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)}>
+    <AssistantAvatar size={40} />
+    <span className="assistant-launcher-text"><strong>Assistant</strong><small>Help · cited answers</small></span></button>
     {open && <AssistantDialog onClose={() => setOpen(false)} />}</>
 }

@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { countEntries, donutSlices, dueInView, weekEntries } from './viewModel.js'
+import { countEntries, donutSlices, dueInView, niceMax, share, weekEntries } from './viewModel.js'
 
 test('missing and invalid chart counts never become invented zero measurements', () => {
   assert.equal(countEntries(null, () => '/'), null)
@@ -22,4 +22,10 @@ test('obligation weeks drill into the exact half-open week and keep overdue firs
   assert.equal(overdue.href, '/app/legal/obligations?overdue=true')
   assert.equal(week.href, '/app/legal/obligations?from=2026-10-28&until=2026-11-04')
   assert.equal(weekEntries(null), null)
+})
+
+test('chart axis ceiling uses 1-2-5 steps and percentages never divide by zero', () => {
+  assert.deepEqual([0, 1, 4, 6, 12, 37, 180].map(niceMax), [1, 1, 4, 10, 20, 50, 200])
+  assert.equal(share(1, 3), 33)
+  assert.equal(share(2, 0), 0)
 })

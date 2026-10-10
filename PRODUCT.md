@@ -29,7 +29,7 @@ Source-grounded proposals, deterministic permissions/state/timers/audit and inde
 ## Capabilities and Constraints
 
 - Frontend: React 19, Vite 7, React Router 8, GSAP 3 (+ @gsap/react). No Tailwind, no overlapping animation libraries. WebGL is written as raw shaders with no new dependency (confirmed).
-- Landing and authentication may be dark, glowing, WebGL-heavy and cinematic. The authenticated `/app/*` workbench stays mild, light, calm and professional (confirmed).
+- Landing and authentication may be dark, glowing, WebGL-heavy and cinematic. Inside `/app/*` (owner, 2026-10-10): a dark navy instrument frame (top bar + sidebar), a night-register Power BI-style legal report canvas, and a navy-nameplate assistant; long-reading and form surfaces stay light, calm and professional.
 - Charts, boards and metrics show live backend data only; empty states where nothing exists; no fabricated values (confirmed).
 - Self-service sign-up, email/OTP recovery and Google sign-in are disabled until the separate auth backend reports those capabilities; the UI must stay honest about that.
 - Approval decisions happen only through the review flow; no drag-to-approve or other shortcut that bypasses it.

@@ -33,6 +33,10 @@ const ICONS = {
   logout: 'M15 4h4v16h-4 M10 8l-4 4 4 4 M6 12h10',
   refresh: 'M20 11a8 8 0 0 0-14.9-3.5 M4 4v4h4 M4 13a8 8 0 0 0 14.9 3.5 M20 20v-4h-4',
   help: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6 M12 17h.01',
+  send: 'M4 12 20 4l-6 16-3-7z M11 13l9-9',
+  expand: 'M4 9V4h5 M20 9V4h-5 M4 15v5h5 M20 15v5h-5',
+  collapse: 'M9 4v5H4 M15 4v5h5 M9 20v-5H4 M15 20v-5h5',
+  table: 'M3 5h18v14H3z M3 10h18 M3 15h18 M9 5v14',
 }
 
 export function Icon({ name, size = 20, ...props }) {

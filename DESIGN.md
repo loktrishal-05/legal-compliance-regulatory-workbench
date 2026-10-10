@@ -247,7 +247,7 @@ The palette is a navy night with cyan instrument light on the public side and a 
 - **Chart series** (`chart-1` to `chart-4`): blue, teal, violet and amber, in that order. Night-side equivalents: `#60a5fa`, `#2dd4bf`, `#a78bfa`, `#fbbf24`.
 
 ### Named Rules
-**The Register Rule.** Landing and auth are always `data-theme="dark"`. The `/app` workbench defaults to light. No public surface goes light, and no workbench surface borrows the cinematic devices (WebGL, footage, glow, Archivo).
+**The Register Rule.** Landing and auth are always `data-theme="dark"`. The `/app` work surfaces default to light. Owner-approved exceptions (2026-10-10): the shell top bar and sidebar are a scoped `data-theme="dark"` instrument frame; the legal dashboard is a night-register report canvas (Archivo title and KPI numerals, cross-highlight + drill-through, focus mode, per-visual data table); the assistant uses a navy nameplate with the research-assistant avatar; workbench page titles use Archivo. No WebGL or footage inside `/app`; reading, forms and source review stay on the light register.
 
 **The Signal-Not-Decoration Rule.** Cyan on the night side marks something live, active or bounded: a line, a stroke, a focus ring, a highlighted phrase. It never fills a large area or a button.
 

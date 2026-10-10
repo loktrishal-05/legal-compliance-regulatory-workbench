@@ -90,7 +90,7 @@ export default function AppShell() {
   const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
   return <div className="shell" data-nav-open={navOpen || undefined}>
     <a className="skip-link" href="#main">Skip to content</a>
-    <header className="shell-topbar">
+    <header className="shell-topbar" data-theme="dark">
       <button type="button" ref={toggle} className="icon-button nav-toggle" aria-expanded={navOpen} aria-controls="shell-nav"
         aria-label={navOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setNavOpen(value => !value)}>
         <Icon name={navOpen ? 'close' : 'menu'} /></button>
@@ -117,7 +117,7 @@ export default function AppShell() {
         </details>
       </div>
     </header>
-    <nav id="shell-nav" className="shell-nav" aria-label="Workbench">
+    <nav id="shell-nav" className="shell-nav" data-theme="dark" aria-label="Workbench">
       {navigationFor(role).map(section => <div className="nav-group" key={section.group}>
         <p className="nav-label">{section.group}</p>
         <ul>{section.items.map(item => <li key={item.path}>
