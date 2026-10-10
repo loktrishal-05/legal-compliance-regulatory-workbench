@@ -1,6 +1,6 @@
 """Source revisions and durable ingestion state."""
 import uuid
-from sqlalchemy import CheckConstraint, ForeignKey, ForeignKeyConstraint, Index, Integer, String, text
+from sqlalchemy import CheckConstraint, ForeignKey, ForeignKeyConstraint, Index, Integer, String, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base, IdentityMixin, CreatedAtMixin
@@ -19,6 +19,8 @@ class DocumentVersion(IdentityMixin, CreatedAtMixin, Base):
     warnings: Mapped[list] = mapped_column(JSONB, default=list)
 
     __table_args__ = (
+        UniqueConstraint("organization_id", "workspace_id", "document_id", "id", "source_sha256",
+                         name="uq_document_versions_legal_lineage"),
         CheckConstraint("(organization_id IS NULL) = (workspace_id IS NULL)", name="legal_scope_pair"),
         ForeignKeyConstraint(["organization_id", "workspace_id", "document_id"],
             ["legal_document_scopes.organization_id", "legal_document_scopes.workspace_id",

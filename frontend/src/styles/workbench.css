@@ -342,3 +342,17 @@ button.danger:hover:not(:disabled) { border-color: var(--danger); background: co
 .shell-main tr[aria-current] > td { background: color-mix(in srgb, var(--ai) 7%, var(--surface-1)); }
 .panel > .toolbar + .review-notice { margin-top: var(--space-4); }
 .pid-regions { overflow-x: hidden; } .pid-regions .queue-row-title { white-space: normal; overflow-wrap: anywhere; }
+
+
+/* ── Workbench polish: light frame, crisp navigation, display titles ─ */
+.shell-nav .nav-link { position: relative; transition: background var(--dur) var(--ease-out), color var(--dur) var(--ease-out); }
+.shell-nav .nav-link.active::before { content: ""; position: absolute; left: -8px; top: 50%; width: 3px; height: 18px; border-radius: 2px; background: var(--ai); transform: translateY(-50%); }
+.shell-main { background: radial-gradient(70rem 22rem at 30% -6rem, color-mix(in srgb, var(--ai) 6%, transparent), transparent 70%); }
+.page-header h1 { font-family: var(--font-brand); font-weight: 700; font-stretch: 108%; letter-spacing: -0.03em; line-height: 1.02; text-wrap: balance; }
+.page-header { animation: header-in 0.6s var(--ease-expo) both; }
+@keyframes header-in { from { transform: translateY(6px); } }
+.legal-agent-icon { box-shadow: 0 0 0 1px var(--line), 0 6px 16px rgba(15, 35, 65, 0.12); }
+@media (max-width: 520px) { .shell-topbar .brand-lockup > span { display: none; } }
+.page-header > div:has(> .legal-agent-icon) { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: var(--space-4); }
+.page-header > div > .legal-agent-icon { float: none; margin: 0; }
+.page-header > div:has(> .legal-agent-icon) > .page-description { grid-column: 1 / -1; margin-top: var(--space-2); }

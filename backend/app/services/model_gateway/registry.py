@@ -62,4 +62,7 @@ def get_runtime(name: str, settings):
     if name == "vllm":
         from app.services.model_gateway.vllm_runtime import VLLMRuntime
         return VLLMRuntime(settings)
-    raise ModelConfigurationError(f"Unknown MODEL_RUNTIME '{name}'; expected 'ollama' or 'vllm'")
+    if name == "onnx":
+        from app.services.model_gateway.onnx_runtime import OnnxRuntime
+        return OnnxRuntime(settings)
+    raise ModelConfigurationError(f"Unknown MODEL_RUNTIME '{name}'; expected 'ollama', 'vllm' or 'onnx'")

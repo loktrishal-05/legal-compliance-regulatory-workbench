@@ -1,0 +1,13 @@
+1. Parties
+This synthetic agreement is between Alpha Labs and Beta Research.
+2. Definitions
+"Confidential Information" means non-public test research disclosed by Discloser.
+3. Confidentiality
+Recipient shall not disclose Confidential Information except with written consent.
+Recipient shall return test materials within 10 days after termination.
+4. Term
+This agreement starts on 2027-01-01 and continues for one year.
+5. Notice
+Termination requires 30 days written notice.
+6. Governing Law
+This agreement is governed by the laws of Fictional Territory.

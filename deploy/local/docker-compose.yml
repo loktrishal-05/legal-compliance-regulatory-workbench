@@ -1,0 +1,55 @@
+# One-command local run:  docker compose --env-file .env -f deploy/local/docker-compose.yml up --build
+# Open http://localhost:8000. Synthetic demo data only; uploads stay quarantined (no malware scanner here).
+name: lrw-local
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: lrw
+      POSTGRES_PASSWORD: ${LOCAL_POSTGRES_PASSWORD:-lrw-local-only}
+      POSTGRES_DB: lrw
+    volumes: [db-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U lrw -d lrw]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  app:
+    build:
+      context: ../..
+      dockerfile: deploy/local/Dockerfile
+      args:
+        VITE_DEMO_MODE: "true"
+        VITE_DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:-demo-admin-local-only}
+        VITE_DEMO_COUNSEL_PASSWORD: ${DEMO_COUNSEL_PASSWORD:-demo-counsel-local-only}
+        VITE_DEMO_COMPLIANCE_PASSWORD: ${DEMO_COMPLIANCE_PASSWORD:-demo-compliance-local-only}
+        VITE_DEMO_ANALYST_PASSWORD: ${DEMO_ANALYST_PASSWORD:-demo-analyst-local-only}
+        VITE_DEMO_OWNER_PASSWORD: ${DEMO_OWNER_PASSWORD:-demo-owner-local-only}
+        VITE_DEMO_AUDITOR_PASSWORD: ${DEMO_AUDITOR_PASSWORD:-demo-auditor-local-only}
+    depends_on:
+      db: {condition: service_healthy}
+    ports: ["8000:8000"]
+    volumes: [app-data:/data]
+    environment:
+      DATABASE_URL: postgresql+psycopg://lrw:${LOCAL_POSTGRES_PASSWORD:-lrw-local-only}@db:5432/lrw
+      WORKBENCH_CORS_ORIGINS: '["http://localhost:8000","http://127.0.0.1:8000"]'
+      CURRENT_TERMS_VERSION: "1.0"
+      LEGAL_DEMO_MODE: "true"
+      # Local Qwen3-0.6B ONNX help model baked into the image (see fetch_help_model.py); application help only.
+      LEGAL_HELP_MODEL_ENABLED: "true"
+      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:-demo-admin-local-only}
+      DEMO_COUNSEL_PASSWORD: ${DEMO_COUNSEL_PASSWORD:-demo-counsel-local-only}
+      DEMO_COMPLIANCE_PASSWORD: ${DEMO_COMPLIANCE_PASSWORD:-demo-compliance-local-only}
+      DEMO_ANALYST_PASSWORD: ${DEMO_ANALYST_PASSWORD:-demo-analyst-local-only}
+      DEMO_OWNER_PASSWORD: ${DEMO_OWNER_PASSWORD:-demo-owner-local-only}
+      DEMO_AUDITOR_PASSWORD: ${DEMO_AUDITOR_PASSWORD:-demo-auditor-local-only}
+      # Loopback placeholders: no model, vector store or hosted AI is used by the legal workflows.
+      MODEL_BASE_URL: http://127.0.0.1:9
+      MODEL_NAME: qwen3.5:9b  # required by settings validation; never called (deterministic legal profiles)
+      QDRANT_URL: http://127.0.0.1:9
+      MODEL_LOG_PROMPTS: "false"
+      AGENT_TRACE_STORE_QUERY: "false"
+      HF_HUB_OFFLINE: "1"
+volumes:
+  db-data:
+  app-data:

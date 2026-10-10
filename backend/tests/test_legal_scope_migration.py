@@ -53,7 +53,10 @@ class LegalScopeMigrationTests(unittest.TestCase):
                 migration_module.upgrade()
             target = MetaData(naming_convention=Base.metadata.naming_convention)
             for table in Base.metadata.tables.values():
-                if table.name.startswith("legal_") or table.name in {"users", "documents"}:
+                # 0019's own tables only; later migrations' parity is `alembic check` in validate_legal_migrations.
+                if table.name in {"legal_organizations", "legal_workspaces", "legal_workspace_memberships",
+                                  "legal_matters", "legal_matter_access", "legal_document_scopes",
+                                  "legal_document_access", "users", "documents"}:
                     table.to_metadata(target)
             self.assertEqual(compare_metadata(context, target), [])
             self.assertEqual(conn.scalar(select(Document.checksum).where(Document.id == document_id)), "b" * 64)
@@ -64,7 +67,7 @@ class LegalScopeMigrationTests(unittest.TestCase):
         config = Config()
         config.set_main_option("script_location", str(BACKEND / "alembic"))
         script = ScriptDirectory.from_config(config)
-        self.assertEqual(script.get_heads(), ["0023_legal_intake_audit"])
+        self.assertEqual(script.get_heads(), ["0031_legal_obligations"])
         module = migration()
         self.assertEqual(module.down_revision, "0018_terms_acceptance")
         output = io.StringIO()

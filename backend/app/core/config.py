@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import AliasChoices, Field, model_validator
+from pydantic import AliasChoices, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,6 +23,14 @@ class Settings(BaseSettings):
     chunk_max_tokens: int = Field(default=500, validation_alias="CHUNK_MAX_TOKENS")
     chunk_overlap_tokens: int = Field(default=60, validation_alias="CHUNK_OVERLAP_TOKENS")
     data_root: Path = Path(__file__).resolve().parents[3] / "data"
+    legal_clamd_socket: str = ""  # WORKBENCH_LEGAL_CLAMD_SOCKET; off until operator-approved
+    legal_scan_timeout_seconds: float = Field(default=30, gt=0, le=30)
+    legal_signature_max_age_hours: float = Field(default=72, ge=1, le=168)
+    legal_ocr_enabled: bool = False
+    legal_help_model_enabled: bool = Field(default=False, validation_alias="LEGAL_HELP_MODEL_ENABLED")
+    legal_help_docs_root: Path = Field(default=Path(__file__).resolve().parents[3] / "docs" / "product-resources", validation_alias="LEGAL_HELP_DOCS_ROOT")
+    model_onnx_path: Path = Field(default=Path(__file__).resolve().parents[3] / "models" / "onnx-help", validation_alias="MODEL_ONNX_PATH")
+    model_onnx_allowed_root: Path = Field(default=Path(__file__).resolve().parents[3] / "models" / "onnx-help", validation_alias="MODEL_ONNX_ALLOWED_ROOT")
     model_root: Path = Path(__file__).resolve().parents[3] / "models"
     pid_vision_enabled: bool = Field(default=False, validation_alias="PID_VISION_ENABLED")
     pid_vision_model: str = Field(default="qwen3.5:9b", validation_alias="PID_VISION_MODEL")
@@ -40,7 +48,7 @@ class Settings(BaseSettings):
     structured_csv_max_rows: int = Field(default=50_000, ge=1, validation_alias="STRUCTURED_CSV_MAX_ROWS")
     structured_query_max_limit: int = Field(default=2000, ge=1, validation_alias="STRUCTURED_QUERY_MAX_LIMIT")
 
-    model_runtime: Literal["ollama", "vllm"] = Field(default="ollama", validation_alias="MODEL_RUNTIME")
+    model_runtime: Literal["ollama", "vllm", "onnx"] = Field(default="ollama", validation_alias="MODEL_RUNTIME")
     model_base_url: str = Field(default="http://127.0.0.1:21434", validation_alias="MODEL_BASE_URL")
     # No default: a guessed model tag would silently benchmark the wrong model.
     model_name: str = Field(default="", validation_alias="MODEL_NAME")
@@ -126,6 +134,12 @@ class Settings(BaseSettings):
     @property
     def model_allowed_hosts_set(self) -> set[str]:
         return {host.strip().lower() for host in self.model_allowed_hosts.split(",") if host.strip()}
+
+    @field_validator("legal_clamd_socket")
+    @classmethod
+    def validate_legal_scanner(cls, value: str) -> str:
+        from app.services.legal_malware import validate_socket_path
+        return validate_socket_path(value)
 
     @model_validator(mode="after")
     def validate_pipeline(self):

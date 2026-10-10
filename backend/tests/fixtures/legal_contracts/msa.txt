@@ -1,0 +1,12 @@
+1. Parties
+This synthetic agreement is between Atlas Buyer and Beacon Supplier.
+2. Services
+Supplier shall deliver the test report upon receipt of the order, subject to approved scope.
+3. Payment
+Buyer shall pay the invoiced amount within 30 days of invoice, provided the invoice is valid.
+4. Liability
+Liability is limited to the fees paid for the test service.
+5. Termination
+Buyer may terminate this agreement if Supplier fails to cure within 20 days of notice.
+6. Governing Law
+This agreement is governed by the laws of Fictional Territory.

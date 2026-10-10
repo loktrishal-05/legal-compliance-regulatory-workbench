@@ -1,0 +1,62 @@
+# Overlay on the approved legal-core synthetic runtime. No application deployment.
+services:
+  signature-update:
+    image: clamav/clamav@sha256:ebec5bc138401b36ae987caa1a3fa3c3b2a21ed3d51f0bfa5852825e663e67b0 # 1.5.4
+    profiles: [signature-update]
+    user: '100:101'
+    entrypoint: [freshclam, --config-file=/etc/clamav/freshclam.conf]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 4g
+    cpus: 2
+    pids_limit: 64
+    volumes:
+      - legal-scanner-signatures:/var/lib/clamav
+      - ./clamav/freshclam.conf:/etc/clamav/freshclam.conf:ro
+    tmpfs: ['/tmp:size=64m,mode=1777']
+    networks: [signature-egress]
+  scanner:
+    image: clamav/clamav@sha256:ebec5bc138401b36ae987caa1a3fa3c3b2a21ed3d51f0bfa5852825e663e67b0 # 1.5.4
+    user: '100:101'
+    environment:
+      TZ: UTC
+    entrypoint: [clamd, --config-file=/etc/clamav/clamd.conf]
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 4g
+    cpus: 2
+    pids_limit: 64
+    volumes:
+      - legal-scanner-signatures:/var/lib/clamav:ro
+      - legal-scanner-socket:/run/legal-scanner
+      - ./clamav/clamd.conf:/etc/clamav/clamd.conf:ro
+    tmpfs: ['/tmp:size=128m,mode=1777']
+    healthcheck:
+      test: [CMD, clamdscan, --config-file=/etc/clamav/clamd.conf, --ping, '1']
+      interval: 5s
+      timeout: 3s
+      retries: 60
+      start_period: 30s
+  tests:
+    environment:
+      WORKBENCH_LEGAL_CLAMD_SOCKET: /run/legal-scanner/clamd.sock
+      LEGAL_SCANNER_ENGINE_TEST: '1'
+    volumes:
+      - legal-scanner-socket:/run/legal-scanner:ro
+    depends_on:
+      scanner:
+        condition: service_healthy
+    command: [python, -B, -m, unittest, discover, -s, tests, -p, test_legal_malware_engine.py, -v]
+volumes:
+  legal-scanner-signatures:
+  legal-scanner-socket:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: uid=100,gid=101,mode=0770
+networks:
+  signature-egress:
+    internal: false

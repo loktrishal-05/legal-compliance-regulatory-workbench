@@ -1,0 +1,23 @@
+# Overrides the root allow-list for the local teammate image only. Never send secrets, data or models.
+# backend/tests stays: the demo seed reads tests/fixtures/legal_contracts.
+**
+!backend/
+!backend/**
+!frontend/
+!frontend/**
+!deploy/local/
+!deploy/local/**
+!docs/
+!docs/product-resources/
+!docs/product-resources/LEGAL_PLATFORM_USER_GUIDE.md
+!docs/product-resources/LEGAL_PLATFORM_TERMS_AND_CONDITIONS_v2.0_DRAFT.md
+**/.env
+**/.env.*
+**/node_modules/
+frontend/dist/
+**/__pycache__/
+**/*.pyc
+backend/.venv/
+data/
+models/
+**/*.log

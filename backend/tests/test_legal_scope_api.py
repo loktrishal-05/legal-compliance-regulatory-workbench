@@ -145,6 +145,73 @@ class LegalScopeApiTests(unittest.TestCase):
         self.fixture.db.commit()
         self.assertEqual(self.client.get(self.path).status_code, 401)
 
+    def test_configured_scanner_controls_http_intake_without_releasing_duplicates(self):
+        import tempfile
+        from app.core.config import settings
+        from app.services.legal_malware import ClamdScanner
+        upload = f"/v1/workspaces/{self.fixture.workspace.id}/documents"
+        params = {"filename": "synthetic.txt", "document_type": "contract", "classification": "internal"}
+        with tempfile.TemporaryDirectory(prefix="legal-api-scan-") as directory:
+            with patch.object(settings, "data_root", Path(directory)), \
+                 patch.object(settings, "legal_clamd_socket", "/tmp/synthetic.sock"), \
+                 patch.object(ClamdScanner, "__call__", return_value=(True, "clean")) as scan:
+                clean = self.client.post(upload, params=params, content=b"SYNTHETIC clean")
+                self.assertEqual((clean.status_code, clean.json()["status"]), (201, "received"))
+                scan.assert_called_once_with(b"SYNTHETIC clean")
+                scan.return_value = (False, "detected")
+                infected = self.client.post(upload, params=params, content=b"SYNTHETIC infected")
+                self.assertEqual(infected.json()["quarantine_reasons"], ["malware_scan:detected"])
+                scan.return_value = (True, "clean")
+                replay = self.client.post(upload, params=params, content=b"SYNTHETIC infected")
+                self.assertEqual((replay.json()["status"], replay.json()["duplicate"]), ("quarantined", True))
+                scan.return_value = (False, "unavailable")
+                unavailable = self.client.post(upload, params=params, content=b"SYNTHETIC outage")
+                self.assertEqual(unavailable.json()["quarantine_reasons"], ["malware_scan:unavailable"])
+
+    def test_extraction_and_source_api_scope_origin_and_quarantine(self):
+        import tempfile
+        from sqlalchemy import update
+        from app.core.config import settings
+        from app.db.models.legal_scope import DocumentAccess
+        from app.services import legal_intake
+        ws = self.fixture.workspace
+        with patch.object(settings, "data_root", Path(tempfile.mkdtemp(prefix="legal-api-extraction-"))):
+            received = legal_intake.receive(self.fixture.db, actor_id=self.fixture.actor.id, workspace_id=ws.id,
+                filename="synthetic.txt", document_type="contract", classification="internal",
+                data=b"SYNTHETIC contract payment within 30 days.\n", current_terms_version="1.0",
+                data_root=settings.data_root, scanner=lambda data: (True, "synthetic-only"))
+            self.fixture.db.add(DocumentAccess(document_id=received.document_id, organization_id=ws.organization_id,
+                workspace_id=ws.id, user_id=self.fixture.actor.id, operation="propose"))
+            self.fixture.db.commit()
+            base = f"/v1/workspaces/{ws.id}/documents/{received.document_id}/versions/{received.version_id}"
+            self.assertEqual(self.client.post(base + "/extractions", headers={"Origin": "https://untrusted.invalid"}).status_code, 403)
+            response = self.client.post(base + "/extractions")
+            self.assertEqual(response.status_code, 201)
+            span = response.json()["span_ids"][0]
+            source = self.client.get(base + "/spans/" + span)
+            self.assertEqual(source.status_code, 200)
+            self.assertEqual(source.json()["quote"], "SYNTHETIC contract payment within 30 days.\n")
+            self.assertEqual(source.headers["cache-control"], "no-store")
+            self.assertNotIn("source_path", source.json())
+            replay = self.client.post(f"/v1/workspaces/{ws.id}/documents", content=b"SYNTHETIC contract payment within 30 days.\n",
+                params={"filename": "synthetic.txt", "document_type": "contract", "classification": "internal"})
+            self.assertEqual((replay.status_code, replay.json()["status"], replay.json()["duplicate"]), (201, "ready", True))
+            self.assertEqual(self.client.get(base + "/spans/" + str(uuid4())).status_code, 404)
+            self.fixture.db.execute(update(DocumentAccess).where(DocumentAccess.document_id == received.document_id)
+                                    .values(is_active=False))
+            self.fixture.db.commit()
+            denied = self.client.get(base + "/spans/" + span)
+            self.assertEqual(denied.status_code, 404)
+            self.assertNotIn("SYNTHETIC contract", denied.text)
+            quarantined = legal_intake.receive(self.fixture.db, actor_id=self.fixture.actor.id, workspace_id=ws.id,
+                filename="quarantined.txt", document_type="contract", classification="internal",
+                data=b"SYNTHETIC unscanned source.\n", current_terms_version="1.0", data_root=settings.data_root)
+            self.fixture.db.add(DocumentAccess(document_id=quarantined.document_id, organization_id=ws.organization_id,
+                workspace_id=ws.id, user_id=self.fixture.actor.id, operation="propose"))
+            self.fixture.db.commit()
+            blocked = self.client.post(f"/v1/workspaces/{ws.id}/documents/{quarantined.document_id}/versions/{quarantined.version_id}/extractions")
+            self.assertEqual((blocked.status_code, blocked.json()), (409, {"detail": {"code": "document_quarantined"}}))
+
     def test_versioned_validation_does_not_echo_input_and_origin_guard_applies(self):
         response = self.client.get(self.path.replace(str(self.fixture.document.id), "private-invalid-id"))
         self.assertEqual(response.status_code, 422)

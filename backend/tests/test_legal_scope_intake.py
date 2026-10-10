@@ -1,5 +1,6 @@
 """Secure legal intake (E1): SYNTHETIC bytes only, temporary data root, SQLite + disposable PostgreSQL."""
 import io
+import hashlib
 import os
 from pathlib import Path
 import stat
@@ -77,7 +78,7 @@ class LegalIntakeTests(unittest.TestCase):
 
     def test_quarantine_reasons(self):
         cases = [(TXT, "a.txt", None, "malware_scanner_not_configured"),
-                 (TXT + b"x", "b.txt", lambda d: (False, "SYNTHETIC-SIGNATURE"), "malware_scan:SYNTHETIC-SIGNATURE"),
+                 (TXT + b"x", "b.txt", lambda d: (False, "SYNTHETIC-SIGNATURE"), "malware_scan:detected"),
                  (PDF.replace(b"<<>>endobj", b"<</JavaScript 1>>endobj"), "c.pdf", CLEAN, "pdf_active_content:JavaScript"),
                  (PDF.replace(b"trailer", b"PK\x03\x04 trailer"), "d.pdf", CLEAN, "embedded_archive"),
                  (docx(rels=b'<Relationship TargetMode="External" Target="http://x.invalid"/>'), "e.docx", CLEAN,
@@ -92,6 +93,37 @@ class LegalIntakeTests(unittest.TestCase):
     def test_clean_pdf_and_docx_received(self):
         self.assertEqual(self.receive(PDF, "contract.pdf").status, "received")
         self.assertEqual(self.receive(docx(), "contract.docx").status, "received")
+
+    def test_scan_revocation_blocks_original_publication(self):
+        from sqlalchemy import update
+        from sqlalchemy.orm import Session
+        from app.db.models.legal_scope import WorkspaceMembership
+        actor_id = self.alice.id
+        def revoke(data):
+            with Session(self.engine) as other:
+                other.execute(update(WorkspaceMembership).where(WorkspaceMembership.user_id == actor_id)
+                              .values(is_active=False))
+                other.commit()
+            return True, "clean"
+        with self.assertRaises(LegalAccessDenied):
+            self.receive(TXT, scanner=revoke)
+        self.assertEqual(list(self.root.rglob("*.txt")), [])
+        self.assertEqual(self.events("LEGAL_DOCUMENT_RECEIVED"), [])
+
+    def test_scanner_outage_preserves_quarantine_and_redacts_error(self):
+        def unavailable(data):
+            raise OSError("private scanner path and source text")
+        result = self.receive(TXT, scanner=unavailable)
+        self.assertEqual((result.status, result.quarantine_reasons),
+                         ("quarantined", ("malware_scan:unavailable",)))
+        self.assertNotIn("private scanner", str(self.events("LEGAL_DOCUMENT_RECEIVED")[-1].payload))
+
+    def test_malformed_scanner_result_never_accepts_truthy_non_boolean(self):
+        for index, outcome in enumerate((("clean", "clean"), (1, "clean"), (True, None), None)):
+            with self.subTest(outcome=outcome):
+                result = self.receive(TXT + str(index).encode(), scanner=lambda data: outcome)
+                self.assertEqual((result.status, result.quarantine_reasons),
+                                 ("quarantined", ("malware_scan:unavailable",)))
 
     def test_rejections_are_audited_and_store_nothing(self):
         bomb = docx([("word/media/zeros.xml", b"\0" * (20 * 1024 * 1024))])
@@ -155,12 +187,72 @@ class LegalIntakeTests(unittest.TestCase):
         authorize_document(self.db, self.alice.id, self.ws.id, result.document_id, current_terms_version=fixtures.TERMS)
 
     def test_stored_original_tampering_detected(self):
-        relative = intake.store_original(self.root, self.ws.organization_id, self.ws.id, "a" * 64, "txt", TXT)
+        sha = hashlib.sha256(TXT).hexdigest()
+        relative = intake.store_original(self.root, self.ws.organization_id, self.ws.id, sha, "txt", TXT)
         path = Path(self.root, *relative.split("/"))
         os.chmod(path, 0o600)
         path.write_bytes(b"tampered")
         with self.assertRaises(intake.IntakeIntegrityError):
+            intake.store_original(self.root, self.ws.organization_id, self.ws.id, sha, "txt", TXT)
+
+    def test_duplicate_rechecks_original_integrity(self):
+        result = self.receive(TXT)
+        document = self.db.get(Document, result.document_id)
+        path = self.root / document.source_path
+        os.chmod(path, 0o600)
+        path.write_bytes(b"SYNTHETIC tampering")
+        with self.assertRaises(intake.IntakeIntegrityError):
+            self.receive(TXT)
+
+    def test_missing_duplicate_original_is_not_silently_recreated(self):
+        result = self.receive(TXT)
+        path = self.root / self.db.get(Document, result.document_id).source_path
+        path.unlink()
+        with self.assertRaises(intake.IntakeIntegrityError):
+            self.receive(TXT)
+        self.assertFalse(path.exists())
+
+    def test_original_symlink_is_not_followed(self):
+        sha = hashlib.sha256(TXT).hexdigest()
+        relative = intake.store_original(self.root, self.ws.organization_id, self.ws.id, sha, "txt", TXT)
+        path = self.root / relative
+        path.unlink()
+        target = self.root / "synthetic-target.txt"
+        target.write_bytes(TXT)
+        path.symlink_to(target)
+        with self.assertRaises(intake.IntakeIntegrityError):
+            intake.store_original(self.root, self.ws.organization_id, self.ws.id, sha, "txt", TXT)
+        self.assertTrue(path.is_symlink())
+        self.assertEqual(target.read_bytes(), TXT)
+
+    def test_content_address_must_match_bytes_before_storage(self):
+        with self.assertRaises(intake.IntakeIntegrityError):
             intake.store_original(self.root, self.ws.organization_id, self.ws.id, "a" * 64, "txt", TXT)
+        self.assertFalse((self.root / "legal").exists())
+
+    def test_existing_original_is_not_replaced_during_publication_race(self):
+        sha = hashlib.sha256(TXT).hexdigest()
+        path = self.root / "legal" / "originals" / str(self.ws.organization_id) / str(self.ws.id) / f"{sha}.txt"
+        real_open = open
+
+        def race_open(name, mode="r", *args, **kwargs):
+            if mode == "xb":
+                path.write_bytes(b"SYNTHETIC concurrent corrupt original")
+            return real_open(name, mode, *args, **kwargs)
+
+        with patch("builtins.open", side_effect=race_open):
+            with self.assertRaises(intake.IntakeIntegrityError):
+                intake.store_original(self.root, self.ws.organization_id, self.ws.id, sha, "txt", TXT)
+        self.assertEqual(path.read_bytes(), b"SYNTHETIC concurrent corrupt original")
+        self.assertEqual(list(path.parent.glob("*.tmp")), [])
+
+    def test_ambiguous_docx_rejection_keeps_audit_and_no_original(self):
+        data = docx([("WORD/DOCUMENT.XML", "<document>SYNTHETIC conflicting text</document>")])
+        with self.assertRaises(intake.IntakeRejected) as rejected:
+            self.receive(data, "ambiguous.docx")
+        self.assertEqual(rejected.exception.code, "ambiguous_archive")
+        self.assertEqual(self.events("LEGAL_INTAKE_REJECTED")[-1].payload["code"], "ambiguous_archive")
+        self.assertFalse((self.root / "legal").exists())
 
     def test_audit_failure_rolls_back_intake_rows(self):
         with patch.object(intake, "append_event", side_effect=AuditChainError("synthetic failure")):
@@ -176,6 +268,51 @@ class LegalIntakeTests(unittest.TestCase):
 @unittest.skipUnless(os.environ.get("LEGAL_TEST_DATABASE_URL"), "Disposable PostgreSQL not explicitly selected")
 class LegalIntakePostgresTests(LegalIntakeTests):
     make_engine = fixtures.LegalProvisioningPostgresTests.make_engine
+
+
+class LegalArchiveInspectionTests(unittest.TestCase):
+    """Synthetic OOXML edge cases; never execute links, entities or embedded content."""
+
+    def test_external_relationship_xml_spellings_are_quarantined(self):
+        for attribute in ("TargetMode='External'", 'TargetMode = "External"',
+                          'TargetMode="Ext&#101;rnal"'):
+            with self.subTest(attribute=attribute):
+                xml = f'<Relationships><Relationship {attribute} Target="https://synthetic.invalid"/></Relationships>'
+                self.assertIn("external_reference", intake.inspect(docx(rels=xml.encode()), "a.docx").quarantine_reasons)
+        xml = '<Relationships><Relationship TargetMode="External" Target="https://synthetic.invalid"/></Relationships>'
+        self.assertIn("external_reference", intake.inspect(docx(rels=xml.encode("utf-16")), "a.docx").quarantine_reasons)
+
+    def test_invalid_relationship_xml_rejected(self):
+        for xml in (b"<Relationships>", b"<!DOCTYPE R [<!ENTITY x 'External'>]><R/>"):
+            with self.subTest(xml=xml):
+                with self.assertRaises(intake.IntakeRejected) as error:
+                    intake.inspect(docx(rels=xml), "a.docx")
+                self.assertEqual(error.exception.code, "malformed_docx")
+
+    def test_duplicate_and_case_colliding_members_rejected(self):
+        for name in ("word/document.xml", "WORD/DOCUMENT.XML"):
+            with self.subTest(name=name):
+                with self.assertRaises(intake.IntakeRejected) as error:
+                    intake.inspect(docx([(name, "<document/>")]), "a.docx")
+                self.assertEqual(error.exception.code, "ambiguous_archive")
+
+    def test_unsupported_compression_has_stable_rejection(self):
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_BZIP2) as archive:
+            archive.writestr("[Content_Types].xml", "<Types/>")
+            archive.writestr("word/document.xml", "<document/>")
+        with self.assertRaises(intake.IntakeRejected) as error:
+            intake.inspect(buffer.getvalue(), "a.docx")
+        self.assertEqual(error.exception.code, "unsupported_archive_compression")
+
+    def test_xml_limit_and_macro_content_type_rejected(self):
+        with patch.object(intake, "DOCX_MAX_XML_BYTES", 8), self.assertRaises(intake.IntakeRejected) as error:
+            intake.inspect(docx(), "a.docx")
+        self.assertEqual(error.exception.code, "archive_limits")
+        data = docx([("word/macro-types.xml", '<Override ContentType="application/vnd.ms-word.document.macroEnabled.main+xml"/>')])
+        with self.assertRaises(intake.IntakeRejected) as error:
+            intake.inspect(data, "a.docx")
+        self.assertEqual(error.exception.code, "macro_content")
 
 
 if __name__ == "__main__":

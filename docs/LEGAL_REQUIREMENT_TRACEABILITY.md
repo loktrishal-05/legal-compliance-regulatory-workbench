@@ -10,6 +10,10 @@ D provisioning evidence (2026-10-06, partial): `app/services/legal_provisioning.
 
 E1 intake evidence (2026-10-06, partial): `app/services/legal_intake.py`, upload route, migration 0023, `tests/test_legal_scope_intake.py` 8 SQLite + 8 PostgreSQL, API upload test. Partial for FR-006 (PDF/DOCX/TXT detection), FR-007 (type/size/archive/macro/quarantine; no malware engine configured), FR-009 (workspace-scoped duplicate detection without cross-tenant leakage), FR-010 (immutable hashed originals). Extraction/OCR/spans pending.
 
+E1 hardening evidence (2026-10-07, partial FR-007/009/010): same service/tests, policy `legal-intake-v2`; XML external-reference encodings, DTD/entity/macro/size rejection, ambiguous ZIP/compression rejection, source-hash matching, duplicate tamper/missing/symlink checks and publication-race no-overwrite. 33 focused tests and 93 scoped tests pass; 96% service line coverage; fresh/0018-to-0023 validator passes. No scanner, extraction/derived spans, recovery or full-FR acceptance is claimed. Full commands/limitations are in VALIDATION_REPORT.
+
+E2a evidence (2026-10-07; partial FR-008/010/050, supporting FR-002/003/007/054/055): `legal_extraction` model/schema/service, native parser worker, source APIs, migration 0024 and `test_legal_scope_extraction.py`. 32 focused and 126 scoped checks pass; actual fresh/0018-to-0024 migration/immutable SQL/history checks pass. Exact version/hash-bound quote offsets and page/paragraph locators persist under tenant-qualified FKs; grants/terms precede source reads. Native DOCX/PDF layout requires verification. OCR, corrections (FR-011), durable async processing, full parser sandbox/scanner and retrieval remain pending; no FR fully accepted solely by this checkpoint.
+
 Part 2 deterministic core evidence (2026-10-06, partial, not acceptance): `app/services/regulatory_versions.py`, `app/services/compliance_assessment.py`, `tests/test_legal_regulatory_core.py` 14/14 with synthetic fixtures; mutation checks confirmed failures are caught. Partial for FR-028/029 (exact part)/032 (freshness)/035/037/038/039/040 and relational part of FR-034. Persistence, tenant FKs, registry/import (FR-026/027), human applicability (FR-030), jurisdiction mapping (FR-031), AI interpretation (FR-036) and APIs remain open.
 
 | Requirement | Priority | Build label / phases | Deliverable and acceptance evidence (planned) |
@@ -83,6 +87,12 @@ Part 2 deterministic core evidence (2026-10-06, partial, not acceptance): `app/s
 
 ## NFR and innovation acceptance
 
+2026-10-08 bounded E2 checkpoint: partial FR-008/010/011 and supporting FR-002/003/050/054. Opt-in English PyMuPDF/Tesseract OCR in isolated child; mixed native text retained, page regions/method/Unicode offsets and language-data digest bound to immutable source. `legal_correction` model/schema/service/API + 0025 add immutable span-bound proposals/successors and independent exact-revision transcription decisions, not legal approval or source replacement. 168 scoped checks, 38 extraction/OCR checks, fresh/0018-to-0025 upgrades pass; correction service 96%/worker 81% line coverage. RED dd81e9f/ca76ab5. Empty-region manual transcription, broader OCR/legal accuracy/frontend acceptance, async processing/kernel sandbox and full phase/pilot acceptance remain open. Owner paused; see current guide/resume/report before further work.
+
+2026-10-08 real-engine partial FR-007: dedicated scanner Compose overlay/config + `test_legal_malware_engine.py`/`test_legal_malware_outage.py`. Official pinned ClamAV 1.5.4, FreshClam update from stale 28136 to 28147, 7 real synthetic engine checks and 1 actual stopped-engine HTTP check pass. Policy v2 enforces bounded current VERSION signature age before configured scans; 142 scoped checks, 9 protocol checks and 97% adapter line coverage pass. RED history 99eea33/f4616b8. Real private application deployment, approved operational freshness policy/cadence, exact loaded engine/signature provenance per upload, rescan/release and production parser sandbox remain gates; FR-007/E not fully accepted. Full commands/failures/fixture basis in VALIDATION_REPORT; reproducible profile in runtime guide §9.
+
+2026-10-08 partial FR-007 (supporting FR-002/003/010/054): optional local ClamAV INSTREAM adapter in `legal_malware.py`, Settings/HTTP intake wiring and intake v3 scan outcome/policy provenance. RED `991437c`; 139 scoped tests pass, adapter 98% line coverage, fresh/0018-to-0024 migrations pass. Synthetic protocol peers and stubbed scanner HTTP journeys verify fail-closed clean/detected/outage, bounded replies/deadline, no quarantine replay release and separate-session revocation before publication. Actual engine/signature/scan-limit acceptance, rescan/release, async work and production sandbox remain unbuilt/unconfigured; no full FR acceptance. Commands/limits: VALIDATION_REPORT and runtime guide §8.
+
 - **Isolation/security/privacy:** authorization before all retrieval/export/model context, malicious upload/parser isolation, least privilege, encrypted storage/transport, redacted telemetry, governed secondary copies. Verified by D/E/L/M; actual encryption/IdP/retention deployment remains unconfigured.
 - **Integrity/audit/explainability:** exact source lineage, immutable decisions and old hash compatibility, sufficient citations, visible uncertainty/status reasons, point-in-time replay. Verified by E-J/L.
 - **Reliability/recovery:** durable processing/receipts/timers, retry/restart/dead letters, model-outage deterministic workflow, dedicated backup/restore/reindex. Verified by E/I/J/M; no SLO or RPO/RTO attainment assumed.
@@ -92,3 +102,28 @@ Part 2 deterministic core evidence (2026-10-06, partial, not acceptance): `app/s
 ## Definition of implementation acceptance
 
 For each requirement, append actual component/file, test command/result, fixture version, demonstration evidence and blockers as its owning phase runs. Change status only after those checks pass. SSO/MFA, legal-pack validation, retention/legal privilege, authoritative source ownership and deployment SLO/RPO/RTO need named approval before operational-pilot claims. The approved development baseline authorizes building/testing, not silently treating those gates as complete.
+
+## Parallel build evidence — agent A (2026-10-09; status "MVP implemented + tested", never "accepted")
+
+Source: `docs/parallel/EVIDENCE_A.md` (agent B and C evidence: `EVIDENCE_B.md`, `EVIDENCE_C.md`). Synthetic fixtures, deterministic profiles, disposable PostgreSQL. External gates below remain open; no FR is accepted.
+
+| FR | Agent A slice | Evidence |
+|---|---|---|
+| FR-002/003/004 | Workspace/matter/clearance/grant filtering before ranking/paging; uniform 404; every legal route x 7 roles matrix | `legal_search.py`, `test_legal_scope_search.py`, `test_legal_scope_authz_matrix.py` |
+| FR-006/007/008 | Durable extraction/OCR jobs with lease/retry/dead letter, workspace backpressure, parser sandbox profile (no network, read-only, non-root) | `legal_jobs.py`, 0026, `test_legal_scope_jobs.py`, compose `parser-sandbox` (container-per-parse wiring open) |
+| FR-010 | Hash-verified original download; worker re-verifies stored hash; tamper fails closed | `legal_jobs.original`, `test_legal_scope_search.py`, `test_legal_scope_security.py` |
+| FR-011 | Blank-region manual transcription anchored to page/bbox + independent review; labelled corrected-text projection | 0026, `test_legal_scope_jobs.py` |
+| FR-019 | Accepted obligations only from independently approved proposals; human-confirmed tz/date; owner/trigger/conditions/notice/recurrence | 0031, `legal_obligations.py`, `test_legal_scope_obligations.py`, J1 |
+| FR-022/048..051 | Authorized PostgreSQL full-text span search (`search_spans`, used by B assistant); document/version/span lists; exact source open | `legal_search.py`, J4 (dense/hybrid retrieval open) |
+| FR-041 | Exact-revision independent review ledger (approve/reject/request_changes/escalate) for all pillars | 0027, `legal_review.py`, `test_legal_scope_reviews.py` |
+| FR-042 | Durable deadlines, exactly-once reminders/escalations, in-app notifications with read state | 0031, `test_legal_scope_obligations.py` (external delivery adapters open) |
+| FR-043 | Remediation from accepted findings; closure evidence + independent review; failed retest reopens | 0031, J2 |
+| FR-044 | Tasks: owner, due, dependencies with cycle denial, evidence requests, overdue, reassignment with current-grant check; comments/mentions | 0031, `test_legal_scope_obligations.py` |
+| FR-045 | Timer scan catch-up after downtime; restart-safe receipts | `scan_deadlines`, J5 |
+| FR-046 | Exception/risk acceptance with mandatory bounded expiry, independent review, expiry scan | 0031 |
+| FR-047 | Bulk triage with per-object authorization and uniform `unavailable` | `bulk_triage` |
+| FR-054/055 | Workspace-filtered legal audit (document-bound events need current grant); outbox and activity audit in the same transaction | `legal_audit_export.py`, `legal_events.py` |
+| FR-056/057 | As-of snapshot separating recorded and effective time | `snapshot`, J3/J6 |
+| FR-058/059 | Frozen evidence packs and JSON findings exports with integrity hash; denied objects excluded | `legal_evidence_packs`, J1/J6 |
+
+Open gates: FR-001/005 enterprise IdP/MFA/step-up; FR-060 archive; FR-061..063 connectors/webhooks/service credentials; legal-pack/pilot approvals; live private-model evaluation; independent human review; penetration test; real-infrastructure backup/restore/SLO.

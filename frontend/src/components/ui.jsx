@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Link, isRouteErrorResponse, useRouteError } from 'react-router'
-import { BRAND_MARK, BRAND_WORDMARK, PRODUCT_NAME } from '../product.js'
+import { BRAND_MARK, PRODUCT_NAME } from '../product.js'
 
 const ICONS = {
   grid: 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',
@@ -33,6 +33,10 @@ const ICONS = {
   logout: 'M15 4h4v16h-4 M10 8l-4 4 4 4 M6 12h10',
   refresh: 'M20 11a8 8 0 0 0-14.9-3.5 M4 4v4h4 M4 13a8 8 0 0 0 14.9 3.5 M20 20v-4h-4',
   help: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6 M12 17h.01',
+  send: 'M4 12 20 4l-6 16-3-7z M11 13l9-9',
+  expand: 'M4 9V4h5 M20 9V4h-5 M4 15v5h5 M20 15v5h-5',
+  collapse: 'M9 4v5H4 M15 4v5h5 M9 20v-5H4 M15 20v-5h5',
+  table: 'M3 5h18v14H3z M3 10h18 M3 15h18 M9 5v14',
 }
 
 export function Icon({ name, size = 20, ...props }) {
@@ -43,9 +47,10 @@ export function Icon({ name, size = 20, ...props }) {
 // Neutral development assets; original industrial artwork remains archived unchanged.
 export function Logo({ variant = 'horizontal', className = '', decorative = false, ...props }) {
   const mark = variant === 'mark'
-  return <picture>{!mark && <source media="(max-width: 640px)" srcSet={BRAND_MARK} />}
-    <img className={`brand-img ${className}`} src={mark ? BRAND_MARK : BRAND_WORDMARK} width={mark ? 512 : 480} height={mark ? 512 : 100}
-      alt={decorative ? '' : PRODUCT_NAME} decoding="async" {...props} /></picture>
+  return <span className={`brand-lockup ${className}`}>
+    <img className="brand-img" src={BRAND_MARK} width={mark ? 48 : 42} height={mark ? 48 : 42}
+      alt={decorative ? '' : PRODUCT_NAME} decoding="async" {...props} />
+    {!mark && <span aria-hidden="true">Legal &amp; Regulatory<br />Assurance Platform</span>}</span>
 }
 
 export function AgentAvatar({ size = 40, className = '' }) {
@@ -53,8 +58,9 @@ export function AgentAvatar({ size = 40, className = '' }) {
 }
 
 export function PageHeader({ title, description, actions }) {
+  const agent = { Contracts: 'contract-analyst', Summaries: 'summary-writer', 'Regulatory intelligence': 'regulatory-watch', Compliance: 'compliance-assessor', 'Obligations and tasks': 'obligation-keeper', 'Legal audit and exports': 'evidence-audit', Assistant: 'research-assistant', 'Review queue': 'human-review-gate' }[title]
   return <header className="page-header">
-    <div><h1 tabIndex={-1} data-page-title>{title}</h1>{description && <p className="page-description">{description}</p>}</div>
+    <div>{agent && <img className="legal-agent-icon" src={`/assets/branding/agents/${agent}.webp`} width="48" height="48" alt={agent === 'human-review-gate' ? 'Human decision gate' : `${title} assistance`} />}<h1 tabIndex={-1} data-page-title>{title}</h1>{description && <p className="page-description">{description}</p>}</div>
     {actions && <div className="page-actions">{actions}</div>}
   </header>
 }

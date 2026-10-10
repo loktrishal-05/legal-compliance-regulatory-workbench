@@ -10,6 +10,9 @@ const pages = () => import('./AppPages.jsx')
 const authPages = () => import('../features/auth/AuthPages.jsx')
 const page = (path, name, title) => ({ path, lazy: lazyNamed(pages, name), handle: { title } })
 const indexPage = (name, title) => ({ index: true, lazy: lazyNamed(pages, name), handle: { title } })
+// Legal area: one route line per page so each owner swaps only its own line (placeholder -> real page).
+const legalShared = () => import('../features/legal/shared/LegalShared.jsx')
+const legalPage = (path, loader, name, title) => ({ path, lazy: lazyNamed(loader, name), handle: { title } })
 const authPage = (path, name, title, media) => ({ path, lazy: lazyNamed(authPages, name), handle: { title, authMedia: media } })
 
 export const routes = [{
@@ -38,6 +41,20 @@ export const routes = [{
         lazy: lazyNamed(() => import('./AppShell.jsx'), 'default'),
         children: [
           { index: true, element: <Navigate to="dashboard" replace /> },
+          { path: 'legal', lazy: lazyNamed(legalShared, 'LegalLayout'), children: [
+            { index: true, element: <Navigate to="documents" replace /> },
+            legalPage('dashboard', () => import('../features/legal/dashboard/LegalDashboardPage.jsx'), 'LegalDashboardPage', 'Legal dashboard'),
+            legalPage('documents', () => import('../features/legal/documents/DocumentsPage.jsx'), 'DocumentsPage', 'Documents'),
+            legalPage('source', () => import('../features/legal/source/SourcePage.jsx'), 'SourcePage', 'Source viewer'),
+            legalPage('contracts', () => import('../features/legal/contracts/ContractsPage.jsx'), 'ContractsPage', 'Contracts'),
+            legalPage('reviews', () => import('../features/legal/reviews/ReviewsPage.jsx'), 'ReviewsPage', 'Review queue'),
+            legalPage('compliance', () => import('../features/legal/compliance/CompliancePage.jsx'), 'default', 'Compliance'),
+            legalPage('regulatory', () => import('../features/legal/regulatory/RegulatoryPage.jsx'), 'RegulatoryPage', 'Regulatory intelligence'),
+            legalPage('summaries', () => import('../features/legal/summaries/SummariesPage.jsx'), 'default', 'Summaries'),
+            legalPage('assistant', () => import('../features/legal/assistant/AssistantPage.jsx'), 'default', 'Legal assistant'),
+            legalPage('obligations', () => import('../features/legal/obligations/ObligationsPage.jsx'), 'ObligationsPage', 'Obligations and tasks'),
+            legalPage('audit', () => import('../features/legal/audit/LegalAuditPage.jsx'), 'LegalAuditPage', 'Legal audit and exports'),
+          ] },
           page('dashboard', 'DashboardPage', 'Dashboard'),
           page('workspace', 'WorkspacePage', 'AI Workspace'),
           page('workspace/voice', 'VoiceWorkspacePage', 'Voice query'),
@@ -55,7 +72,7 @@ export const routes = [{
           { path: 'audit', element: <RequireAuth roles={REVIEWERS} />, children: [indexPage('AuditPage', 'Audit')] },
           page('sovereignty', 'SovereigntyPage', 'Private runtime'),
           page('resources', 'ResourcesPage', 'Government Resources'),
-          page('help', 'HelpPage', 'Help & Resources'),
+          legalPage('help', () => import('../features/resources/LegalHelpPage.jsx'), 'default', 'Help & Resources'),
           { path: 'admin', element: <RequireAuth roles={ADMINS} />, children: [
             indexPage('AdminPage', 'Administration'),
             page('*', 'AdminPage', 'Administration'),

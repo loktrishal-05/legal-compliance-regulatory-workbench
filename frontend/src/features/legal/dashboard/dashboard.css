@@ -1,0 +1,154 @@
+/* Legal assurance report: a light report canvas inside the workbench.
+   Depth comes from light and hairlines; motion is one authored load sequence (counts rise, visuals settle in). */
+.report {
+  --canvas-grid: rgba(20, 45, 80, 0.035);
+  position: relative; isolation: isolate; overflow: hidden;
+  margin-top: var(--space-4); padding: clamp(1rem, 2.4vw, 2rem);
+  border: 1px solid var(--line); border-radius: var(--radius-xl);
+  background:
+    radial-gradient(60rem 28rem at 8% -10%, rgba(9, 107, 118, 0.07), transparent 60%),
+    radial-gradient(48rem 30rem at 100% 0%, rgba(29, 99, 214, 0.08), transparent 65%),
+    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+  color: var(--text);
+  box-shadow: var(--shadow-2);
+}
+.report::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: linear-gradient(var(--canvas-grid) 1px, transparent 1px), linear-gradient(90deg, var(--canvas-grid) 1px, transparent 1px);
+  background-size: 48px 48px; mask-image: linear-gradient(180deg, #000 0%, transparent 55%); }
+.report ::selection { background: color-mix(in srgb, var(--ai) 20%, transparent); }
+
+.report-bar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-5); }
+.report-bar h1 { margin: 0 0 var(--space-2); font-family: var(--font-brand); font-size: clamp(1.9rem, 3.4vw, 2.9rem); font-weight: 700; font-stretch: 110%; letter-spacing: -0.03em; line-height: 1; color: var(--text); text-wrap: balance; }
+.report-bar p { margin: 0; max-width: 70ch; color: var(--text-muted); font-size: var(--fs-sm); }
+.report-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); color: var(--text-faint); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
+.report-button { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--surface-1); color: var(--text); font: 600 var(--fs-sm) var(--font-sans); cursor: pointer; }
+.report-button:hover:not(:disabled) { border-color: var(--ai); background: var(--surface-2); }
+.report-button.primary { border-color: transparent; background: var(--ai); color: #fff; }
+.report-button.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--ai) 86%, #000); }
+.report-button:focus-visible, .report :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+
+/* KPI strip */
+.report-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--space-3); margin: 0 0 var(--space-4); padding: 0; list-style: none; }
+.report-kpi { display: grid; gap: 4px; height: 100%; padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface-1); color: inherit; text-decoration: none;
+  box-shadow: var(--shadow-1); transition: border-color var(--dur) var(--ease-out), transform var(--dur-slow) var(--ease-expo), background var(--dur) var(--ease-out); }
+.report-kpi:hover { border-color: var(--line-strong); box-shadow: var(--shadow-2); transform: translateY(-2px); }
+.report-kpi-label { color: var(--text-muted); font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.report-kpi-value { font-family: var(--font-brand); font-size: clamp(2rem, 3.2vw, 2.75rem); font-weight: 700; font-stretch: 105%; line-height: 1.05; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--text); }
+.report-kpi-context { color: var(--text-faint); font-size: var(--fs-xs); line-height: 1.4; }
+.report-kpi[data-tone="danger"] .report-kpi-value { color: var(--danger); }
+.report-kpi[data-tone="human"] .report-kpi-value { color: var(--human); }
+
+/* Selection bar: the report's cross-highlight state, always one sentence */
+.report-selection { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); min-height: 54px; margin-bottom: var(--space-4); padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
+  border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--surface-1); box-shadow: var(--shadow-1); font-size: var(--fs-sm); }
+.report-selection p { flex: 1; margin: 0; min-width: 12rem; font-variant-numeric: tabular-nums; }
+.report-selection p span { color: var(--text-muted); }
+.report-selection p span::after { content: " ›"; color: var(--text-faint); }
+.report-hint { color: var(--text-faint); }
+.report-swatch { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 3px; }
+
+/* Report grid and visuals */
+.report-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-4); }
+.report-visual { container-type: inline-size; position: relative; grid-column: span var(--span, 4); display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; padding: var(--space-4) var(--space-4) var(--space-5);
+  border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface-1);
+  box-shadow: var(--shadow-1); animation: visual-in 0.7s var(--ease-expo) calc(var(--i, 0) * 60ms) both; }
+@keyframes visual-in { from { transform: translateY(10px); } }
+.report-visual:hover { border-color: var(--line-strong); box-shadow: var(--shadow-2); }
+.report-visual > header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.report-visual h2 { margin: 0; font: 700 var(--fs-md)/1.3 var(--font-sans); letter-spacing: -0.005em; color: var(--text); }
+.report-visual header p { margin: 2px 0 0; color: var(--text-faint); font-size: var(--fs-xs); }
+.report-visual-actions { display: flex; gap: 2px; opacity: 0.55; transition: opacity var(--dur) var(--ease-out); }
+.report-visual:hover .report-visual-actions, .report-visual:focus-within .report-visual-actions { opacity: 1; }
+.report-visual-actions button { display: grid; place-items: center; width: 32px; height: 32px; min-height: 0; padding: 0; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--text-muted); cursor: pointer; }
+.report-visual-actions button:hover, .report-visual-actions button[aria-pressed="true"] { border-color: var(--line); background: var(--surface-3); color: var(--text); }
+.report-empty { margin: auto 0; padding: var(--space-5) var(--space-3); border: 1px dashed var(--line-strong); border-radius: var(--radius-md); color: var(--text-faint); font-size: var(--fs-sm); text-align: center; }
+.report-grid.is-focus .report-visual { min-height: 26rem; }
+
+/* Marks: shared cross-highlight behaviour */
+.report-mark { cursor: pointer; outline: none; transition: opacity var(--dur) var(--ease-out), filter var(--dur) var(--ease-out); }
+.report-mark[data-dim], .report-legend li[data-dim] { opacity: 0.28; }
+.report-mark:hover, .report-mark:focus-visible { filter: brightness(1.18); }
+.report-mark[aria-pressed="true"] { filter: brightness(1.25) drop-shadow(0 4px 8px rgba(15, 35, 65, 0.22)); }
+.report-mark:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Donut */
+.report-donut { display: grid; grid-template-columns: minmax(130px, 180px) minmax(0, 1fr); align-items: center; gap: var(--space-3); }
+.report-donut.is-large { grid-template-columns: minmax(220px, 340px) 1fr; }
+.report-donut svg { width: 100%; height: auto; overflow: visible; }
+.report-donut circle { fill: none; stroke-width: 15; }
+.report-donut-track { stroke: var(--surface-3); }
+.report-donut .report-mark { animation: donut-in 1.1s var(--ease-expo) both; }
+.report-donut .report-mark[aria-pressed="true"] { stroke-width: 19; }
+@keyframes donut-in { from { stroke-dasharray: 0 100; } }
+.report-donut-value { fill: var(--text); font: 700 26px var(--font-brand); text-anchor: middle; font-variant-numeric: tabular-nums; }
+.report-donut-label { fill: var(--text-muted); font: 600 7.5px var(--font-sans); text-anchor: middle; text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* Legend rows (donut + stacked) */
+.report-legend { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; transition: opacity var(--dur); }
+.report-legend button { display: grid; grid-template-columns: 10px minmax(0, 1fr) 2ch 2.6rem; align-items: center; gap: 8px; width: 100%; min-height: 30px; padding: 3px 6px; white-space: nowrap; border: 0; border-radius: 8px; background: transparent; color: var(--text-muted); font: 500 var(--fs-sm) var(--font-sans); text-align: left; cursor: pointer; }
+.report-legend button:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
+.report-legend button:disabled { cursor: default; }
+.report-legend span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; }
+.report-legend span:nth-child(2)::first-letter { text-transform: uppercase; }
+.report-legend b { color: var(--text); font-variant-numeric: tabular-nums; }
+.report-legend small { color: var(--text-faint); font-size: var(--fs-xs); text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Columns */
+.report-columns { width: 100%; height: auto; overflow: visible; }
+.report-gridline line { stroke: var(--line); stroke-dasharray: 2 4; }
+.report-gridline text { fill: var(--text-faint); font: 500 10px var(--font-sans); text-anchor: end; font-variant-numeric: tabular-nums; }
+.report-hit { fill: transparent; }
+.report-mark:hover .report-hit, .report-mark:focus-visible .report-hit { fill: color-mix(in srgb, var(--ai) 5%, transparent); }
+.report-column { transform-box: fill-box; transform-origin: bottom; animation: column-in 0.9s var(--ease-expo) calc(150ms + var(--i) * 45ms) both; }
+@keyframes column-in { from { transform: scaleY(0.02); } }
+.report-datalabel { fill: var(--text); font: 700 11px var(--font-sans); text-anchor: middle; font-variant-numeric: tabular-nums; }
+.report-axis { fill: var(--text-faint); font: 500 10.5px var(--font-sans); text-anchor: middle; }
+.report-axis[data-alert] { fill: var(--danger); font-weight: 700; }
+.report-columns .report-mark:focus-visible { outline: none; }
+.report-columns .report-mark:focus-visible .report-hit { stroke: var(--focus); stroke-width: 1.5; }
+
+/* Horizontal bars */
+.report-bars { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.report-bars li { display: grid; grid-template-columns: minmax(4.5rem, 38%) minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); min-height: 30px; padding: 2px 6px; border-radius: 8px; font-size: var(--fs-sm); }
+.report-bars li:hover, .report-bars li:focus-visible { background: var(--surface-2); }
+.report-bar-label { overflow: hidden; color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; }
+.report-bar-label::first-letter { text-transform: uppercase; }
+.report-bar-track { height: 12px; overflow: hidden; border-radius: 4px; background: var(--surface-3); }
+.report-bar-fill { display: block; height: 100%; border-radius: 4px; transform-origin: left; animation: bar-in 0.9s var(--ease-expo) calc(150ms + var(--i) * 50ms) both; }
+@keyframes bar-in { from { transform: scaleX(0.02); } }
+.report-bars b { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* 100% stacked bar */
+.report-stacked { display: grid; gap: var(--space-4); }
+.report-stack { display: flex; gap: 3px; height: 26px; overflow: hidden; border-radius: 6px; background: var(--surface-3); }
+.report-stack .report-mark { flex-basis: 0; min-width: 6px; transform-origin: left; animation: bar-in 1s var(--ease-expo) 150ms both; }
+
+/* Tooltip */
+.report-tip { position: absolute; z-index: 5; display: grid; grid-template-columns: 10px auto auto; align-items: center; column-gap: 8px; row-gap: 2px; min-width: 9rem; padding: 8px 12px;
+  border: 1px solid var(--line-strong); border-radius: 10px; background: var(--surface-1); color: var(--text); font-size: var(--fs-xs);
+  box-shadow: var(--shadow-2); pointer-events: none; transform: translate(-50%, calc(-100% - 12px)); white-space: nowrap; }
+.report-tip strong { font-weight: 600; }
+.report-tip b { font-size: var(--fs-sm); text-align: right; font-variant-numeric: tabular-nums; }
+.report-tip small { grid-column: 2 / -1; color: var(--text-muted); }
+
+/* Data tables inside the night canvas */
+.report .table-scroll { max-height: 280px; overflow: auto; }
+.report table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.report th, .report td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+.report .num { text-align: right; font-variant-numeric: tabular-nums; }
+.report table a { color: var(--ai); text-underline-offset: 0.2em; }
+.report thead th { color: var(--text-faint); font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+
+@media (max-width: 1180px) { .report-visual { grid-column: span 6; } }
+@media (max-width: 760px) {
+  .report { padding: var(--space-4) var(--space-3); border-radius: var(--radius-lg); }
+  .report-visual { grid-column: 1 / -1; }
+  .report-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .report-kpi { padding: var(--space-3); }
+  .report-donut, .report-donut.is-large { grid-template-columns: 1fr; justify-items: center; }
+  .report-donut svg { max-width: 220px; }
+  .report-legend { width: 100%; }
+  .report-selection { border-radius: var(--radius-lg); }
+}
+.report-grid.is-focus .report-visual { grid-column: 1 / -1; }
+@container (max-width: 540px) { .report-donut { grid-template-columns: 1fr; justify-items: center; } .report-donut svg { max-width: 190px; } .report-donut .report-legend { width: 100%; } }

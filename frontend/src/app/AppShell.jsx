@@ -4,6 +4,7 @@ import { useSession } from './session.jsx'
 import { navigationFor } from './navigation.js'
 import { Icon, Logo } from '../components/ui.jsx'
 import { CommandPalette } from '../features/command/CommandPalette.jsx'
+import AssistantLauncher from '../features/legal/assistant/AssistantLauncher.jsx'
 import '../styles/workbench.css'
 import { LanguageSelector } from '../ProductPages.jsx'
 import { useBackendHealth } from '../hooks/useBackendHealth.js'
@@ -128,5 +129,6 @@ export default function AppShell() {
     <button type="button" className="nav-scrim" aria-hidden="true" tabIndex={-1} onClick={() => setNavOpen(false)} />
     <main id="main" ref={main} tabIndex={-1} className="shell-main"><p className="review-notice">{DEVELOPMENT_NOTICE}</p><Outlet /></main>
     <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={commands} />
+    <AssistantLauncher />
   </div>
 }
