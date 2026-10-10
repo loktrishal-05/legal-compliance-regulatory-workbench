@@ -12,7 +12,6 @@ const page = (path, name, title) => ({ path, lazy: lazyNamed(pages, name), handl
 const indexPage = (name, title) => ({ index: true, lazy: lazyNamed(pages, name), handle: { title } })
 // Legal area: one route line per page so each owner swaps only its own line (placeholder -> real page).
 const legalShared = () => import('../features/legal/shared/LegalShared.jsx')
-const placeholders = () => import('../features/legal/shared/Placeholders.jsx')
 const legalPage = (path, loader, name, title) => ({ path, lazy: lazyNamed(loader, name), handle: { title } })
 const authPage = (path, name, title, media) => ({ path, lazy: lazyNamed(authPages, name), handle: { title, authMedia: media } })
 
@@ -44,17 +43,17 @@ export const routes = [{
           { index: true, element: <Navigate to="dashboard" replace /> },
           { path: 'legal', lazy: lazyNamed(legalShared, 'LegalLayout'), children: [
             { index: true, element: <Navigate to="documents" replace /> },
-            legalPage('dashboard', placeholders, 'LegalDashboardPlaceholder', 'Legal dashboard'),
+            legalPage('dashboard', () => import('../features/legal/dashboard/LegalDashboardPage.jsx'), 'LegalDashboardPage', 'Legal dashboard'),
             legalPage('documents', () => import('../features/legal/documents/DocumentsPage.jsx'), 'DocumentsPage', 'Documents'),
             legalPage('source', () => import('../features/legal/source/SourcePage.jsx'), 'SourcePage', 'Source viewer'),
             legalPage('contracts', () => import('../features/legal/contracts/ContractsPage.jsx'), 'ContractsPage', 'Contracts'),
             legalPage('reviews', () => import('../features/legal/reviews/ReviewsPage.jsx'), 'ReviewsPage', 'Review queue'),
-            legalPage('compliance', placeholders, 'CompliancePlaceholder', 'Compliance'),
-            legalPage('regulatory', placeholders, 'RegulatoryPlaceholder', 'Regulatory intelligence'),
-            legalPage('summaries', placeholders, 'SummariesPlaceholder', 'Summaries'),
+            legalPage('compliance', () => import('../features/legal/compliance/CompliancePage.jsx'), 'default', 'Compliance'),
+            legalPage('regulatory', () => import('../features/legal/regulatory/RegulatoryPage.jsx'), 'RegulatoryPage', 'Regulatory intelligence'),
+            legalPage('summaries', () => import('../features/legal/summaries/SummariesPage.jsx'), 'default', 'Summaries'),
             legalPage('assistant', () => import('../features/legal/assistant/AssistantPage.jsx'), 'default', 'Legal assistant'),
-            legalPage('obligations', placeholders, 'ObligationsPlaceholder', 'Obligations and tasks'),
-            legalPage('audit', placeholders, 'LegalAuditPlaceholder', 'Legal audit and exports'),
+            legalPage('obligations', () => import('../features/legal/obligations/ObligationsPage.jsx'), 'ObligationsPage', 'Obligations and tasks'),
+            legalPage('audit', () => import('../features/legal/audit/LegalAuditPage.jsx'), 'LegalAuditPage', 'Legal audit and exports'),
           ] },
           page('dashboard', 'DashboardPage', 'Dashboard'),
           page('workspace', 'WorkspacePage', 'AI Workspace'),

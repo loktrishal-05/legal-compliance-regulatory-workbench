@@ -342,3 +342,9 @@ button.danger:hover:not(:disabled) { border-color: var(--danger); background: co
 .shell-main tr[aria-current] > td { background: color-mix(in srgb, var(--ai) 7%, var(--surface-1)); }
 .panel > .toolbar + .review-notice { margin-top: var(--space-4); }
 .pid-regions { overflow-x: hidden; } .pid-regions .queue-row-title { white-space: normal; overflow-wrap: anywhere; }
+
+/* Legal dashboard: hand-written SVG charts */
+.legal-dashboard-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.legal-dashboard-grid svg [role="link"]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.legal-legend { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); }
+.legal-legend span { display: inline-block; width: 0.8em; height: 0.8em; border-radius: 2px; }
