@@ -4,6 +4,8 @@ WORKDIR /web
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY frontend/ ./
+# The in-app guide imports these exact Markdown files (../../../../docs from src/features/resources).
+COPY docs/product-resources/LEGAL_PLATFORM_USER_GUIDE.md docs/product-resources/LEGAL_PLATFORM_TERMS_AND_CONDITIONS_v2.0_DRAFT.md /docs/product-resources/
 # Synthetic demo login values are baked into this LOCAL bundle on purpose (demo build only).
 ARG VITE_DEMO_MODE=true
 ARG VITE_DEMO_ADMIN_PASSWORD VITE_DEMO_COUNSEL_PASSWORD VITE_DEMO_COMPLIANCE_PASSWORD

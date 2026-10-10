@@ -4,21 +4,36 @@ Development build for teammates. **All data is synthetic.** Uploaded files stay 
 
 ## Prerequisites
 
-- Docker Desktop (running), git, about 8 GB free RAM and ~3 GB disk.
+- Docker Desktop (running), about 8 GB free RAM and ~5 GB free disk (images + the ~525 MB help model). Git is optional (ZIP works).
+- Internet for the first build only (npm/pip packages and the pinned help model).
 - Free port **8000**.
 
 ## Start
 
+**Option A — ZIP (no git needed).** Download
+https://github.com/loktrishal-05/legal-compliance-regulatory-workbench/archive/refs/heads/integration/backend-continuation-20261007.zip
+(or on GitHub switch the branch selector to `integration/backend-continuation-20261007`, then **Code > Download ZIP** — the default branch is a different, older line). Unzip it and open a terminal in the unzipped folder `legal-compliance-regulatory-workbench-integration-backend-continuation-20261007`.
+
+**Option B — git.**
 ```bash
-git clone https://github.com/loktrishal-05/legal-compliance-regulatory-workbench.git
+git clone -b integration/backend-continuation-20261007 https://github.com/loktrishal-05/legal-compliance-regulatory-workbench.git
 cd legal-compliance-regulatory-workbench
+```
+
+Then (same for both):
+```bash
 cp .env.example .env            # Windows PowerShell: Copy-Item .env.example .env
 docker compose --env-file .env -f deploy/local/docker-compose.yml up --build
 ```
 
-The first build takes a few minutes (frontend build + Python packages). When the log shows `Uvicorn running on http://0.0.0.0:8000`, open **http://localhost:8000**.
+The first build takes about 10–15 minutes (frontend build, Python packages and the help model download). When the log shows `Uvicorn running on http://0.0.0.0:8000`, open **http://localhost:8000**.
 
 On first start the app container runs database migrations and seeds a synthetic demo workspace once (contracts with analysis and an approved obligation, a regulatory source with two versions, compliance assessments in several states including a stale one, tasks and notifications). Later starts print `already_seeded`.
+
+### AI in this local run
+
+- **Help chatbot (Assistant > Help):** a local **Qwen3-0.6B ONNX** model (`onnx-community/Qwen3-0.6B-ONNX`, pinned revision, Apache-2.0 base, CPU int4) is downloaded at build time and runs inside the container. It only picks which sections of the public user guide answer your question; the text shown is always the exact guide text with a citation. It never reads your documents and never gives legal advice. No Ollama, GPU or hosted AI is needed. To skip the download, build with `--build-arg DOWNLOAD_HELP_MODEL=false`; help then shows the best-matching guide excerpts.
+- **Document Q&A, contract analysis, summaries, compliance:** deterministic and source-cited by design (no model call), so results are reproducible and every statement links to its exact source span.
 
 ## Demo accounts
 
